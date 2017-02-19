@@ -39,6 +39,11 @@ public class Util {
 		return false;
 	}
 
+	public boolean isFirstPeer(String iD) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 
 }

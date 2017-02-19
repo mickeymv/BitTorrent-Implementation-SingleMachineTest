@@ -8,7 +8,7 @@ import java.net.Socket;
  * @author Xiaolong Li
  *
  */
-public class P2pConnection {
+public class P2PConnection {
 
 	
 	private Socket connection = null;
@@ -16,7 +16,7 @@ public class P2pConnection {
 	private String hostname = null;
 	private int port = -1;
 	
-	public P2pConnection(Socket connection, String peerID, String hostname, int port) {
+	public P2PConnection(Socket connection, String peerID, String hostname, int port) {
 		
 		this.connection = connection;
 		this.peerID = peerID;

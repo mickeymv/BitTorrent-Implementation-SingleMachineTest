@@ -34,11 +34,11 @@ public class PeerProcess {
 	}
 	
 	/**
-	 * Self initiation for the local machine.
+	 * Self initiation for the local peer.
 	 */
 	private static void initiatePeerProcess() {
-
 		connManager = new TCPConnectionManager(peerInstance);
+		connManager.initializePeer();
 	}
 	
 

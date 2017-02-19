@@ -24,13 +24,11 @@ import util.Util;
 public class TCPConnectionManager {
 
 	/** This is the map for P2pConnections. Input is the peerID of a peer.*/
-	private static HashMap<String, P2pConnection> connMap = new HashMap<String, P2pConnection>();
+	private static HashMap<String, P2PConnection> connMap = new HashMap<String, P2PConnection>();
 
 	private String ID = null;
 	private String hostname = null;
 	private int port = -1;
-	private ArrayList<PeerInfo> previousPeers = null;
-	private boolean isLastPeer = false;
 	private ServerSocket listener = null;
 	
 	private static Util utilInstance = Util.getInstance();
@@ -47,27 +45,40 @@ public class TCPConnectionManager {
 		this.ID = localPeer.getPeerID();
 		this.hostname = localPeer.getHostName();
 		this.port = localPeer.getPortNumber();
-		this.previousPeers = utilInstance.getPreviousPeer(ID);
-		this.isLastPeer = utilInstance.isLastPeer(ID);
 	}
+	
+	
 	/**
-	 * This method will initiate peer by creating server and client.
+	 * This method will initialize the peer by creating server and client connections as required.
 	 */
-	public void initiatePeer() {
-
-		if (! isLastPeer) {
+	public void initializePeer() {
+		//if the peer is not the first, create client connections to previous peers.
+		if(!utilInstance.isFirstPeer(ID)) {
+			createClientConnections();
+		}
+		//if the peer is not the last, create a server socket and listen to connection requests from succeeding peers.
+		if (!utilInstance.isLastPeer(ID)) {
 			// create a server
 			listener = createServer(port);
 		}
-
-
 	}
+	
+	
+	private void createClientConnections() {
+		ArrayList<PeerInfo> previousPeers = utilInstance.getPreviousPeer(ID);
+		for(PeerInfo peer:previousPeers) {
+			Socket clientSocket = new Socket(peer.getHostName(), peer.getPortNumber()); 
+			populateConnMap(clientSocket, peer.getPeerID(),
+					peer.getHostName(), peer.getPortNumber());
+		}
+	}
+	
 	/**
 	 * Create a connection to a peer.
 	 * @param peerID
 	 * @return
 	 */
-	public Socket createConnection(String peerID) {
+	private Socket createConnection(String peerID) {
 
 		return null;
 	}
@@ -77,7 +88,7 @@ public class TCPConnectionManager {
 	 * @param serverPort
 	 * @return
 	 */
-	public ServerSocket createServer(int serverPort) {
+	private ServerSocket createServer(int serverPort) {
 
 		ServerSocket listener = new ServerSocket(serverPort);
 		System.out.println("The server is running."); 
@@ -112,8 +123,8 @@ public class TCPConnectionManager {
 	private static void populateConnMap(Socket connection, String peerID,
 			String hostname, int port) {
 		
-		P2pConnection p2pConn = 
-				new P2pConnection(connection, peerID, hostname, port);
+		P2PConnection p2pConn = 
+				new P2PConnection(connection, peerID, hostname, port);
 		connMap.put(peerID, p2pConn);
 	}
 
