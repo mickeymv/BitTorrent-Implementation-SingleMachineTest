@@ -1,4 +1,4 @@
-package peer;
+package type;
 
 import java.net.*;
 import java.io.*;

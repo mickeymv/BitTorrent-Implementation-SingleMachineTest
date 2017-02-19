@@ -1,7 +1,7 @@
 /**
  * 
  */
-package peer;
+package type;
 
 /**
  * @author Mickey Vellukunnel (mickeymv)

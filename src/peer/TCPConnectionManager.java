@@ -8,7 +8,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import peer.Server.Handler;
+import type.PeerInfo;
+import type.Server.Handler;
 
 /**
  * This TCPConnectionManager will manage TCP connections between peers. 

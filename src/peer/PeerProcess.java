@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Xiaolong Li
  *
  */
-public class Peer {
+public class PeerProcess {
 	
 	/** peer ID*/
 	private int peerID = 0;
@@ -22,7 +22,7 @@ public class Peer {
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = null;
 	
-	private Peer(int peerID) {
+	private PeerProcess(int peerID) {
 		
 		this.peerID = peerID;
 	}
