@@ -22,6 +22,10 @@ public class PeerInfo {
 		this.hasFileInitially = hasFileInitially;
 	}
 	
+	public PeerInfo() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public String getPeerID() {
 		return peerID;
 	}

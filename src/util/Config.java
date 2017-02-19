@@ -1,8 +1,13 @@
 package util;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.ArrayList;
+import java.util.Scanner;
+
+import type.PeerInfo;
 
 /**
  * 1. read config files - common.cfg, peerinfo.cfg
@@ -32,9 +37,10 @@ import java.util.ArrayList;
     1006 lin114-05.cise.ufl.edu 6008 0
  *
  */
-public class info {
+public class Config {
 
     //from common.cfg
+	/*
     private final int numberOfPreferredNeighbors;
     private final int unchokingInterval;
     private final int optimisticUnchokingInterval;
@@ -43,7 +49,6 @@ public class info {
     private final int pieceSize;
 
     final int numberOfPieces;
-
     public int getNumberOfPreferredNeighbors(){
         return numberOfPreferredNeighbors;
     }
@@ -67,56 +72,41 @@ public class info {
     public int getPieceSize(){
         return pieceSize;
     }
-
+*/
     //from peerInfo.cfg
-    private final ArrayList<Integer> peerList;
-    private final ArrayList<Integer> myPeerList;
-    private final ArrayList<Integer> myPreviousPeers;
-    private final ArrayList<String> hostName;
-    private final ArrayList<Integer> ports;
-    private final ArrayList<boolean> hasFile;
-    private final boolean amIFirst;
-    private final boolean amILast;
+   
+    private final ArrayList<PeerInfo> peerList;
+    
+    private static final String peerInfoFile = "PeerInfo.cfg";
+    private static final String commonInfoFile = "Common.cfg";
 
     private final int numberOfPeers;
 
-    public ArrayList<Integer> getPeerList(){
+    public ArrayList<PeerInfo> getPeerList(){
         return peerList;
     }
-
-    public ArrayList<Integer> getMyPeerList(){
-        return myPeerList;
+    
+    private static Config instance = null;
+    
+    public static Config getInstance() {
+    		if(instance == null) {
+    			instance = new Config();
+    		}
+    		return instance;
     }
 
-    public ArrayList<Integer> getMyPreviousPeers(){
-        return myPreviousPeers;
-    }
-
-    public ArrayList<String> getHostName(){
-        return hostName;
-    }
-
-    public ArrayList<Integer> getPorts(){
-        return ports;
-    }
-
-    public ArrayList<boolean> getHasFile(){
-        return hasFile;
-    }
-
-    public boolean getAmIFirst(int peerID){
-        return amIFirst;
-    }
-
-    public boolean getAmILast(int peerID){
-        return amILast;
-    }
-
-    public Config(String commonConfig){
+    private Config(){
 
         //reading from common.cfg
 
-        Scanner scanner = new Scanner(new FileReader(commonConfig));
+        Scanner scanner;
+        int count = 0;
+        peerList = new ArrayList<PeerInfo>();
+
+		try {
+			/*
+			scanner = new Scanner(new FileReader(commonInfoFile));
+		
 
         this.numberOfPreferredNeighbors = Integer.parseInt(scanner.nextLine().trim());
         this.unchokingInterval = Integer.parseInt(scanner.nextLine().trim());
@@ -132,37 +122,34 @@ public class info {
         }
 
         scanner.close();
-
+*/
         // reading from peerInfo.cfg
 
         //read peer info
-        Scanner peerScanner = new Scanner(new FileReader(peerInfo));
+        Scanner peerScanner = new Scanner(new FileReader(peerInfoFile));
 
-        peerList = new ArrayList<Integer>();
-        hostName = new ArrayList<String>();
-        ports = new ArrayList<Integer>();
-        hasFile = new ArrayList<Boolean>();
 
-        uploadPorts = new ArrayList<Integer>();
-        havePorts = new ArrayList<Integer>();
+        
 
-        int count = 0;
+       
         while (peerScanner.hasNextLine()) {
-
+        	PeerInfo peerInfo = new PeerInfo();
             String string = peerScanner.nextLine();
             String[] splitBySpace = string.split(" ");
-            this.peerList.add(Integer.parseInt(splitBySpace[0].trim()));
-            this.hostName.add(splitBySpace[1].trim());
-            this.ports.add(Integer.parseInt(splitBySpace[2].trim()));
-            this.uploadPorts.add(Integer.parseInt(splitBySpace[2].trim()) + 1);
-            this.havePorts.add(Integer.parseInt(splitBySpace[2].trim()) + 2);
+            peerInfo.setPeerID(splitBySpace[0].trim());
+            peerInfo.setHostName(splitBySpace[1].trim());
+            peerInfo.setPortNumber(Integer.parseInt(splitBySpace[2].trim()));
             if (splitBySpace[3].trim().equals("1")) {
-                this.hasFile.add(true);
+            		peerInfo.setHasFileInitially(true);
             } else {
-                this.hasFile.add(false);
+            	peerInfo.setHasFileInitially(false);
             }
+            peerList.add(peerInfo);
             count++;
-        }
+        }} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         this.numberOfPeers = count;
     }
