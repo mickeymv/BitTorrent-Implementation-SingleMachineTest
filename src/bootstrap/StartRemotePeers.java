@@ -1,8 +1,11 @@
 package bootstrap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
-import com.sun.corba.se.impl.javax.rmi.CORBA.Util;
+import type.PeerInfo;
+
+import util.Util;
 
 /**
  *
@@ -16,7 +19,7 @@ import com.sun.corba.se.impl.javax.rmi.CORBA.Util;
 
 public class StartRemotePeers {
 		
-		private static final String peerProcessName = "java peerProcess";
+		private static final String peerProcessName = "java PeerProcess";
 		
 		public static void main() {
 			String workingDir = System.getProperty("user.dir");
@@ -25,7 +28,7 @@ public class StartRemotePeers {
 			String hostname = "xiaolong@thunder.cise.ufl.edu"; //should be given by util method //lin114-00.cise.ufl.edu
 			//peer.getHostName()
 			
-			List peerList = Util.getInstance().getListOfPeers();
+			ArrayList<PeerInfo> peerList = Util.getInstance().getListOfPeers();
 			
 			try {
 				for(PeerInfo peer:peerList) {

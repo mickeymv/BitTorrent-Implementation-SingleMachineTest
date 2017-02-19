@@ -3,83 +3,60 @@ import util.Util;
 
 import java.util.ArrayList;
 
+import type.PeerInfo;
+
 /**
- * This class define a peer in a peer-to-peer network
- * 1. Initiate peer class by reading configuration files and set peer ID.
- * 2. Make TCP connections to other peers
- * 3. 
- * @author Xiaolong Li
+ * This class sets up a peer in a peer-to-peer network
+ * 1. Initiate peer and set peer ID.
+ * 2. Make TCP connections to other peers.
+
+ * @author Xiaolong Li, Mickey Vellukunnel
  *
  */
 public class PeerProcess {
 	
 	/** peer ID*/
-	private int peerID = 0;
-	private int port = 0;
-	private static Peer peerInstance = null;
+	private static String peerID;
+	private static PeerInfo peerInstance = null;
 	private static Util utilInstance = Util.getInstance();
+	
+	private static TCPConnectionManager connManager = null;
+	
 	
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = null;
 	
-	private PeerProcess(int peerID) {
-		
-		this.peerID = peerID;
-	}
-	
-	public static Peer getPeerInstance(int peerID, ) {
-		
+	public static PeerInfo getLocalPeerInstance() {
 		if (peerInstance == null) {
-			
-			return new Peer(peerID);
-		} else {
-			return peerInstance;
+			 peerInstance = utilInstance.getPeerInfo(peerID);
 		}
+		return peerInstance;
 	}
 	
 	/**
 	 * Self initiation for the local machine.
 	 */
-	private void initiatePeer() {
-		
-		//get a list of all other peers in the network
-		beighbors = PeerInfo.getPeerList();
-		// get previous peer in order to start TCP connections
-		ArrayList<PeerInfo> previousPeers = PeerInfo.getPreviousPeer(peerID);
-		
-		for(PeerInfo peer : previousPeers) {
-			
-			// create TCP connection with previous peers
-		}
-		
-		if (previousPeers == null) {
-			
-			startListening();
-		}
+	private static void initiatePeerProcess() {
+
+		connManager = new TCPConnectionManager(peerInstance);
 	}
 	
-	private void startListening() {
-		
-		
-	}
-	
-	
-	private void createConnection(String hostname, int port) {
-		
-		
-	}
+
 	
 	/**
 	 * Peer starts running from here
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		if (args.length != 3) {
+			System.out.println("\n\nError: Incorrect number of arguments. Syntax is, \"java PeerProcess [peerID]\"");
+			return;
+		}
+		
+		peerID = args[2];
 		
 		
+		initiatePeerProcess();
 	}
 	
-	class PeerInfo {
-		
-		
-	}
 }

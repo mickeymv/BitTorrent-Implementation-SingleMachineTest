@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import type.PeerInfo;
 import type.Server.Handler;
+import util.Util;
 
 /**
  * This TCPConnectionManager will manage TCP connections between peers. 
@@ -17,7 +18,7 @@ import type.Server.Handler;
  * All of the connections will be stored in a Map which takes peerID 
  * as key.
  * 
- * @author adminuser
+ * @author Xiaolong Li, Mickey Vellukunnel
  *
  */
 public class TCPConnectionManager {
@@ -31,6 +32,9 @@ public class TCPConnectionManager {
 	private ArrayList<PeerInfo> previousPeers = null;
 	private boolean isLastPeer = false;
 	private ServerSocket listener = null;
+	
+	private static Util utilInstance = Util.getInstance();
+
 	/**
 	 * Constructor, initiate the object.
 	 * @param hostname: host name of self
@@ -39,13 +43,12 @@ public class TCPConnectionManager {
 	 * @param isLastPeer: is self the last peer in the list. If true, this peer will not
 	 * 						create a server object. 
 	 */
-	public TCPConnectionManager(String ID, String hostname, int port, 
-			ArrayList<PeerInfo> perviousPeers, boolean isLastPeer) {
-		this.ID = ID;
-		this.hostname = hostname;
-		this.port = port;
-		this.previousPeers = previousPeers;
-		this.isLastPeer = isLastPeer;
+	public TCPConnectionManager(PeerInfo localPeer) {
+		this.ID = localPeer.getPeerID();
+		this.hostname = localPeer.getHostName();
+		this.port = localPeer.getPortNumber();
+		this.previousPeers = utilInstance.getPreviousPeer(ID);
+		this.isLastPeer = utilInstance.isLastPeer(ID);
 	}
 	/**
 	 * This method will initiate peer by creating server and client.
