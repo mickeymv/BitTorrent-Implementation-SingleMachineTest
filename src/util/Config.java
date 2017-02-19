@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import type.PeerInfo;
@@ -81,12 +83,18 @@ public class Config {
     private static final String commonInfoFile = "Common.cfg";
 
     private final int numberOfPeers;
+    
+    private Map<String, Integer> peerIDToPositionMap = new HashMap<>();
 
     public ArrayList<PeerInfo> getPeerList(){
         return peerList;
     }
     
-    private static Config instance = null;
+    public Map<String, Integer> getPeerIDToPositionMap() {
+		return peerIDToPositionMap;
+	}
+
+	private static Config instance = null;
     
     public static Config getInstance() {
     		if(instance == null) {
@@ -145,7 +153,7 @@ public class Config {
             	peerInfo.setHasFileInitially(false);
             }
             peerList.add(peerInfo);
-            count++;
+            peerIDToPositionMap.put(peerInfo.getPeerID(),count++);
         }} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
