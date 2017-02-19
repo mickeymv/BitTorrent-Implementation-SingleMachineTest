@@ -44,15 +44,6 @@ public class info {
 
     final int numberOfPieces;
 
-    //from peerInfo.cfg
-    private final ArrayList<Integer> peerID;
-    private final ArrayList<String> hostName;
-    private final ArrayList<Integer> ports;
-    private final ArrayList<boolean> hasFile;
-
-    private final int numberOfPeers;
-
-    //common.cfg
     public int getNumberOfPreferredNeighbors(){
         return numberOfPreferredNeighbors;
     }
@@ -77,21 +68,62 @@ public class info {
         return pieceSize;
     }
 
-    //peerInfo.cfg
+    //from peerInfo.cfg
+    private final ArrayList<Integer> peerList;
+    private final ArrayList<Integer> myPeerList;
+    private final ArrayList<Integer> myPreviousPeers;
+    private final ArrayList<String> hostName;
+    private final ArrayList<Integer> ports;
+    private final ArrayList<boolean> hasFile;
+    private final boolean amIFirst;
+    private final boolean amILast;
 
+    private final int numberOfPeers;
+
+    public ArrayList<Integer> getPeerList(){
+        return peerList;
+    }
+
+    public ArrayList<Integer> getMyPeerList(){
+        return myPeerList;
+    }
+
+    public ArrayList<Integer> getMyPreviousPeers(){
+        return myPreviousPeers;
+    }
+
+    public ArrayList<String> getHostName(){
+        return hostName;
+    }
+
+    public ArrayList<Integer> getPorts(){
+        return ports;
+    }
+
+    public ArrayList<boolean> getHasFile(){
+        return hasFile;
+    }
+
+    public boolean getAmIFirst(int peerID){
+        return amIFirst;
+    }
+
+    public boolean getAmILast(int peerID){
+        return amILast;
+    }
 
     public Config(String commonConfig){
 
-        //reading common.cfg file
+        //reading from common.cfg
 
         Scanner scanner = new Scanner(new FileReader(commonConfig));
 
-        this.numberOfPreferredNeighbors = Integer.parseInt(in1.nextLine().trim());
-        this.unchokingInterval = Integer.parseInt(in1.nextLine().trim());
-        this.optimisticUnchokingInterval = Integer.parseInt(in1.nextLine().trim());
-        this.fileName = in1.nextLine().trim();
-        this.fileSize = Integer.parseInt(in1.nextLine().trim());
-        this.pieceSize = Integer.parseInt(in1.nextLine().trim());
+        this.numberOfPreferredNeighbors = Integer.parseInt(scanner.nextLine().trim());
+        this.unchokingInterval = Integer.parseInt(scanner.nextLine().trim());
+        this.optimisticUnchokingInterval = Integer.parseInt(scanner.nextLine().trim());
+        this.fileName = scanner.nextLine().trim();
+        this.fileSize = Integer.parseInt(scanner.nextLine().trim());
+        this.pieceSize = Integer.parseInt(scanner.nextLine().trim());
 
         if (this.fileSize%this.pieceSize == 0) {
             this.numberOfPieces = this.fileSize/this.pieceSize;
@@ -100,7 +132,38 @@ public class info {
         }
 
         scanner.close();
+
+        // reading from peerInfo.cfg
+
+        //read peer info
+        Scanner peerScanner = new Scanner(new FileReader(peerInfo));
+
+        peerList = new ArrayList<Integer>();
+        hostName = new ArrayList<String>();
+        ports = new ArrayList<Integer>();
+        hasFile = new ArrayList<Boolean>();
+
+        uploadPorts = new ArrayList<Integer>();
+        havePorts = new ArrayList<Integer>();
+
+        int count = 0;
+        while (peerScanner.hasNextLine()) {
+
+            String string = peerScanner.nextLine();
+            String[] splitBySpace = string.split(" ");
+            this.peerList.add(Integer.parseInt(splitBySpace[0].trim()));
+            this.hostName.add(splitBySpace[1].trim());
+            this.ports.add(Integer.parseInt(splitBySpace[2].trim()));
+            this.uploadPorts.add(Integer.parseInt(splitBySpace[2].trim()) + 1);
+            this.havePorts.add(Integer.parseInt(splitBySpace[2].trim()) + 2);
+            if (splitBySpace[3].trim().equals("1")) {
+                this.hasFile.add(true);
+            } else {
+                this.hasFile.add(false);
+            }
+            count++;
+        }
+
+        this.numberOfPeers = count;
     }
-
-
 }
