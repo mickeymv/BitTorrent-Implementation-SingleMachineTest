@@ -96,7 +96,7 @@ public class TCPConnectionManager {
 	 * @param serverPort
 	 * @return
 	 */
-	private ServerSocket createServer(int serverPort) {
+	private void createServer(int serverPort) {
 
 		try {
 			listener = new ServerSocket(serverPort);
