@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -66,7 +67,7 @@ public class TCPConnectionManager {
 		//if the peer is not the last, create a server socket and listen to connection requests from succeeding peers.
 		if (!utilInstance.isLastPeer(ID)) {
 			// create a server
-			listener = createServer(port);
+			createServer(port);
 		}
 	}
 	
@@ -74,9 +75,18 @@ public class TCPConnectionManager {
 	private void createClientConnections() {
 		ArrayList<PeerInfo> previousPeers = utilInstance.getPreviousPeer(ID);
 		for(PeerInfo peer:previousPeers) {
-			Socket clientSocket = new Socket(peer.getHostName(), peer.getPortNumber()); 
-			populateConnMap(clientSocket, peer.getPeerID(),
-					peer.getHostName(), peer.getPortNumber());
+			Socket clientSocket;
+			try {
+				clientSocket = new Socket(peer.getHostName(), peer.getPortNumber());
+				populateConnMap(clientSocket, peer.getPeerID(),
+						peer.getHostName(), peer.getPortNumber());
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 		}
 	}
 	
@@ -88,7 +98,6 @@ public class TCPConnectionManager {
 	 */
 	private ServerSocket createServer(int serverPort) {
 
-		ServerSocket listener = null;
 		try {
 			listener = new ServerSocket(serverPort);
 			System.out.println("The server is running."); 
@@ -109,7 +118,6 @@ public class TCPConnectionManager {
 					+ " port number " + port);
 			e.printStackTrace();
 		}
-		return listener;
 	}
 
 	/**
