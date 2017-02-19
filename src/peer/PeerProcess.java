@@ -4,6 +4,7 @@ import util.Util;
 import java.util.ArrayList;
 
 import type.PeerInfo;
+import logging.FileLogger;
 
 /**
  * This class sets up a peer in a peer-to-peer network
@@ -27,6 +28,7 @@ public class PeerProcess {
 	private ArrayList<PeerInfo> neighbors = null;
 	
 	public static PeerInfo getLocalPeerInstance() {
+
 		if (peerInstance == null) {
 			 peerInstance = utilInstance.getPeerInfo(peerID);
 		}
@@ -55,6 +57,8 @@ public class PeerProcess {
 		
 		peerID = args[2];
 		
+        // start logging
+        FileLogger.initialize();
 		
 		initiatePeerProcess();
 	}

@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import type.PeerInfo;
 import type.Server.Handler;
 import util.Util;
@@ -23,9 +25,14 @@ import util.Util;
  */
 public class TCPConnectionManager {
 
+	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
+	
 	/** This is the map for P2pConnections. Input is the peerID of a peer.*/
 	private static HashMap<String, P2PConnection> connMap = new HashMap<String, P2PConnection>();
 
+	/** This is a list that contains all of the peers in the network */
+	private static ArrayList<PeerInfo> peerList = new ArrayList<PeerInfo>();
+	
 	private String ID = null;
 	private String hostname = null;
 	private int port = -1;
@@ -73,16 +80,7 @@ public class TCPConnectionManager {
 		}
 	}
 	
-	/**
-	 * Create a connection to a peer.
-	 * @param peerID
-	 * @return
-	 */
-	private Socket createConnection(String peerID) {
-
-		return null;
-	}
-
+	
 	/**
 	 * Create a server
 	 * @param serverPort
@@ -90,17 +88,28 @@ public class TCPConnectionManager {
 	 */
 	private ServerSocket createServer(int serverPort) {
 
-		ServerSocket listener = new ServerSocket(serverPort);
-		System.out.println("The server is running."); 
-
+		ServerSocket listener = null;
 		try {
-			while(true) {
-				new Handler(listener.accept()).start();
-				System.out.println("Client "  + ID + " is connected!");
-			}
-		} finally {
-			listener.close();
-		} 
+			listener = new ServerSocket(serverPort);
+			System.out.println("The server is running."); 
+			
+			try {
+				while(true) {
+					new Handler(listener.accept()).start();
+					System.out.println("Client "  + ID + " is connected!");
+				}
+			} finally {
+				listener.close();
+			} 
+			
+		} catch (IOException e) {
+
+			System.err.println("Error: Cannot create server socket " 
+					+ "with hostname " + hostname
+					+ " port number " + port);
+			e.printStackTrace();
+		}
+		return listener;
 	}
 
 	/**
@@ -109,9 +118,17 @@ public class TCPConnectionManager {
 	 * @return
 	 */
 	private static String hostname2peerID(String hostname) {
-		//TODO: 
 		
-		return null;
+		String peerID = null;
+		for (PeerInfo peer : peerList) {
+			
+			if (hostname.equals(peer.getHostName())) {
+				
+				peerID = peer.getPeerID();
+				break;
+			}
+		}
+		return peerID;
 	}
 	
 	/**
@@ -146,7 +163,6 @@ public class TCPConnectionManager {
 			String clientHostname = connection.getInetAddress().getHostName();
 			String clientPeerID = hostname2peerID(clientHostname);
 			populateConnMap(connection, clientPeerID, clientHostname, connection.getPort());
-			
 		}
 
 		public void run() {
