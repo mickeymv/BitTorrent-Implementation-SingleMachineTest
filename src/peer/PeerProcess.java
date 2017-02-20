@@ -72,6 +72,8 @@ public class PeerProcess {
 		
 		peerID = args[2];
 		
+		getLocalPeerInstance();
+		
         // start logging
         FileLogger.initialize();
 		
@@ -80,7 +82,7 @@ public class PeerProcess {
 	
 	public static void initiatePeerProcessForTesting(String peerID) {
 		
-	peerID = peerID;
+		peerInstance = utilInstance.getPeerInfo(peerID);
 		initiatePeerProcess();
 	}
 	
