@@ -23,10 +23,11 @@ public class PeerProcess {
 	private static Util utilInstance = Util.getInstance();
 	
 	private static TCPConnectionManager connManager = null;
-	
+	private static PeerProcess instance = null;
 	
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = null;
+	
 	
 	public static PeerInfo getLocalPeerInstance() {
 
@@ -34,6 +35,15 @@ public class PeerProcess {
 			 peerInstance = utilInstance.getPeerInfo(peerID);
 		}
 		return peerInstance;
+	}
+	
+	public static PeerProcess getPeerProcessInstance() {
+		
+		if (instance == null) {
+			
+			instance = new PeerProcess();
+		}
+		return instance;
 	}
 	
 	/**
@@ -63,5 +73,12 @@ public class PeerProcess {
 		
 		initiatePeerProcess();
 	}
+	
+	public static void initiatePeerProcessForTesting(String peerID) {
+		
+	peerID = peerID;
+		initiatePeerProcess();
+	}
+	
 	
 }
