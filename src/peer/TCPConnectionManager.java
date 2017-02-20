@@ -73,7 +73,7 @@ public class TCPConnectionManager {
 	
 	
 	private void createClientConnections() {
-		ArrayList<PeerInfo> previousPeers = utilInstance.getPreviousPeer(ID);
+		ArrayList<PeerInfo> previousPeers = utilInstance.getMyPreviousPeers(ID);
 		for(PeerInfo peer:previousPeers) {
 			Socket clientSocket;
 			try {

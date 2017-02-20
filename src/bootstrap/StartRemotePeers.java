@@ -28,7 +28,7 @@ public class StartRemotePeers {
 			String hostname = "xiaolong@thunder.cise.ufl.edu"; //should be given by util method //lin114-00.cise.ufl.edu
 			//peer.getHostName()
 			
-			ArrayList<PeerInfo> peerList = Util.getInstance().getListOfPeers();
+			ArrayList<PeerInfo> peerList = Util.getInstance().getPeerList();
 			
 			try {
 				for(PeerInfo peer:peerList) {
