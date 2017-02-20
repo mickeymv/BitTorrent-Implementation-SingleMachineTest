@@ -3,6 +3,8 @@ import util.Util;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import connection.TCPConnectionManager;
 import type.PeerInfo;
 import logging.FileLogger;
@@ -16,6 +18,8 @@ import logging.FileLogger;
  *
  */
 public class PeerProcess {
+	
+	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
 	
 	/** peer ID*/
 	private static String peerID;
