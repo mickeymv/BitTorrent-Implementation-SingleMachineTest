@@ -1,4 +1,4 @@
-package util;
+package test;
 
 import static org.junit.Assert.*;
 
@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import type.PeerInfo;
+import util.Util;
 
 public class UtilTest {
 
