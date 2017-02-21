@@ -74,4 +74,12 @@ public class Util {
 		PeerInfo peerInfo = peerList.get(peerPosition);
 		return peerInfo;
 	}
+
+	/*
+	 * Returns address of a peer (given PeerInfo object) in the format
+	 * 'hostName:portNumber'
+	 */
+	public static String getPeerAddress(PeerInfo peer) {
+		return peer.getHostName() + ":" + peer.getPortNumber();
+	}
 }

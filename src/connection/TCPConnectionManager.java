@@ -40,9 +40,11 @@ public class TCPConnectionManager {
 
 	private static Util utilInstance = Util.getInstance();
 
-	// TODO: Note: this map only works with unique hostnames, so it won't work
-	// with the localhost testing!
-	private static HashMap<String, String> hostNameToPeerIDMap = new HashMap<>();
+	/*
+	 * the map has as key the peer's address, formatted as
+	 * 'hostName:portNumber'; and value as the peerID.
+	 **/
+	private static HashMap<String, String> peerAddressToPeerIDMap = new HashMap<>();
 
 	/**
 	 * Constructor, initiate the object.
@@ -56,13 +58,13 @@ public class TCPConnectionManager {
 		this.ID = localPeer.getPeerID();
 		this.hostname = localPeer.getHostName();
 		this.port = localPeer.getPortNumber();
-		populateHostNameToPeerIDHashMap();
+		populatePeerAddressToPeerIDHashMap();
 	}
 
-	private void populateHostNameToPeerIDHashMap() {
+	private void populatePeerAddressToPeerIDHashMap() {
 		peerList = utilInstance.getPeerList();
 		for (PeerInfo peer : peerList) {
-			hostNameToPeerIDMap.put(peer.getHostName(), peer.getPeerID());
+			peerAddressToPeerIDMap.put(Util.getPeerAddress(peer), peer.getPeerID());
 		}
 	}
 
@@ -90,8 +92,8 @@ public class TCPConnectionManager {
 			Socket clientSocket;
 			try {
 				clientSocket = new Socket(peer.getHostName(), peer.getPortNumber());
-				System.out.println("Client: " + ID + ", connected to a server at: " + peer.getHostName() + ":"
-						+ peer.getPortNumber());
+				System.out.println("Client: " + ID + ", connected to Server: "
+						+ peerAddressToPeerIDMap.get(Util.getPeerAddress(peer)));
 				// String serverPeerID =
 				// hostNameToPeerIDMap.get(peer.getHostName()); //
 				// hostname2peerID(peer.getHostName());
@@ -133,8 +135,7 @@ public class TCPConnectionManager {
 						listener.close();
 					}
 				} catch (IOException e) {
-					System.err.println("Error: Cannot create server socket " 
-							+ "with hostname " + hostname
+					System.err.println("Error: Cannot create server socket " + "with hostname " + hostname
 							+ " port number " + port);
 					e.printStackTrace();
 				}
@@ -182,12 +183,15 @@ public class TCPConnectionManager {
 		private ObjectOutputStream out; // stream write to the socket
 		private String peerID; // The index number of the client
 
+		/*
+		 * the socket object coming in is the server's socket associated with a
+		 * particular incoming client tcp connection.
+		 */
 		public Handler(Socket connection, String serverPeerID) {
 			this.connection = connection;
 			String clientHostname = connection.getInetAddress().getHostName();
-			String clientPeerID = hostNameToPeerIDMap.get(clientHostname); // hostname2peerID(clientHostname);
-			// System.out.println("Server: " + serverPeerID + ", connected to a
-			// client: " + clientPeerID);
+			String clientPeerID = peerAddressToPeerIDMap.get(clientHostname + ":" + connection.getPort());
+			System.out.println("Server: " + serverPeerID + ", connected to a client: " + clientPeerID);
 			populateConnMap(connection, clientPeerID, clientHostname, connection.getPort());
 		}
 
