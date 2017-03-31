@@ -16,7 +16,7 @@ import type.PeerInfo;
  * 2. store relevant common
  * variables and peer information
  * 
- * @author Mickey Vellukunnel, Arpitha
+ * @author Mickey Vellukunnel, Arpitha, Xiaolong
  *
  *         content of common.cfg:
  *
@@ -36,26 +36,43 @@ import type.PeerInfo;
 public class ConfigurationSetup {
 
 	// from common.cfg
-	/*
-	 * private final int numberOfPreferredNeighbors; private final int
-	 * unchokingInterval; private final int optimisticUnchokingInterval; private
-	 * final String fileName; private final int fileSize; private final int
-	 * pieceSize;
-	 * 
-	 * final int numberOfPieces; public int getNumberOfPreferredNeighbors(){
-	 * return numberOfPreferredNeighbors; }
-	 * 
-	 * public int getUnchokingInterval(){ return unchokingInterval; }
-	 * 
-	 * public int getOptimisticUnchokingInterval(){ return
-	 * optimisticUnchokingInterval; }
-	 * 
-	 * public String getFileName(){ return fileName; }
-	 * 
-	 * public int getFileSize(){ return fileSize; }
-	 * 
-	 * public int getPieceSize(){ return pieceSize; }
-	 */
+	 public static final int NULL = -1;
+	 private static int numberOfPreferredNeighbors = NULL; 
+	 private static int unchokingInterval = NULL; 
+	 private static int optimisticUnchokingInterval = NULL; 
+	 
+	 private static String fileName = null; 
+	 private static int fileSize = NULL; 
+	 
+	 private static int pieceSize = NULL;
+	  
+	 static int numberOfPieces = NULL;
+	 
+	 public static int getNumberOfPieces() {
+		return numberOfPieces;
+	}
+
+	public static void setNumberOfPieces(int numberOfPieces) {
+		ConfigurationSetup.numberOfPieces = numberOfPieces;
+	}
+
+	public int getNumberOfPreferredNeighbors(){
+		 
+		 return numberOfPreferredNeighbors; 
+	 }
+	  
+	 public int getUnchokingInterval(){ return unchokingInterval; }
+	  
+	 public int getOptimisticUnchokingInterval() { 
+		 return optimisticUnchokingInterval; 
+	 }
+	  
+	 public String getFileName(){ return fileName; }
+	  
+	 public int getFileSize(){ return fileSize; }
+	  
+	 public int getPieceSize(){ return pieceSize; }
+	 
 	// from peerInfo.cfg
 
 	// list of all the peers in the network (including local peer)
@@ -80,6 +97,7 @@ public class ConfigurationSetup {
 	public static ConfigurationSetup getInstance() {
 		if (instance == null) {
 			instance = new ConfigurationSetup();
+			readCommonInfoConfigFile();
 		}
 		return instance;
 	}
@@ -93,30 +111,32 @@ public class ConfigurationSetup {
 		readPeerInfoConfigFile();
 	}
 
-	private static final void readCommonInfoConfigFile() {
+	/**
+	 * Read Common.cfg
+	 */
+	private static void readCommonInfoConfigFile() {
 		// reading from common.cfg
 		try {
-			/*
-			 * Scanner scanner; scanner = new Scanner(new
-			 * FileReader(commonInfoFile));
-			 * 
-			 * 
-			 * this.numberOfPreferredNeighbors =
-			 * Integer.parseInt(scanner.nextLine().trim());
-			 * this.unchokingInterval =
-			 * Integer.parseInt(scanner.nextLine().trim());
-			 * this.optimisticUnchokingInterval =
-			 * Integer.parseInt(scanner.nextLine().trim()); this.fileName =
-			 * scanner.nextLine().trim(); this.fileSize =
-			 * Integer.parseInt(scanner.nextLine().trim()); this.pieceSize =
-			 * Integer.parseInt(scanner.nextLine().trim());
-			 * 
-			 * if (this.fileSize%this.pieceSize == 0) { this.numberOfPieces =
-			 * this.fileSize/this.pieceSize; } else { this.numberOfPieces =
-			 * this.fileSize/this.pieceSize + 1; }
-			 * 
-			 * scanner.close();
-			 */} catch (Exception e) { // FileNotFoundException
+			
+			 Scanner scanner = new Scanner(new
+					 FileReader(commonInfoFile));
+			 
+			 numberOfPreferredNeighbors = Integer.parseInt(scanner.nextLine().trim());
+			 unchokingInterval = Integer.parseInt(scanner.nextLine().trim());
+			 optimisticUnchokingInterval = Integer.parseInt(scanner.nextLine().trim()); 
+			 fileName = scanner.nextLine().trim(); 
+			 fileSize = Integer.parseInt(scanner.nextLine().trim()); 
+			 pieceSize = Integer.parseInt(scanner.nextLine().trim());
+			  
+			 if (fileSize % pieceSize == 0) { 
+				 
+				 numberOfPieces = fileSize / pieceSize; 
+			 } else {
+				 
+				 numberOfPieces = fileSize / pieceSize + 1; 
+			 }
+			 scanner.close();
+		} catch (Exception e) { // FileNotFoundException
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
