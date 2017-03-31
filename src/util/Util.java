@@ -106,18 +106,22 @@ public class Util {
 			
 			return;
 		} else {
+			bitField = new ArrayList<Byte>();
 			
-			int lengthOfBitfield = (int) Math.ceil(ConfigurationSetup.getNumberOfPieces() / 8);
+			int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 			
+			System.out.println("length of bitfield:" + lengthOfBitfield);
 			// set all full bytes
-			for (int i = 0; i < lengthOfBitfield - 1; i ++) {
+			for (int i = 0; i < lengthOfBitfield; i ++) {
 				
 				Byte b = new Byte((byte)0xFF);
 				bitField.add(b);
 			}
 			
 			// set remaining bits of the last byte.
-			int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield-1) * 8;
+			int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
+			System.out.println("number of pieces:" + ConfigurationSetup.getNumberOfPieces() + " \n"
+					+ "remaining:" + remaining);
 			Byte b = setFirstNDigits(remaining);
 			bitField.add(b);
 		}
@@ -194,6 +198,7 @@ public class Util {
 		System.out.println(s1);
 	}
 	
+<<<<<<< HEAD
 public static void move(String peerID, String fileName)throws IOException{
 		
 //		String fileName = "TheFile.dat";
@@ -205,7 +210,13 @@ public static void move(String peerID, String fileName)throws IOException{
 
 		Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
 	}
-
+	public static void printBitfield() {
+		
+		for (Byte b : bitField) {
+			
+			printByteToBinaryString(b);
+		}
+	}
 }
 
 
