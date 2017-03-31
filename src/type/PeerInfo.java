@@ -14,7 +14,16 @@ public class PeerInfo {
 	private String hostName;
 	private int portNumber;
 	boolean hasFileInitially;
+	int bitfield;    // bitfield of this peer.
 	
+	public int getBitfield() {
+		return bitfield;
+	} 
+	
+	public void setBitfield(int bitfield) {
+		this.bitfield = bitfield;
+	}
+
 	public PeerInfo(String peerID, String hostName, int portNumber, boolean hasFileInitially) {
 		this.peerID = peerID;
 		this.hostName = hostName;
