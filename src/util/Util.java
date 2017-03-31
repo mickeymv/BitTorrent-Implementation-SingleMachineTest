@@ -108,7 +108,7 @@ public class Util {
 			// set all full bytes
 			for (int i = 0; i < lengthOfBitfield - 1; i ++) {
 				
-				Byte b = new Byte("11111111");
+				Byte b = new Byte((byte)0xFF);
 				bitField.add(b);
 			}
 			
@@ -128,6 +128,8 @@ public class Util {
 		byte b = 0;
 		for (int i = 0; i < n; i ++) {
 			b = (byte) (b>>1);
+			b = (byte) (b | 0b10000000);
+			System.out.println("b:" + b + '\t');
 		}
 		return new Byte(b);
 	}
@@ -179,6 +181,13 @@ public class Util {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void printByteToBinaryString(Byte b) {
+		
+		String s1 = String.format("%8s", 
+				Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+		System.out.println(s1);
 	}
 }
 
