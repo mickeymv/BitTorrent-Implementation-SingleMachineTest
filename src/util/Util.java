@@ -4,6 +4,10 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -189,6 +193,19 @@ public class Util {
 				Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 		System.out.println(s1);
 	}
+	
+public static void move(String peerID, String fileName)throws IOException{
+		
+//		String fileName = "TheFile.dat";
+		
+		String fileName2 = "~/BitTorrent-Implementation/peer_"+peerID;
+		
+		Path source = Paths.get(fileName);
+		Path target = Paths.get(fileName2);
+
+		Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+	}
+
 }
 
 

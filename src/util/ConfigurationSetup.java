@@ -41,7 +41,7 @@ public class ConfigurationSetup {
 	 private static int unchokingInterval = NULL; 
 	 private static int optimisticUnchokingInterval = NULL; 
 	 
-	 private static String fileName = null; 
+	 public static String fileName = null; 
 	 private static int fileSize = NULL; 
 	 
 	 private static int pieceSize = NULL;
