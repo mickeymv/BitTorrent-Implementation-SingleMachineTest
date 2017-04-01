@@ -10,8 +10,6 @@ import util.ConfigurationSetup;
 import util.Util;
 
 public class UtilTest {
-
-
 	ConfigurationSetup instance = ConfigurationSetup.getInstance();
 	Util testInstance = Util.getInstance();
 	

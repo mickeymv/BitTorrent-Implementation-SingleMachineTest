@@ -9,9 +9,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.io.File;
 
 import type.PeerInfo;
 /*
@@ -197,18 +197,33 @@ public class Util {
 				Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 		System.out.println(s1);
 	}
+
 	
-<<<<<<< HEAD
 public static void move(String peerID, String fileName)throws IOException{
 		
 //		String fileName = "TheFile.dat";
 		
-		String fileName2 = "~/BitTorrent-Implementation/peer_"+peerID;
+		/*String fileName2 = "~/BitTorrent-Implementation/peer_"+peerID;
 		
 		Path source = Paths.get(fileName);
 		Path target = Paths.get(fileName2);
 
-		Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+		Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);*/
+	
+	try{
+
+ 	   File afile =new File("F:\\Semester_3\\Computer Networks\\BitTorrent-Implementation\\"+fileName);
+
+ 	   if(afile.renameTo(new File("F:\\Semester_3\\Computer Networks\\BitTorrent-Implementation\\peer\\peer_" + peerID))){
+ 		System.out.println("File is moved successful!");
+ 	   }else{
+ 		System.out.println("File is failed to move!");
+ 	   }
+
+ 	}catch(Exception e){
+ 		e.printStackTrace();
+ 	}
+	
 	}
 	public static void printBitfield() {
 		
