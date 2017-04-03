@@ -2,6 +2,7 @@ package util;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -150,7 +151,9 @@ public class Util {
 	public static void splitDataFile() {
 		
 		Path path = Paths.get(ConfigurationSetup.getInstance().getFileName());
-		String pieceDir = "project/peer_" + PeerProcess.getLocalPeerInstance().getPeerID();
+		//String pieceDir = "project/peer_" + PeerProcess.getLocalPeerInstance().getPeerID();
+		String pieceDir = "project" + File.pathSeparator + "peer_xxxxxx";
+		
 		byte[] byteChunk;
 		FileOutputStream outputStream = null;
 		int pieceSize = ConfigurationSetup.getInstance().getPieceSize();
@@ -172,7 +175,7 @@ public class Util {
 		            to = from + (int)remaining;
 		            remaining = 0;
 		        } else {
-		        		to = from + pieceSize-1;
+		        		to = from + pieceSize;
 		        		remaining -= pieceSize;
 		        }
 		        
@@ -188,13 +191,107 @@ public class Util {
 		        byteChunk = null;
 		        outputStream = null;
 		        
-		        from = to + 1;
+		        from = to;
 		    }
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
+		
+	
+	/**
+	 * Merge all pieces of data file into a single file.
+	 * 
+	 */
+	public static void mergeDataPieces(String directory) {
+		
+		File path = new File(directory);
+		FileOutputStream outputStream = null;
+		
+		try {
+			outputStream = new FileOutputStream(ConfigurationSetup.getInstance().getFileName(), true);
+		} catch (FileNotFoundException e1) {
+			System.err.print("Cannot create data file.");
+			e1.printStackTrace();
+		}
+		
+		for (int i = 1; i <= ConfigurationSetup.getNumberOfPieces(); i ++) {
 			
+			String pieceFileName = directory + File.separator + "peer_xxxxxx_piece_" + i;
+			File file = new File(pieceFileName);
+			if (file.exists()) {
+				
+				byte[] data;
+				try {
+					data = Files.readAllBytes(file.toPath());
+				    outputStream.write(data);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				
+				System.err.println("piece file not found! " + pieceFileName);
+			}
+		}
+		
+		try {
+			outputStream.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Save a piece of data into a binary file.
+	 * @param data
+	 */
+	public static void savePieceFile(byte[] data, String name) {
+		
+		FileOutputStream outputStream = null;
+		
+		try {
+				outputStream = new FileOutputStream(new File(name));
+		        outputStream.write(data);
+		        outputStream.flush();
+		        outputStream.close();
+		        data = null;
+		    } catch (IOException e) {
+		    		e.printStackTrace();
+		    }
+	}
+	
+	/**
+	 * Return piece file name given piece number
+	 * @param pieceNum
+	 * @return
+	 */
+	public static String getPieceFileName(int pieceNum) {
+		
+		return "project" + File.separator + "peer_xxxxxx_piece_" + pieceNum;
+	}
+	
+	/**
+	 * read a piece of data file as a byte array
+	 * @param pieceNum
+	 */
+	public static byte[] getPieceAsByteArray(int pieceNum) {
+		Path path = Paths.get(getPieceFileName(pieceNum));
+		byte[] data = null;
+		
+		try {
+			if (path.toFile().exists())
+				data = Files.readAllBytes(path);
+			else 
+				System.err.println("file not exist:" + path.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return data;
+	}
+	
 	
 	/**
 	 * Set the first N digits of a Byte object

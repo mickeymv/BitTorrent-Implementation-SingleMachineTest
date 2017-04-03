@@ -20,13 +20,18 @@ public class UtilTest {
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
 		
 		Util.initiateBitfield();
-		Util.createRandomDataFile(instance.getFileSize());
-		Util.splitDataFile();
+		//Util.createRandomDataFile(instance.getFileSize());
+		//Util.splitDataFile();
+		//Util.mergeDataPieces("project/");
 		
 		
 		//System.out.println(ConfigurationSetup.numberOfPieces);
 		//Util.printBitfield();
-		
+		byte[] data = Util.getPieceAsByteArray(1);
+		for (byte b : data) {
+			
+			Util.printByteToBinaryString(b);
+		}		
 		
 	}
 
