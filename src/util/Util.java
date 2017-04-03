@@ -11,10 +11,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.io.File;
-
+import connection.TCPConnectionManager;
+import peer.PeerProcess;
 import type.PeerInfo;
 /*
 * @author Mickey Vellukunnel, Arpitha
@@ -147,36 +149,50 @@ public class Util {
 	 */
 	public static void splitDataFile() {
 		
-		File theFile = new File(ConfigurationSetup.getInstance().getFileName());
-		FileInputStream inputStream = null;
-		String newName;
-		FileOutputStream chunk;
-		int pieceSize = ConfigurationSetup.getInstance().getPieceSize();
-		int nChunks = 0, read = 0, readLength = Chunk_Size;
+		Path path = Paths.get(ConfigurationSetup.getInstance().getFileName());
+		String pieceDir = "project/peer_" + PeerProcess.getLocalPeerInstance().getPeerID();
 		byte[] byteChunk;
+		FileOutputStream outputStream = null;
+		int pieceSize = ConfigurationSetup.getInstance().getPieceSize();
+		File temp_path = new File("project");
+		temp_path.mkdirs();
+		
 		try {
-		    inputStream = new FileInputStream(theFile);
-		    StupidTest.size = (int)ifile.length();
-		    while (fileSize > 0) {
-		        if (fileSize <= Chunk_Size) {
-		            readLength = fileSize;
+			byte[] data = Files.readAllBytes(path);
+			long fileLength = data.length;
+			long remaining = fileLength;
+			System.out.println("size of data:" + data.length);
+			int from = 0;
+			int to = 0;
+			int chunkIdx = 0;
+			String pieceFileName = null;
+			
+		    while (remaining > 0) { // if there is more data
+		        if (remaining <= pieceSize) {
+		            to = from + (int)remaining;
+		            remaining = 0;
+		        } else {
+		        		to = from + pieceSize-1;
+		        		remaining -= pieceSize;
 		        }
 		        
-		        byteChunk = new byte[readLength];
-		        read = fis.read(byteChunk, 0, readLength);
-		        fileSize -= read;
-		        assert(read==byteChunk.length);
-		        nChunks++;
-		        newName = fname + ".part" + Integer.toString(nChunks - 1);
-		        chunk = new FileOutputStream(new File(newName));
-		        chunk.write(byteChunk);
-		        chunk.flush();
-		        chunk.close();
+		        System.out.println("from:" + from + " to:" + to);
+		        
+		        byteChunk = Arrays.copyOfRange(data, from, to);
+		        chunkIdx ++;
+		        pieceFileName = pieceDir + "_piece_" + Integer.toString(chunkIdx);
+		        outputStream = new FileOutputStream(new File(pieceFileName));
+		        outputStream.write(byteChunk);
+		        outputStream.flush();
+		        outputStream.close();
 		        byteChunk = null;
-		        chunk = null;
+		        outputStream = null;
+		        
+		        from = to + 1;
 		    }
-		    fis.close();
-		    fis = null;
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 			
 	

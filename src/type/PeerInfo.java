@@ -3,6 +3,8 @@
  */
 package type;
 
+import java.util.ArrayList;
+
 /**
  * @author Mickey Vellukunnel (mickeymv)
  *	Class which encapsulates details about a peer such as 
@@ -14,13 +16,13 @@ public class PeerInfo {
 	private String hostName;
 	private int portNumber;
 	boolean hasFileInitially;
-	int bitfield;    // bitfield of this peer.
+	ArrayList<Byte> bitfield;    // bitfield of this peer.
 	
-	public int getBitfield() {
+	public ArrayList<Byte> getBitfield() {
 		return bitfield;
 	} 
 	
-	public void setBitfield(int bitfield) {
+	public void setBitfield(ArrayList<Byte> bitfield) {
 		this.bitfield = bitfield;
 	}
 

@@ -16,13 +16,16 @@ public class UtilTest {
 //		
 //		int n = Util.getFirstNDigits(new Byte((byte)0XF8));
 //		System.out.println(n);
-		
+		Util inst = Util.getInstance();
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
 		
 		Util.initiateBitfield();
+		Util.createRandomDataFile(instance.getFileSize());
+		Util.splitDataFile();
 		
-		System.out.println(ConfigurationSetup.numberOfPieces);
-		Util.printBitfield();
+		
+		//System.out.println(ConfigurationSetup.numberOfPieces);
+		//Util.printBitfield();
 		
 		
 	}
