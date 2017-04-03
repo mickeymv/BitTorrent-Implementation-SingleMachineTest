@@ -41,6 +41,17 @@ public class Util {
 		}
 		return instance;
 	}
+	
+	/*
+	 * Converts an integer to its 4 byte representation.
+	 */
+	public final byte[] intToByteArray(int value) {
+	    return new byte[] {
+	            (byte)(value >>> 24),
+	            (byte)(value >>> 16),
+	            (byte)(value >>> 8),
+	            (byte)value};
+	}
 
 	public ArrayList<PeerInfo> getPeerList() {
 		return peerList;
