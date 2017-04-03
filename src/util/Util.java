@@ -1,6 +1,8 @@
 package util;
 
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -137,6 +139,46 @@ public class Util {
 			bitField.add(b);
 		}
 	}
+	
+	
+	/**
+	 * split the data file into pieces.
+	 * Directory: project/peer_[peerID]
+	 */
+	public static void splitDataFile() {
+		
+		File theFile = new File(ConfigurationSetup.getInstance().getFileName());
+		FileInputStream inputStream = null;
+		String newName;
+		FileOutputStream chunk;
+		int pieceSize = ConfigurationSetup.getInstance().getPieceSize();
+		int nChunks = 0, read = 0, readLength = Chunk_Size;
+		byte[] byteChunk;
+		try {
+		    inputStream = new FileInputStream(theFile);
+		    StupidTest.size = (int)ifile.length();
+		    while (fileSize > 0) {
+		        if (fileSize <= Chunk_Size) {
+		            readLength = fileSize;
+		        }
+		        
+		        byteChunk = new byte[readLength];
+		        read = fis.read(byteChunk, 0, readLength);
+		        fileSize -= read;
+		        assert(read==byteChunk.length);
+		        nChunks++;
+		        newName = fname + ".part" + Integer.toString(nChunks - 1);
+		        chunk = new FileOutputStream(new File(newName));
+		        chunk.write(byteChunk);
+		        chunk.flush();
+		        chunk.close();
+		        byteChunk = null;
+		        chunk = null;
+		    }
+		    fis.close();
+		    fis = null;
+	}
+			
 	
 	/**
 	 * Set the first N digits of a Byte object
