@@ -103,10 +103,8 @@ public class ConfigurationSetup {
 	}
 
 	private ConfigurationSetup() {
-
 		// reading from common.cfg
 		readCommonInfoConfigFile();
-
 		// reading from peerInfo.cfg
 		readPeerInfoConfigFile();
 	}
