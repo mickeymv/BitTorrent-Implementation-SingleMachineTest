@@ -1,7 +1,9 @@
 package messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import connection.TCPConnectionManager;
 
@@ -12,7 +14,51 @@ import connection.TCPConnectionManager;
 public class Message {
 
 	private Message() {
+	}
+	
+	private static final int MESSAGETYPE_CHOKE = 0;
+	private static final int MESSAGETYPE_UNCHOKE = 1;
+	private static final int MESSAGETYPE_INTERESTED = 2;
+	private static final int MESSAGETYPE_NOTINTERESTED = 3;
+	private static final int MESSAGETYPE_HAVE = 4;
+	private static final int MESSAGETYPE_BITFIELD = 5;
+	private static final int MESSAGETYPE_REQUEST = 6;
+	private static final int MESSAGETYPE_PIECE = 7;
 
+	/**
+	 * 
+	 * @param messageType, the type of message
+	 * @param messagePayload, the payload
+	 * @return the byte array to be sent across as the complete message, which is the messageType + Payload
+	 */
+	public static byte[] getMessage(int messageType, byte[] messagePayload) {
+		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
+		try {
+			streamToCombineByteArrays.write((byte)messageType);
+			streamToCombineByteArrays.write(messagePayload);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return streamToCombineByteArrays.toByteArray();
+	}
+	
+	/**
+	 * 
+	 * @param message, the received byte array
+	 * @return, the byte array payload
+	 */
+	public static byte[] getMessagePayload(byte[] message) {		
+		return Arrays.copyOfRange(message, 1, message.length);
+	}
+	
+	/**
+	 * 
+	 * @param message, the received byte array
+	 * @return, the message type
+	 */
+	public static int getMessageType(byte[] message) {		
+		return message[0];
 	}
 
 	// send a message to the output stream

@@ -16,9 +16,8 @@ import util.Util;
 public class HandShake {
 
 	private HandShake() {
-
 	}
-
+	
 	private static final String HANDSHAKE_HEADER = "P2PFILESHARINGPROJ";
 
 	private static Util utilInstance = Util.getInstance();
@@ -63,9 +62,9 @@ public class HandShake {
 	}
 
 	private static byte[] getHandShakeBytes(String fromPeerID) {
-		byte[] handshakeHeaderbyteArray = ("[" + HANDSHAKE_HEADER + " " + fromPeerID + "]").getBytes();
-		byte[] tenByteZeroBits = new byte[10];
-		byte[] peerIDintBytes = utilInstance.intToByteArray(Integer.parseInt(fromPeerID));
+		byte[] handshakeHeaderbyteArray = ("[" + HANDSHAKE_HEADER + " " + fromPeerID + "]").getBytes(); //TODO: Supposed to be 18 bytes
+		byte[] tenByteZeroBits = new byte[10]; //10 bytes
+		byte[] peerIDintBytes = utilInstance.intToByteArray(Integer.parseInt(fromPeerID)); //TODO: should be a 4 byte integer representation of the peerID
 
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
