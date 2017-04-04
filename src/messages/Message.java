@@ -60,7 +60,47 @@ public class Message {
 	public static int getMessageType(byte[] message) {		
 		return message[0];
 	}
+	
+	/**
+	 * 
+	 * @param messageType, the type of message to sent
+	 * @param messagePayload, the required payload
+	 * @param toPeerID, which peer to sent it to
+	 */
+	public static void sendMessage(int messageType, byte[] messagePayload, String toPeerID) {
+		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
+		try {
+			streamToCombineByteArrays.write((byte)messageType);
+			streamToCombineByteArrays.write(messagePayload);
+			byte[] message = streamToCombineByteArrays.toByteArray();
+			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
+			out.writeInt(message.length);
+			out.write(message);
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
+	/**
+	 * For messages without a payload.
+	 * 
+	 * @param messageType, the type of message to sent
+	 * @param toPeerID, which peer to sent it to
+	 */
+	public static void sendMessage(int messageType, String toPeerID) {
+		try {
+			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
+			out.writeInt(1);
+			out.write((byte)messageType);
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	// send a message to the output stream
 	public static void sendMessage(byte[] msg, String fromPeerID, String toPeerID) {
 		try {
