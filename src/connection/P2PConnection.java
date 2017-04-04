@@ -1,52 +1,89 @@
 package connection;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
- * This is a wrapper class, which will contain all information about 
- * a TCP connection between peers.
- * @author Xiaolong Li
+ * This is a wrapper class, which will contain all information about a TCP
+ * connection between peers.
+ * 
+ * @author Xiaolong Li, Mickey Vellukunnel
  *
  */
 public class P2PConnection {
 
-	
-	private Socket connection = null;
-	private String peerID = null;
-	private String hostname = null;
-	private int port = -1;
-	
+	private Socket localSocket = null;
+	private String remotePeerID = null;
+	private String remotePeerHostName = null;
+	private int remotePeerPortNumber = -1;
+	private DataOutputStream dataOutputStream = null;
+	private DataInputStream dataInputStream = null;
+
 	public P2PConnection(Socket connection, String peerID, String hostname, int port) {
-		
-		this.connection = connection;
-		this.peerID = peerID;
-		this.hostname = hostname;
-		this.port = port;
+		this.localSocket = connection;
+		this.remotePeerID = peerID;
+		this.remotePeerHostName = hostname;
+		this.remotePeerPortNumber = port;
+		try {
+			this.dataInputStream = new DataInputStream(connection.getInputStream());
+			this.dataOutputStream = new DataOutputStream(connection.getOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	public void setConnection(Socket connection) {
-		
-		this.connection = connection;
+
+	public DataOutputStream getDataOutputStream() {
+		return dataOutputStream;
 	}
-	public String getPeerID() {
-		return peerID;
+
+	public DataInputStream getDataInputStream() {
+		return dataInputStream;
 	}
-	public void setPeerID(String peerID) {
-		this.peerID = peerID;
+
+	// public void setConnection(Socket connection) {
+	// this.localSocket = connection;
+	// }
+
+	public String getRemotePeerID() {
+		return remotePeerID;
 	}
-	public String getHostname() {
-		return hostname;
+
+	// public void setRemotePeerID(String peerID) {
+	// this.remotePeerID = peerID;
+	// }
+
+	public String getRemotePeerHostname() {
+		return remotePeerHostName;
 	}
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
+
+	// public void setHostname(String hostname) {
+	// this.remotePeerHostName = hostname;
+	// }
+
+	public int getRemotePeerPort() {
+		return remotePeerPortNumber;
 	}
-	public int getPort() {
-		return port;
+
+	// public void setPort(int port) {
+	// this.remotePeerPortNumber = port;
+	// }
+
+	// public Socket getConnection() {
+	// return localSocket;
+	// }
+
+	public void closeConnection() {
+		try {
+			this.dataInputStream.close();
+			this.dataOutputStream.close();
+			this.localSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	public void setPort(int port) {
-		this.port = port;
-	}
-	public Socket getConnection() {
-		return connection;
-	}
-	
+
 }

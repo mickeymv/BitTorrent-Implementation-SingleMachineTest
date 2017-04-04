@@ -1,33 +1,36 @@
 package test;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import type.PeerInfo;
 import util.ConfigurationSetup;
 import util.Util;
 
 public class UtilTest {
-	ConfigurationSetup instance = ConfigurationSetup.getInstance();
-	Util testInstance = Util.getInstance();
-	
-	
-	@Test
-	public void testMoveUtil() throws IOException{
-		String peerID = "60016";
-		Util.move(peerID, ConfigurationSetup.fileName);
-	}
-	
+
 	@Test
 	public void test() {
-		ArrayList<PeerInfo> peerList = testInstance.getPeerList();
+//		fail("Not yet implemented");
 		
-		for (PeerInfo peer: peerList) {
-			
-			System.out.println(peer.getPeerID() + " \t" + peer.getHostName() 
-			 		+ " \t" + peer.getPortNumber() + " " + peer.isHasFileInitially());
-		}
-	}	
+//		Byte b = Util.setFirstNDigits(3);
+//		String s1 = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+//		System.out.println(s1);
+//		
+//		int n = Util.getFirstNDigits(new Byte((byte)0XF8));
+//		System.out.println(n);
+		Util inst = Util.getInstance();
+		ConfigurationSetup instance = ConfigurationSetup.getInstance();
+		
+		Util.initiateBitfield();
+		Util.createRandomDataFile(instance.getFileSize());
+		Util.splitDataFile();
+		
+		
+		//System.out.println(ConfigurationSetup.numberOfPieces);
+		//Util.printBitfield();
+		
+		
+	}
+
 }
