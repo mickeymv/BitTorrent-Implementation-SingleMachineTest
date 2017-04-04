@@ -34,7 +34,7 @@ import type.PeerInfo;
  *
  */
 public class ConfigurationSetup {
-
+	
 	// from common.cfg
 	 public static final int NULL = -1;
 	 private static int numberOfPreferredNeighbors = NULL; 

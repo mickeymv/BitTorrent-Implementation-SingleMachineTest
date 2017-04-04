@@ -11,7 +11,7 @@ import util.Util;
 
 public class UtilATest {
 	ConfigurationSetup instance = ConfigurationSetup.getInstance();
-	Util testInstance = Util.getInstance();
+	Util testInstance = Util.initializeUtil();
 	
 	
 	@Test

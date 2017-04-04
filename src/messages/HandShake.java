@@ -20,7 +20,7 @@ public class HandShake {
 	
 	private static final String HANDSHAKE_HEADER = "P2PFILESHARINGPROJ";
 
-	private static Util utilInstance = Util.getInstance();
+	private static Util utilInstance = Util.initializeUtil();
 
 	public static void establishClientHandShakeTwoWayStream(String localClientPeerID, String remoteServerPeerID) {
 		try {

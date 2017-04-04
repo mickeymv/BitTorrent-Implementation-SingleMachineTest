@@ -20,7 +20,7 @@ public class UtilTest {
 		//
 		// int n = Util.getFirstNDigits(new Byte((byte)0XF8));
 		// System.out.println(n);
-		Util inst = Util.getInstance();
+		Util inst = Util.initializeUtil();
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
 
 		Util.initiateBitfield();

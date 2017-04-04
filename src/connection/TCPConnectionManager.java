@@ -42,7 +42,7 @@ public class TCPConnectionManager {
 	private int localPeerServerListeningPort = -1;
 	private ServerSocket listener = null;
 
-	private static Util utilInstance = Util.getInstance();
+	private static Util utilInstance = Util.initializeUtil();
 
 	/*
 	 * This is required for local testing. the map has as key the peer's

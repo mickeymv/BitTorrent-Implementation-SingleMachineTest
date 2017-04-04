@@ -32,11 +32,11 @@ public class Util {
 	private static Map<String, Integer> peerIDToPositionMap;
 	private static ConfigurationSetup configInstance = null;
 	private static ArrayList<Byte> bitField = null;
-
+	
 	private Util() {
 	}
 
-	public static Util getInstance() {
+	public static Util initializeUtil() {
 		if (instance == null) {
 			instance = new Util();
 			configInstance = ConfigurationSetup.getInstance();
@@ -50,7 +50,7 @@ public class Util {
 	/*
 	 * Converts an integer to its 4 byte representation.
 	 */
-	public final byte[] intToByteArray(int value) {
+	public static final byte[] intToByteArray(int value) {
 	    return new byte[] {
 	            (byte)(value >>> 24),
 	            (byte)(value >>> 16),
@@ -58,7 +58,7 @@ public class Util {
 	            (byte)value};
 	}
 
-	public ArrayList<PeerInfo> getPeerList() {
+	public static ArrayList<PeerInfo> getPeerList() {
 		return peerList;
 	}
 
@@ -73,7 +73,7 @@ public class Util {
 		return myPeerList;
 	}
 
-	public ArrayList<PeerInfo> getMyPreviousPeers(String peerID) {
+	public static ArrayList<PeerInfo> getMyPreviousPeers(String peerID) {
 		ArrayList<PeerInfo> myPreviousPeers = new ArrayList<PeerInfo>();
 		int peerPosition = peerIDToPositionMap.get(peerID);
 		for (int i1 = 0; i1 < peerPosition; i1++) {
@@ -82,21 +82,21 @@ public class Util {
 		return myPreviousPeers;
 	}
 
-	public boolean isFirstPeer(String peerID) {
+	public static boolean isFirstPeer(String peerID) {
 		if (peerList.get(0).getPeerID() == peerID) {
 			return true;
 		}
 		return false;
 	}
 
-	public boolean isLastPeer(String peerID) {
+	public static boolean isLastPeer(String peerID) {
 		if (peerList.get(peerList.size() - 1).getPeerID() == peerID) {
 			return true;
 		}
 		return false;
 	}
 
-	public PeerInfo getPeerInfo(String peerID) {
+	public static PeerInfo getPeerInfo(String peerID) {
 		int peerPosition = peerIDToPositionMap.get(peerID);
 		PeerInfo peerInfo = peerList.get(peerPosition);
 		return peerInfo;
@@ -357,6 +357,7 @@ public class Util {
 		}
 	}
 	
+	
 	public static void printByteToBinaryString(Byte b) {
 		
 		String s1 = String.format("%8s", 
@@ -365,7 +366,12 @@ public class Util {
 	}
 
 	
-public static void move(String peerID, String fileName)throws IOException{
+	/**
+	 * @param peerID
+	 * @param fileName
+	 * @throws IOException
+	 */
+	public static void move(String peerID, String fileName)throws IOException{
 		
 //		String fileName = "TheFile.dat";
 		
@@ -391,6 +397,10 @@ public static void move(String peerID, String fileName)throws IOException{
  	}
 	
 	}
+	
+	/**
+	 * Print bitfield as a string.
+	 */
 	public static void printBitfield() {
 		
 		for (Byte b : bitField) {
