@@ -32,7 +32,16 @@ public class PeerProcess {
 
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = null;
-
+	
+	/** the indice of the preferred neighbor set. */
+	private ArrayList<Integer> preferred_neighbors = null;
+	/** the unchoked neighbor. */
+	private int unchoked_neighbor = -1;
+	/** time interval used to update preferred neighbors.*/
+	private static int time_interval_p_preferred_neighbor = 0;
+	/** time intervals used to update unchoked neighbor. */
+	private static int time_interval_m_unchoked_neighbor = 0;
+	
 	public static PeerInfo getLocalPeerInstance() {
 
 		if (peerInstance == null) {
@@ -48,7 +57,36 @@ public class PeerProcess {
 		connManager = new TCPConnectionManager(peerInstance);
 		connManager.initializePeer();
 	}
-
+	
+	
+	public void choke(int peerID) {
+		
+		
+	}
+	
+	public void unchoke(int peerID) {
+		
+		
+	}
+	
+	/**
+	 * Determine preferred neighbors every p seconds.
+	 */
+	public void determinePreferredNeighbors() {
+		
+		
+	}
+	
+	/**
+	 * Determines unchoked neighbor every m seconds.
+	 */
+	public void determineUnchokedNeighbor() {
+		
+		
+	}
+	
+	
+	
 	/**
 	 * Peer starts running from here
 	 * 
