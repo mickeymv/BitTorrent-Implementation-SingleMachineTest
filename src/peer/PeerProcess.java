@@ -72,6 +72,12 @@ public class PeerProcess {
 			TCPConnectionManager connManager = new TCPConnectionManager(peerInstance);
 			connManager.initializePeer();
 		}
+		try {
+			Thread.sleep(20000); //give enough time before the main program exits for the different threads to finish execution (check to see if the various ports/streams have the data or not)
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

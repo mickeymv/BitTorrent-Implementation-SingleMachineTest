@@ -1,8 +1,11 @@
-package util;
+package test;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import util.ConfigurationSetup;
+import util.Util;
 
 public class ConfigurationSetupTest {
 	

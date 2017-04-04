@@ -18,8 +18,8 @@ public class PeerProcessTest {
 		peerIDList.add("2");
 		peerIDList.add("3");
 		peerIDList.add("4");
-		peerIDList.add("5");
-		peerIDList.add("6");
+//		peerIDList.add("5");
+//		peerIDList.add("6");
 		PeerProcess.initiatePeerProcessForLocalHostTesting(peerIDList);
 	}
 
