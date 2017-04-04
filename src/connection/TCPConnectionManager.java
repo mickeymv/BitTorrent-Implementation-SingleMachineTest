@@ -265,9 +265,7 @@ public class TCPConnectionManager {
 		}
 
 		public void run() {
-			// System.out
-			// .println("Inside the server " + localServerPeerID + " thread,
-			// after accepted a client request...");
+			//System.out.println("Inside the server " + localServerPeerID + " thread,after accepted a client request...");
 			HandShake.establishServerHandShakeTwoWayStream(localServerPeerID, remoteClientPeerID);
 		}
 

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,12 +51,14 @@ public class Util {
 	/*
 	 * Converts an integer to its 4 byte representation.
 	 */
-	public static final byte[] intToByteArray(int value) {
-	    return new byte[] {
-	            (byte)(value >>> 24),
-	            (byte)(value >>> 16),
-	            (byte)(value >>> 8),
-	            (byte)value};
+	public final byte[] intToByteArray(int peerIDIntegerValue) {
+		ByteBuffer b = ByteBuffer.allocate(4);
+		b.putInt(peerIDIntegerValue);
+		return b.array();
+	}
+	
+	public final int intFromByteArray(byte[] integerBytes) {
+		return ByteBuffer.wrap(integerBytes).getInt(0);
 	}
 
 	public static ArrayList<PeerInfo> getPeerList() {

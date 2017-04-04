@@ -106,6 +106,7 @@ public class Message {
 		try {
 			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
 			out.writeInt(msg.length);
+			//System.out.println("The handshake message length from "+fromPeerID+" to "+toPeerID+" is "+msg.length);
 			out.write(msg);
 			out.flush();
 			// System.out.println("Send message: " + new String(msg) + " from "
