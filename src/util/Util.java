@@ -223,9 +223,9 @@ public static void move(String peerID, String fileName)throws IOException{
 	
 	try{
 
- 	   File afile =new File("F:\\Semester_3\\Computer Networks\\BitTorrent-Implementation\\"+fileName);
+ 	   File afile =new File(fileName);
 
- 	   if(afile.renameTo(new File("F:\\Semester_3\\Computer Networks\\BitTorrent-Implementation\\peer\\peer_" + peerID))){
+ 	   if(afile.renameTo(new File("peer_" + peerID))){
  		System.out.println("File is moved successful!");
  	   }else{
  		System.out.println("File is failed to move!");
