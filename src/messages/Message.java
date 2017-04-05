@@ -16,14 +16,14 @@ public class Message {
 	private Message() {
 	}
 	
-	private static final int MESSAGETYPE_CHOKE = 0;
-	private static final int MESSAGETYPE_UNCHOKE = 1;
-	private static final int MESSAGETYPE_INTERESTED = 2;
-	private static final int MESSAGETYPE_NOTINTERESTED = 3;
-	private static final int MESSAGETYPE_HAVE = 4;
-	private static final int MESSAGETYPE_BITFIELD = 5;
-	private static final int MESSAGETYPE_REQUEST = 6;
-	private static final int MESSAGETYPE_PIECE = 7;
+	public static final int MESSAGETYPE_CHOKE = 0;
+	public static final int MESSAGETYPE_UNCHOKE = 1;
+	public static final int MESSAGETYPE_INTERESTED = 2;
+	public static final int MESSAGETYPE_NOTINTERESTED = 3;
+	public static final int MESSAGETYPE_HAVE = 4;
+	public static final int MESSAGETYPE_BITFIELD = 5;
+	public static final int MESSAGETYPE_REQUEST = 6;
+	public static final int MESSAGETYPE_PIECE = 7;
 
 	/**
 	 * 
