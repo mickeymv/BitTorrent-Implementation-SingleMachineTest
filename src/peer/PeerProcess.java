@@ -27,7 +27,7 @@ public class PeerProcess {
 	/** peer ID */
 	private String localPeerID;
 	private PeerInfo localPeerInfo = null;
-	private static Util utilInstance = Util.initializeUtil();
+	private  Util utilInstance = Util.initializeUtil();
 
 	private ArrayList<Byte> localPeerBitField = null;
 
@@ -49,6 +49,8 @@ public class PeerProcess {
 	private int time_interval_m_unchoked_neighbor = 0;
 	/** number of preferred neighbors. */
 	private int k_preferred_neighbors = 0;
+	
+	private boolean gotCompletedFile = false;
 
 	public PeerProcess(String localPeerID) {
 		this.localPeerID = localPeerID;
@@ -61,6 +63,7 @@ public class PeerProcess {
 		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
 		findNeighbors();
 		setPeersBitfields();
+		this.gotCompletedFile = localPeerInfo.isHasFileInitially();
 	}
 
 	private void setPeersBitfields() {
@@ -129,14 +132,19 @@ public class PeerProcess {
 	 * Determine preferred neighbors every p seconds.
 	 */
 	public void determinePreferredNeighbors() {
-
+		if(this.gotCompletedFile) { //determine preferred neighbors randomly
+			
+		} else { //use downloading rates.
+			
+		}
 	}
 
 	/**
 	 * Determines unchoked neighbor every m seconds.
+	 * optimistically unchoked neighbor randomly among neighbors that are choked at that moment but are interested in its data.
 	 */
 	public void determineUnchokedNeighbor() {
-
+		
 	}
 
 	/**
