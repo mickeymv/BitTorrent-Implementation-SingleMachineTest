@@ -92,6 +92,8 @@ public class TCPConnectionManager {
 			// create a server
 			createServer(localPeerServerListeningPort);
 		}
+		
+		//TODO: Sent and recieve Bitfield messages. For now doing locally as all are on one machine.
 	}
 
 	private void createClientConnections() {

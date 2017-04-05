@@ -112,11 +112,11 @@ public class Util {
 	}
 
 	/**
-	 * Initialize bitfield according to the local file.
+	 * get bitfield for a peer according to the local file.
 	 * 
 	 * @return
 	 */
-	public static ArrayList<Byte> initializeLocalPeerBitfield(boolean hasFileInitially) {
+	public static ArrayList<Byte> getPeerBitfield(boolean hasFileInitially) {
 		ArrayList<Byte> bitField = new ArrayList<Byte>();
 
 		// if there is no local file, set the bitmap to be null

@@ -28,8 +28,11 @@ public class PeerProcess {
 	private String localPeerID;
 	private PeerInfo localPeerInfo = null;
 	private static Util utilInstance = Util.initializeUtil();
-	
+
 	private ArrayList<Byte> localPeerBitField = null;
+
+	/* Map of peers' bitfields */
+	private HashMap<String, ArrayList<Byte>> peersBitfields = new HashMap<>();
 
 	private TCPConnectionManager connManager = null;
 
@@ -50,23 +53,42 @@ public class PeerProcess {
 	public PeerProcess(String localPeerID) {
 		this.localPeerID = localPeerID;
 		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
-		localPeerBitField = utilInstance.initializeLocalPeerBitfield(localPeerInfo.isHasFileInitially());
-		//System.out.println("the bitfield for peer: "+localPeerID+" is:");
-		//utilInstance.printBitfield(localPeerBitField);
+		localPeerBitField = utilInstance.getPeerBitfield(localPeerInfo.isHasFileInitially());
+		// System.out.println("the bitfield for peer: "+localPeerID+" is:");
+		// utilInstance.printBitfield(localPeerBitField);
+		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
+		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
+		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
+		findNeighbors();
+		setPeersBitfields();
+	}
+
+	private void setPeersBitfields() {
+		for (PeerInfo peer : neighbors) {
+			setPeerBitField(peer.getPeerID(), utilInstance.getPeerBitfield(peer.isHasFileInitially()));
+		}
+	}
+
+	public void setPeerBitField(String remotePeerID, ArrayList<Byte> remotePeerBitfield) {
+		peersBitfields.put(remotePeerID, remotePeerBitfield);
+		System.out.println("the bitfield for peer: "+remotePeerID+" is:");
+		utilInstance.printBitfield(remotePeerBitfield);
+	}
+
+	public ArrayList<Byte> getPeerBitField(String remotePeerID) {
+		return peersBitfields.get(remotePeerID);
 	}
 
 	/**
 	 * Self initiation for the local peer.
 	 */
-	//TODO: Change this to private after local testing is done
+	// TODO: Change this to private after local testing is done and before
+	// remote machine testing.
 	public void initiatePeerProcess() {
-		// read configurations files and initialize local peer.
+		// read configurations files and initialize local peer (setup
+		// connections to all other peers).
 		connManager = new TCPConnectionManager(localPeerInfo);
 		connManager.initializePeer();
-		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
-		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
-		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
-		findNeighbors();
 	}
 
 	/**

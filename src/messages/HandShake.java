@@ -22,6 +22,12 @@ public class HandShake {
 
 	private static Util utilInstance = Util.initializeUtil();
 
+	/**
+	 * This is called by the client socket. Sends handshake to server and waits for one back.
+	 * 
+	 * @param localClientPeerID
+	 * @param remoteServerPeerID
+	 */
 	public static void establishClientHandShakeTwoWayStream(String localClientPeerID, String remoteServerPeerID) {
 		try {
 			byte handshakeMessageBytes[] = getHandShakeBytes(localClientPeerID);
@@ -41,6 +47,7 @@ public class HandShake {
 			int messageLength;
 			byte[] messageBytes = null; // message received back from the server
 
+			/*Blocking call!*/
 			// receive the HandShake message sent back from the server
 			messageLength = TCPConnectionManager.getDataInputStream(remoteServerPeerID).readInt();
 
@@ -99,12 +106,19 @@ public class HandShake {
 		return streamToCombineByteArrays.toByteArray();
 	}
 
+	
+	/**
+	 * This is called by the server socket. Waits for handshake from client and sends one back.
+	 * @param localServerPeerID
+	 * @param remoteClientPeerID
+	 */
 	public static void establishServerHandShakeTwoWayStream(String localServerPeerID, String remoteClientPeerID) {
 		try {
 
 			int messageLength;
 			byte[] messageBytes = null;
 
+			/*Blocking call!*/
 			// receive the HandShake message sent from the client
 			messageLength = TCPConnectionManager.getDataInputStream(remoteClientPeerID).readInt();
 
