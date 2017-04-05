@@ -111,6 +111,7 @@ public class ConfigurationSetup {
 
 	/**
 	 * Read Common.cfg
+	 * TODO: Do this with the correct file format.
 	 */
 	private static void readCommonInfoConfigFile() {
 		// reading from common.cfg
@@ -127,10 +128,8 @@ public class ConfigurationSetup {
 			 pieceSize = Integer.parseInt(scanner.nextLine().trim());
 			  
 			 if (fileSize % pieceSize == 0) { 
-				 
 				 numberOfPieces = fileSize / pieceSize; 
 			 } else {
-				 
 				 numberOfPieces = fileSize / pieceSize + 1; 
 			 }
 			 scanner.close();

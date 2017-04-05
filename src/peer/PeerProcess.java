@@ -28,6 +28,8 @@ public class PeerProcess {
 	private String localPeerID;
 	private PeerInfo localPeerInfo = null;
 	private static Util utilInstance = Util.initializeUtil();
+	
+	private ArrayList<Byte> localPeerBitField = null;
 
 	private TCPConnectionManager connManager = null;
 
@@ -48,6 +50,9 @@ public class PeerProcess {
 	public PeerProcess(String localPeerID) {
 		this.localPeerID = localPeerID;
 		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
+		localPeerBitField = utilInstance.initializeLocalPeerBitfield(localPeerInfo.isHasFileInitially());
+		//System.out.println("the bitfield for peer: "+localPeerID+" is:");
+		//utilInstance.printBitfield(localPeerBitField);
 	}
 
 	/**

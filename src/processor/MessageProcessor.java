@@ -2,7 +2,6 @@ package processor;
 
 /**
  * @author Mickey Vellukunnel
- *
  */
 
 public class MessageProcessor {

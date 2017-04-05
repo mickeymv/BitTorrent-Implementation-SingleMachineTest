@@ -11,9 +11,8 @@ import util.Util;
 
 /**
  * @author Mickey Vellukunnel
- *
+ *	Establish handshake and exchange BitFields.
  */
-
 public class HandShake {
 
 	private HandShake() {

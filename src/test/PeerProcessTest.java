@@ -12,6 +12,10 @@ import peer.PeerProcess;
 import type.PeerInfo;
 import util.Util;
 
+/**
+ * @author Mickey Vellukunnel
+ */
+
 public class PeerProcessTest {
 
 	@Test
