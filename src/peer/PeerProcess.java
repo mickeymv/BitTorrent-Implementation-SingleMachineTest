@@ -22,116 +22,131 @@ import logging.FileLogger;
  */
 public class PeerProcess {
 
-	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
+	private Logger logger = Logger.getLogger(TCPConnectionManager.class);
 
 	/** peer ID */
-	private String peerID;
-	private PeerInfo peerInstance = null;
-	private Util utilInstance = Util.initializeUtil();
+	private String localPeerID;
+	private PeerInfo localPeerInfo = null;
+	private  Util utilInstance = Util.initializeUtil();
+
+	private ArrayList<Byte> localPeerBitField = null;
+
+	/* Map of peers' bitfields */
+	private HashMap<String, ArrayList<Byte>> peersBitfields = new HashMap<>();
 
 	private TCPConnectionManager connManager = null;
-	private PeerProcess instance = null;
 
 	/** this list contains all other peers' information in the network. */
-	private ArrayList<PeerInfo> neighbors = null;
-	
+	private ArrayList<PeerInfo> neighbors = new ArrayList<>();
+
 	/** the indice of the preferred neighbor set. */
-	private HashMap<String, Boolean> preferred_neighbors = null;
+	private HashMap<String, Boolean> preferred_neighbors = new HashMap<>();
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
-	/** time interval used to update preferred neighbors.*/
+	/** time interval used to update preferred neighbors. */
 	private int time_interval_p_preferred_neighbor = 0;
 	/** time intervals used to update unchoked neighbor. */
 	private int time_interval_m_unchoked_neighbor = 0;
-	/** number of preferred neighbors.*/
+	/** number of preferred neighbors. */
 	private int k_preferred_neighbors = 0;
 	
-	public PeerProcess() {
-		
-		
-	}
-	
-	
-	public PeerInfo getLocalPeerInstance() {
+	private boolean gotCompletedFile = false;
 
-		if (peerInstance == null) {
-			peerInstance = utilInstance.getPeerInfo(peerID);
-		}
-		return peerInstance;
+	public PeerProcess(String localPeerID) {
+		this.localPeerID = localPeerID;
+		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
+		localPeerBitField = utilInstance.getPeerBitfield(localPeerInfo.isHasFileInitially());
+		// System.out.println("the bitfield for peer: "+localPeerID+" is:");
+		// utilInstance.printBitfield(localPeerBitField);
+		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
+		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
+		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
+		findNeighbors();
+		setPeersBitfields();
+		this.gotCompletedFile = localPeerInfo.isHasFileInitially();
 	}
-	
+
+	private void setPeersBitfields() {
+		for (PeerInfo peer : neighbors) {
+			setPeerBitField(peer.getPeerID(), utilInstance.getPeerBitfield(peer.isHasFileInitially()));
+		}
+	}
+
+	public void setPeerBitField(String remotePeerID, ArrayList<Byte> remotePeerBitfield) {
+		peersBitfields.put(remotePeerID, remotePeerBitfield);
+		System.out.println("the bitfield for peer: "+remotePeerID+" is:");
+		utilInstance.printBitfield(remotePeerBitfield);
+	}
+
+	public ArrayList<Byte> getPeerBitField(String remotePeerID) {
+		return peersBitfields.get(remotePeerID);
+	}
+
 	/**
 	 * Self initiation for the local peer.
 	 */
-	private void initiatePeerProcess() {
-		// read configurations files and initialize local peer.
-		Util.initializeUtil();
-		connManager = new TCPConnectionManager(peerInstance);
+	// TODO: Change this to private after local testing is done and before
+	// remote machine testing.
+	public void initiatePeerProcess() {
+		// read configurations files and initialize local peer (setup
+		// connections to all other peers).
+		connManager = new TCPConnectionManager(localPeerInfo);
 		connManager.initializePeer();
-		time_interval_p_preferred_neighbor = 
-				ConfigurationSetup.getInstance().getUnchokingInterval();
-		time_interval_m_unchoked_neighbor = 
-				ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
-		k_preferred_neighbors = 
-				ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
-		
-		findNeighbors();
 	}
-	
+
 	/**
 	 * Initialize the neighbors list.
 	 */
 	private void findNeighbors() {
-		
+
 		for (PeerInfo peer : Util.getPeerList()) {
-			
-			if (! peer.getPeerID().equals(peerID)) {
-				
+
+			if (!peer.getPeerID().equals(getPeerID())) {
+
 				neighbors.add(peer);
 				preferred_neighbors.put(peer.getPeerID(), false);
 			}
 		}
-		
-		
+
 	}
+
 	/**
 	 * Choke a peer
+	 * 
 	 * @param peerID
 	 */
 	public void choke(int peerID) {
-		
-		
+
 	}
-	
+
 	/**
 	 * unchoke a peer
+	 * 
 	 * @param peerID
 	 */
 	public void unchoke(int peerID) {
-		
-		
+
 	}
-	
-	
-	
+
 	/**
 	 * Determine preferred neighbors every p seconds.
 	 */
 	public void determinePreferredNeighbors() {
-		
-		
+		if(this.gotCompletedFile) { //determine preferred neighbors randomly
+			
+		} else { //use downloading rates.
+			
+		}
 	}
-	
+
 	/**
 	 * Determines unchoked neighbor every m seconds.
+	 * optimistically unchoked neighbor randomly among neighbors that are choked at that moment but are interested in its data.
 	 */
 	public void determineUnchokedNeighbor() {
 		
-		
 	}
-	
-	
-	
+
 	/**
 	 * Peer starts running from here
 	 * 
@@ -142,26 +157,18 @@ public class PeerProcess {
 			System.out.println("\n\nError: Incorrect number of arguments. Syntax is, \"java PeerProcess [peerID]\"");
 			return;
 		}
-		PeerProcess localPeer = new PeerProcess();
-		localPeer.peerID = args[2];
-		localPeer.getLocalPeerInstance();
+		PeerProcess localPeer = new PeerProcess(args[2]);
 		// start logging
-		FileLogger.initialize();
+		FileLogger.initialize(args[2]);
 		localPeer.initiatePeerProcess();
 	}
 
-	public static void initiatePeerProcessForLocalHostTesting(ArrayList<String> peerIDList) {
-		for (String peerID : peerIDList) {
-			PeerInfo peerInstance = Util.getPeerInfo(peerID);
-			TCPConnectionManager connManager = new TCPConnectionManager(peerInstance);
-			connManager.initializePeer();
-		}
-		try {
-			Thread.sleep(20000); //give enough time before the main program exits for the different threads to finish execution (check to see if the various ports/streams have the data or not)
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public String getPeerID() {
+		return localPeerID;
+	}
+
+	public void setPeerID(String peerID) {
+		localPeerID = peerID;
 	}
 
 }

@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import listener.MessageListener;
 import messages.HandShake;
 import type.PeerInfo;
 import type.Server.Handler;
@@ -91,6 +92,8 @@ public class TCPConnectionManager {
 			// create a server
 			createServer(localPeerServerListeningPort);
 		}
+		
+		//TODO: Sent and recieve Bitfield messages. For now doing locally as all are on one machine.
 	}
 
 	private void createClientConnections() {
@@ -267,6 +270,10 @@ public class TCPConnectionManager {
 		public void run() {
 			//System.out.println("Inside the server " + localServerPeerID + " thread,after accepted a client request...");
 			HandShake.establishServerHandShakeTwoWayStream(localServerPeerID, remoteClientPeerID);
+			
+			MessageListener localPeerMessageListener = new MessageListener(localServerPeerID, remoteClientPeerID, getDataInputStream(remoteClientPeerID));
+			
+			localPeerMessageListener.startListening();
 		}
 
 	}

@@ -15,7 +15,7 @@ import peer.PeerProcess;
 
 public final class FileLogger {
 
-	public static void initialize() {
+	public static void initialize(String localPeerID) {
 		
 		//Logger logger = Logger.getLogger(FileLogger.class);
 		try {
@@ -27,7 +27,7 @@ public final class FileLogger {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd.h-mm.a");
 			String formattedDate = sdf.format(date);
 			
-			String filename = "log_peer_" + PeerProcess.getLocalPeerInstance().getPeerID() + ".log";
+			String filename = "log_peer_" + localPeerID + ".log";
 			
 			File logFile = new File(logFileDirectory.getAbsolutePath(), filename);
 
