@@ -6,12 +6,15 @@ import util.Util;
 import java.awt.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
+import java.util.Collections;
 
 import connection.TCPConnectionManager;
 import type.PeerInfo;
 import logging.FileLogger;
+
 
 /**
  * This class sets up a peer in a peer-to-peer network 1. Initiate peer and set
@@ -36,6 +39,8 @@ public class PeerProcess {
 
 	private TCPConnectionManager connManager = null;
 
+	private PeerProcess instance = null;
+	
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = new ArrayList<>();
 
@@ -100,14 +105,13 @@ public class PeerProcess {
 	private void findNeighbors() {
 
 		for (PeerInfo peer : Util.getPeerList()) {
-
-			if (!peer.getPeerID().equals(getPeerID())) {
-
+			if (! peer.getPeerID().equals(getPeerID())) {
+				// add as neighbor
 				neighbors.add(peer);
+				// none of the neighbors is preferred neighbor at the begining.
 				preferred_neighbors.put(peer.getPeerID(), false);
 			}
 		}
-
 	}
 
 	/**
@@ -127,9 +131,41 @@ public class PeerProcess {
 	public void unchoke(int peerID) {
 
 	}
-
+	
+	/**
+	 * Initially, choose k preferred neighbors randomly.
+	 */
+	public void initializePreferredNeighbors() {
+		
+		int k = k_preferred_neighbors;
+		
+		ArrayList<String> peerIDs = new ArrayList<String>();
+		
+		for (PeerInfo peer : neighbors) {
+			
+			peerIDs.add(peer.getPeerID());
+		}
+		
+		Collections.shuffle(peerIDs);
+		
+		for (int i = 0; i < k && i < peerIDs.size(); i ++) {
+			
+			preferred_neighbors.put(peerIDs.get(i), true);
+		}
+	}
+	
+	
 	/**
 	 * Determine preferred neighbors every p seconds.
+	 * 
+	 * Then every p seconds, peer A reselects its
+	 * preferred neighbors. To make the decision,
+	 * peer A calculates the downloading rate from 
+	 * each of its neighbors, respectively, during 
+	 * the previous unchoking interval. Among neighbors 
+	 * that are interested in its data, peer A picks 
+	 * k neighbors that has fed its data at the 
+	 * highest rate.
 	 */
 	public void determinePreferredNeighbors() {
 		if(this.gotCompletedFile) { //determine preferred neighbors randomly
