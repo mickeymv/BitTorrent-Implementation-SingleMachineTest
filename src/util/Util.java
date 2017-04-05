@@ -49,13 +49,13 @@ public class Util {
 	/*
 	 * Converts an integer to its 4 byte representation.
 	 */
-	public final byte[] intToByteArray(int peerIDIntegerValue) {
+	public static final byte[] intToByteArray(int peerIDIntegerValue) {
 		ByteBuffer b = ByteBuffer.allocate(4);
 		b.putInt(peerIDIntegerValue);
 		return b.array();
 	}
 
-	public final int intFromByteArray(byte[] integerBytes) {
+	public static final int intFromByteArray(byte[] integerBytes) {
 		return ByteBuffer.wrap(integerBytes).getInt(0);
 	}
 
@@ -63,7 +63,7 @@ public class Util {
 		return peerList;
 	}
 
-	public ArrayList<PeerInfo> getMyPeerList(String peerID) {
+	public static ArrayList<PeerInfo> getMyPeerList(String peerID) {
 		ArrayList<PeerInfo> myPeerList = new ArrayList<PeerInfo>();
 
 		for (PeerInfo peerInfo : peerList) {
@@ -427,5 +427,9 @@ public class Util {
 		for (Byte b : bitField) {
 			printByteToBinaryString(b);
 		}
+	}
+
+	public static void setPieceIndexInBitField(ArrayList<Byte> remotePeerBitField, int pieceIndex) {
+		// TODO Auto-generated method stub
 	}
 }

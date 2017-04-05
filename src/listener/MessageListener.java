@@ -24,7 +24,7 @@ public class MessageListener {
 		this.localPeerID = localPeerID;
 		this.remotePeerID = remotePeerID;
 		this.in = in;
-		messageProcessor = new EventProcessor();
+		messageProcessor = new EventProcessor(localPeerID, remotePeerID);
 	}
 
 	/**

@@ -61,9 +61,9 @@ public class ConfigurationSetup {
 		 return numberOfPreferredNeighbors; 
 	 }
 	  
-	 public int getUnchokingInterval(){ return unchokingInterval; }
+	 public static int getUnchokingInterval(){ return unchokingInterval; }
 	  
-	 public int getOptimisticUnchokingInterval() { 
+	 public static int getOptimisticUnchokingInterval() { 
 		 return optimisticUnchokingInterval; 
 	 }
 	  

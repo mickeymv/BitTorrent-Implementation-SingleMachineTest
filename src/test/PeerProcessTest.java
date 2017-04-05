@@ -18,6 +18,7 @@ import util.Util;
 
 public class PeerProcessTest {
 
+	
 	@Test
 	public void test() {
 		ArrayList<String> peerIDList = new ArrayList<>();
@@ -27,28 +28,8 @@ public class PeerProcessTest {
 		peerIDList.add("4");
 //		peerIDList.add("5");
 //		peerIDList.add("6");
-		initiatePeerProcessForLocalHostTesting(peerIDList);
+		PeerProcesses.initiatePeerProcessForLocalHostTesting(peerIDList);
 	}
-	
-	public void initiatePeerProcessForLocalHostTesting(ArrayList<String> peerIDList) {
-		ArrayList<PeerProcess> peerProcesses = new ArrayList<>();
-		for (String peerID : peerIDList) {
-			PeerProcess localPeer = new PeerProcess(peerID);
-			peerProcesses.add(localPeer);
-			// start logging
-			//FileLogger.initialize(peerID);
-			localPeer.initiatePeerProcess();
-		}
-		
-		try {
-			Thread.sleep(20000); // give enough time before the main program
-									// exits for the different threads to finish
-									// execution (check to see if the various
-									// ports/streams have the data or not)
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+
 
 }
