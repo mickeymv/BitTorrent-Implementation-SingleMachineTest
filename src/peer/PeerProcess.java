@@ -25,41 +25,39 @@ public class PeerProcess {
 	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
 
 	/** peer ID */
-	private String peerID;
-	private PeerInfo peerInstance = null;
-	private Util utilInstance = Util.initializeUtil();
+	private static String peerID;
+	private static PeerInfo peerInstance = null;
+	private static Util utilInstance = Util.initializeUtil();
 
 	private TCPConnectionManager connManager = null;
 	private PeerProcess instance = null;
 
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = null;
-	
+
 	/** the indice of the preferred neighbor set. */
 	private HashMap<String, Boolean> preferred_neighbors = null;
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
-	/** time interval used to update preferred neighbors.*/
+	/** time interval used to update preferred neighbors. */
 	private int time_interval_p_preferred_neighbor = 0;
 	/** time intervals used to update unchoked neighbor. */
 	private int time_interval_m_unchoked_neighbor = 0;
-	/** number of preferred neighbors.*/
+	/** number of preferred neighbors. */
 	private int k_preferred_neighbors = 0;
-	
+
 	public PeerProcess() {
-		
-		
+
 	}
-	
-	
-	public PeerInfo getLocalPeerInstance() {
+
+	public static PeerInfo getLocalPeerInstance() {
 
 		if (peerInstance == null) {
 			peerInstance = utilInstance.getPeerInfo(peerID);
 		}
 		return peerInstance;
 	}
-	
+
 	/**
 	 * Self initiation for the local peer.
 	 */
@@ -68,70 +66,61 @@ public class PeerProcess {
 		Util.initializeUtil();
 		connManager = new TCPConnectionManager(peerInstance);
 		connManager.initializePeer();
-		time_interval_p_preferred_neighbor = 
-				ConfigurationSetup.getInstance().getUnchokingInterval();
-		time_interval_m_unchoked_neighbor = 
-				ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
-		k_preferred_neighbors = 
-				ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
-		
+		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
+		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
+		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
+
 		findNeighbors();
 	}
-	
+
 	/**
 	 * Initialize the neighbors list.
 	 */
 	private void findNeighbors() {
-		
+
 		for (PeerInfo peer : Util.getPeerList()) {
-			
-			if (! peer.getPeerID().equals(peerID)) {
-				
+
+			if (!peer.getPeerID().equals(peerID)) {
+
 				neighbors.add(peer);
 				preferred_neighbors.put(peer.getPeerID(), false);
 			}
 		}
-		
-		
+
 	}
+
 	/**
 	 * Choke a peer
+	 * 
 	 * @param peerID
 	 */
 	public void choke(int peerID) {
-		
-		
+
 	}
-	
+
 	/**
 	 * unchoke a peer
+	 * 
 	 * @param peerID
 	 */
 	public void unchoke(int peerID) {
-		
-		
+
 	}
-	
-	
-	
+
 	/**
 	 * Determine preferred neighbors every p seconds.
 	 */
 	public void determinePreferredNeighbors() {
-		
-		
+
 	}
-	
+
 	/**
 	 * Determines unchoked neighbor every m seconds.
 	 */
 	public void determineUnchokedNeighbor() {
-		
-		
+
 	}
-	
-	
-	
+
 	/**
 	 * Peer starts running from here
 	 * 
@@ -157,7 +146,10 @@ public class PeerProcess {
 			connManager.initializePeer();
 		}
 		try {
-			Thread.sleep(20000); //give enough time before the main program exits for the different threads to finish execution (check to see if the various ports/streams have the data or not)
+			Thread.sleep(20000); // give enough time before the main program
+									// exits for the different threads to finish
+									// execution (check to see if the various
+									// ports/streams have the data or not)
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
