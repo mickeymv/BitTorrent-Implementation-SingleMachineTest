@@ -35,7 +35,7 @@ public class EventProcessor {
 			// do nothing
 			break;
 			
-		
+			
 		case Message.MESSAGETYPE_UNCHOKE:
 			/* 
 			 * if local peer has complete file, do nothing.
@@ -95,7 +95,7 @@ public class EventProcessor {
 	public void preferredNeighborsUpdated() {
 		
 		/*
-		 * re-select k preferred neighbors
+		 * re-select k preferred neighbors from interesetd neighbors.
 		 * Send unchoke message to B if B was choked before.
 		 * send choke message to B if B was unchoked.
 		 */
@@ -104,7 +104,7 @@ public class EventProcessor {
 	public void optimiticallyUnchokedNeighborUpdated() {
 		
 		/*
-		 * re-select one optimistically unchoked neighbor
+		 * re-select one optimistically unchoked neighbor from interested neighbors.
 		 * send choked to previous "optimistically unchoked neighbor" if it is not preferred neighbor now.
 		 * send unchoke to the new "optimistically unchoked neighbor"
 		 */
