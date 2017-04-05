@@ -17,13 +17,13 @@ public class NeighborSelection {
 	
 	static String peerID = null;
 	
-	ArrayList<PeerInfo> myPeers = Util.getMyPeerList(peerID);
+//	ArrayList<PeerInfo> myPeers = Util.getMyPeerList(peerID);
 	
 	int p = ConfigurationSetup.getUnchokingInterval();
 	
 	int m = ConfigurationSetup.getOptimisticUnchokingInterval();
 	
-	public ArrayList<String> selectKPreferredNeighbors(ArrayList<String> myPeers, int k){
+	public static ArrayList<String> selectKPreferredNeighbors(ArrayList<String> myPeers, int k){
 		
 		ArrayList<String> preferredKNeighbors = new ArrayList<>();
 		

@@ -65,7 +65,7 @@ public class Util {
 		return peerList;
 	}
 
-	public ArrayList<PeerInfo> getMyPeerList(String peerID) {
+	public static ArrayList<PeerInfo> getMyPeerList(String peerID) {
 		ArrayList<PeerInfo> myPeerList = new ArrayList<PeerInfo>();
 
 		for (PeerInfo peerInfo : peerList) {
