@@ -22,21 +22,20 @@ import logging.FileLogger;
  */
 public class PeerProcess {
 
-	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
+	private Logger logger = Logger.getLogger(TCPConnectionManager.class);
 
 	/** peer ID */
-	private static String peerID;
-	private static PeerInfo peerInstance = null;
+	private String localPeerID;
+	private PeerInfo localPeerInfo = null;
 	private static Util utilInstance = Util.initializeUtil();
 
 	private TCPConnectionManager connManager = null;
-	private PeerProcess instance = null;
 
 	/** this list contains all other peers' information in the network. */
-	private ArrayList<PeerInfo> neighbors = null;
+	private ArrayList<PeerInfo> neighbors = new ArrayList<>();
 
 	/** the indice of the preferred neighbor set. */
-	private HashMap<String, Boolean> preferred_neighbors = null;
+	private HashMap<String, Boolean> preferred_neighbors = new HashMap<>();
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
 	/** time interval used to update preferred neighbors. */
@@ -46,30 +45,22 @@ public class PeerProcess {
 	/** number of preferred neighbors. */
 	private int k_preferred_neighbors = 0;
 
-	public PeerProcess() {
-
-	}
-
-	public static PeerInfo getLocalPeerInstance() {
-
-		if (peerInstance == null) {
-			peerInstance = utilInstance.getPeerInfo(peerID);
-		}
-		return peerInstance;
+	public PeerProcess(String localPeerID) {
+		this.localPeerID = localPeerID;
+		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
 	}
 
 	/**
 	 * Self initiation for the local peer.
 	 */
-	private void initiatePeerProcess() {
+	//TODO: Change this to private after local testing is done
+	public void initiatePeerProcess() {
 		// read configurations files and initialize local peer.
-		Util.initializeUtil();
-		connManager = new TCPConnectionManager(peerInstance);
+		connManager = new TCPConnectionManager(localPeerInfo);
 		connManager.initializePeer();
 		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
 		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
 		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
-
 		findNeighbors();
 	}
 
@@ -80,7 +71,7 @@ public class PeerProcess {
 
 		for (PeerInfo peer : Util.getPeerList()) {
 
-			if (!peer.getPeerID().equals(peerID)) {
+			if (!peer.getPeerID().equals(getPeerID())) {
 
 				neighbors.add(peer);
 				preferred_neighbors.put(peer.getPeerID(), false);
@@ -131,29 +122,18 @@ public class PeerProcess {
 			System.out.println("\n\nError: Incorrect number of arguments. Syntax is, \"java PeerProcess [peerID]\"");
 			return;
 		}
-		PeerProcess localPeer = new PeerProcess();
-		localPeer.peerID = args[2];
-		localPeer.getLocalPeerInstance();
+		PeerProcess localPeer = new PeerProcess(args[2]);
 		// start logging
-		FileLogger.initialize();
+		FileLogger.initialize(args[2]);
 		localPeer.initiatePeerProcess();
 	}
 
-	public static void initiatePeerProcessForLocalHostTesting(ArrayList<String> peerIDList) {
-		for (String peerID : peerIDList) {
-			PeerInfo peerInstance = Util.getPeerInfo(peerID);
-			TCPConnectionManager connManager = new TCPConnectionManager(peerInstance);
-			connManager.initializePeer();
-		}
-		try {
-			Thread.sleep(20000); // give enough time before the main program
-									// exits for the different threads to finish
-									// execution (check to see if the various
-									// ports/streams have the data or not)
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public String getPeerID() {
+		return localPeerID;
+	}
+
+	public void setPeerID(String peerID) {
+		localPeerID = peerID;
 	}
 
 }
