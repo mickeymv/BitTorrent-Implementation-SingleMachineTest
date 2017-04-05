@@ -106,7 +106,7 @@ public class EventProcessor {
 		/*
 		 * re-select one optimistically unchoked neighbor
 		 * send choked to previous "optimistically unchoked neighbor" if it is not preferred neighbor now.
-		 * send unchoke to the new "optimistically unchoked neighbor".
+		 * send unchoke to the new "optimistically unchoked neighbor"
 		 */
 	}
 	
