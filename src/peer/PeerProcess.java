@@ -437,12 +437,22 @@ public class PeerProcess {
 	 * @return list of peers which do not have interesting pieces for the local peer.
 	 */
 	public ArrayList<String> getListOfUnInterestingPeers() {
-		// TODO Auto-generated method stub
-		ArrayList<String> uninterestedPeerList = new ArrayList<>();		
+		
+		ArrayList<String> uninterestedPeerList = new ArrayList<>();
 		for(int i = 0; i < neighbors.size(); i++){
-			for(int j = 0; i<interestedNeighbors.size();j++){
-				if(neighbors.get(i).toString()!=interestedNeighbors.get(j)){
-					uninterestedPeerList.add(neighbors.get(i).toString());
+			uninterestedPeerList.add(neighbors.get(i).getPeerID());
+		}
+		for(int i = 0; i < neighbors.size(); i++){
+			ArrayList<Byte> remotePeerBitField = peersBitfields.get(neighbors.get(i));
+			for(int j=0; j<remotePeerBitField.size();j++){
+				
+				for(int k = 0; k < 8; k++){
+					if(Integer.toBinaryString(localPeerBitField.get(j)).charAt(k)== 0){
+						if(Integer.toBinaryString(remotePeerBitField.get(j)).charAt(k)!= 0){
+							uninterestedPeerList.remove(i);
+							break;
+						}
+					}
 				}
 			}
 		}
