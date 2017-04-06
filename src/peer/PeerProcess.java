@@ -6,7 +6,11 @@ import util.Util;
 import java.awt.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import java.util.Collections;
@@ -14,6 +18,7 @@ import java.util.Collections;
 import connection.TCPConnectionManager;
 import type.PeerInfo;
 import logging.FileLogger;
+import messages.Message;
 
 /**
  * This class sets up a peer in a peer-to-peer network 1. Initiate peer and set
@@ -43,7 +48,8 @@ public class PeerProcess {
 
 	/** the index of the preferred neighbor set. */
 	private HashMap<String, Boolean> preferred_neighbors = new HashMap<>();
-
+	private String optimistically_unchoked_neighbor = null;
+	
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
 
@@ -55,7 +61,13 @@ public class PeerProcess {
 
 	/** number of preferred neighbors. */
 	private int k_preferred_neighbors = 0;
-
+	
+	/** data structures for maintaining the control logic*/
+	/** a map to find which peer is in interested. */
+	HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
+	/** track the download speed from each peers, in number of pieces. */
+	HashMap<String, Integer> download_speed = new HashMap<String, Integer>();
+	
 	/*
 	 * Map of which piece index was sent as a "have" message to which remote
 	 * peer. remotePeerID -> PieceIndex
@@ -95,8 +107,8 @@ public class PeerProcess {
 		localPeerBitField = utilInstance.getPeerBitfield(localPeerInfo.isHasFileInitially());
 		// System.out.println("the bitfield for peer: "+localPeerID+" is:");
 		// utilInstance.printBitfield(localPeerBitField);
-		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
-		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
+		time_interval_p_preferred_neighbor = ConfigurationSetup.getUnchokingInterval();
+		time_interval_m_unchoked_neighbor = ConfigurationSetup.getOptimisticUnchokingInterval();
 		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
 		findNeighbors();
 		setPeersBitfields();
@@ -123,7 +135,7 @@ public class PeerProcess {
 
 	private void initializePiecesRemainingMap() {
 		if (!gotCompletedFile) {
-			for (int i = 0; i < ConfigurationSetup.getInstance().getNumberOfPieces(); i++) {
+			for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 				this.piecesRemainingToBeRequested.put(i, i);
 			}
 		}
@@ -162,11 +174,11 @@ public class PeerProcess {
 	 */
 	private void findNeighbors() {
 
+		neighbors = Util.getMyPeerList(localPeerID);
+		
 		for (PeerInfo peer : Util.getPeerList()) {
 			if (!peer.getPeerID().equals(getPeerID())) {
-				// add as neighbor
-				neighbors.add(peer);
-				// none of the neighbors is preferred neighbor at the beginning.
+				// none of the neighbors is preferred neighbor at the begining.
 				preferred_neighbors.put(peer.getPeerID(), false);
 			}
 		}
@@ -177,8 +189,8 @@ public class PeerProcess {
 	 * 
 	 * @param peerID
 	 */
-	public void choke(int peerID) {
-
+	public void choke(String peerID) {
+		Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
 	}
 
 	/**
@@ -186,8 +198,8 @@ public class PeerProcess {
 	 * 
 	 * @param peerID
 	 */
-	public void unchoke(int peerID) {
-
+	public void unchoke(String peerID) {
+		Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
 	/**
@@ -196,16 +208,17 @@ public class PeerProcess {
 	public void initializePreferredNeighbors() {
 
 		int k = k_preferred_neighbors;
-
+		
 		ArrayList<String> peerIDs = new ArrayList<String>();
-
+		// get peerID list of all interested neighbors
 		for (PeerInfo peer : neighbors) {
-
-			peerIDs.add(peer.getPeerID());
+			if (interested_peer_list.containsKey(peer.getPeerID())) {
+				
+				peerIDs.add(peer.getPeerID());
+			}	
 		}
-
+		
 		Collections.shuffle(peerIDs);
-
 		for (int i = 0; i < k && i < peerIDs.size(); i++) {
 
 			preferred_neighbors.put(peerIDs.get(i), true);
@@ -213,35 +226,116 @@ public class PeerProcess {
 	}
 
 	/**
-	 * Determine preferred neighbors every p seconds.
-	 * 
 	 * Then every p seconds, peer A reselects its preferred neighbors. To make
 	 * the decision, peer A calculates the downloading rate from each of its
 	 * neighbors, respectively, during the previous unchoking interval. Among
 	 * neighbors that are interested in its data, peer A picks k neighbors that
 	 * has fed its data at the highest rate.
+	 * 1). select at most K preferred neighbors from interested_peer_list
+	 * 2). choke peers that are not in the newPreferredKNeighbors
+	 * 3). unchoke peers that were not in preferredKNeighbors and now in newPreferredKNeighbors
+	 * 
 	 */
-	public void determinePreferredNeighbors() {
-		// Only choose preferred and Unchoked neighbor from this
-		// interestedNeighbors list!
+	public void updatePreferredNeighbors(ArrayList<String> myPeers, int k) {
+		
+		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
+		
+		download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
 
-		if (this.gotCompletedFile) { // determine preferred neighbors randomly
-
-		} else { // use downloading rates.
-
+		// use the first k peers in the interested_peer_list
+		int index = 0;
+		for (Map.Entry<String, Integer> entry : download_speed.entrySet()) {
+			if (index >= k) break;
+			if (interested_peer_list.containsKey(entry.getKey())) {
+				newPreferredKNeighbors.put(entry.getKey(), true);
+			}
+		}
+		HashMap<String, String> needToNotify = new HashMap<String, String>();
+		
+		// choke peers that is not in newPreferredKNeighbors
+		// unchoke peers that were not in preferredKNeighbors and now selected.
+		for (PeerInfo peer : neighbors) {
+			String id = peer.getPeerID();
+			if (! newPreferredKNeighbors.containsKey(id)) { // if id is selected this time
+				needToNotify.put(id, "choke");
+				//choke(id); // choke peer
+			} else if(! preferred_neighbors.containsKey(id)) { // 
+				needToNotify.put(id, "unchoke");
+			}
+		}
+		// update preferred_neighbors
+		for (String peerid : preferred_neighbors.keySet()) {
+			
+			if (newPreferredKNeighbors.containsKey(peerid)) {
+				preferred_neighbors.put(peerid, true);
+			} else {
+				preferred_neighbors.put(peerid, false);
+			}
+		}
+		
+		// notify neighbors
+		for (String peerid : needToNotify.keySet()) {
+			
+			if (needToNotify.get(peerid).equals("choke")) {
+				
+				choke(peerid);
+			} else {
+				unchoke(peerid);
+			}
 		}
 	}
+	
+	/**
+	 * sort map entries by values.
+	 * @param map
+	 * @return
+	 */
+	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+		return map.entrySet().stream().sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+	}
+	
 
 	/**
 	 * Determines unchoked neighbor every m seconds. optimistically unchoked
 	 * neighbor randomly among neighbors that are choked at that moment but are
 	 * interested in its data.
 	 */
-	public void determineUnchokedNeighbor() {
-		// Only choose preferred and Unchoked neighbor from this
-		// interestedNeighbors list!
+	public void updateUnchokedNeighbor() {
+		
+		ArrayList<String> interested_choked_peers = new ArrayList<String>();
+		Set<String> peerSet = null;
+		synchronized(interested_peer_list) {
+			peerSet = interested_peer_list.keySet();
+		}
+		
+		for (String peer : peerSet) {
+			
+			if (interested_peer_list.get(peer) == true && ! preferred_neighbors.containsKey(peer)) {
+				
+				interested_choked_peers.add(peer);
+			}
+		}
+		
+		if (! interested_choked_peers.isEmpty()) {
+			Collections.shuffle(interested_choked_peers);
+			
+			synchronized(optimistically_unchoked_neighbor) {
+				optimistically_unchoked_neighbor = interested_choked_peers.get(0);
+			}
+		} else {
+			Random random = new Random();
+			int idx = random.nextInt(neighbors.size());
+			
+			synchronized(optimistically_unchoked_neighbor) {
+				optimistically_unchoked_neighbor = neighbors.get(idx).getPeerID();
+			}
+		}
+		// unchoke the new optimistically unchoked neighbor
+		unchoke(optimistically_unchoked_neighbor);
 	}
 
+	
 	/**
 	 * Peer starts running from here
 	 * 
