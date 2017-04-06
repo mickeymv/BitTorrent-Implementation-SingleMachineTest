@@ -14,7 +14,7 @@ import util.ConfigurationSetup;
 import util.Util;
 
 public class NeighborSelection {
-	
+	// for a peer that has full file?
 	static String peerID = null;
 	
 //	ArrayList<PeerInfo> myPeers = Util.getMyPeerList(peerID);
