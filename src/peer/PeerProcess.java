@@ -438,7 +438,16 @@ public class PeerProcess {
 	 */
 	public ArrayList<String> getListOfUnInterestingPeers() {
 		// TODO Auto-generated method stub
-		return null;
+		ArrayList<String> uninterestedPeerList = new ArrayList<>();		
+		for(int i = 0; i < neighbors.size(); i++){
+			for(int j = 0; i<interestedNeighbors.size();j++){
+				if(neighbors.get(i).toString()!=interestedNeighbors.get(j)){
+					uninterestedPeerList.add(neighbors.get(i).toString());
+				}
+			}
+		}
+		
+		return uninterestedPeerList;
 	}
 
 }
