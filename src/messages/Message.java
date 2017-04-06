@@ -3,6 +3,7 @@ package messages;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import connection.TCPConnectionManager;
@@ -114,5 +115,24 @@ public class Message {
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
 		}
+	}
+
+	/**
+	 * Broadcast to all peers of the local peer that this peer
+	 * "has" the specified piece.
+	 * @param pieceIndex
+	 */
+	public static void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * Send "NOT_INTERESTED" message to the peers who the local peer
+	 * is not interested in.
+	 * @param notInterestingPeers
+	 */
+	public static void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
+		// TODO Auto-generated method stub
+		
 	}
 }
