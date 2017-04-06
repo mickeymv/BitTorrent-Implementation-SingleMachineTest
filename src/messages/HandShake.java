@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import connection.TCPConnectionManager;
+import listener.MessageListener;
 import util.Util;
 
 /**
- * @author Mickey Vellukunnel
- *	Establish handshake and exchange BitFields.
+ * @author Mickey Vellukunnel Establish handshake and exchange BitFields.
  */
 public class HandShake {
 
@@ -23,7 +23,8 @@ public class HandShake {
 	private static Util utilInstance = Util.initializeUtil();
 
 	/**
-	 * This is called by the client socket. Sends handshake to server and waits for one back.
+	 * This is called by the client socket. Sends handshake to server and waits
+	 * for one back.
 	 * 
 	 * @param localClientPeerID
 	 * @param remoteServerPeerID
@@ -47,7 +48,7 @@ public class HandShake {
 			int messageLength;
 			byte[] messageBytes = null; // message received back from the server
 
-			/*Blocking call!*/
+			/* Blocking call! */
 			// receive the HandShake message sent back from the server
 			messageLength = TCPConnectionManager.getDataInputStream(remoteServerPeerID).readInt();
 
@@ -61,7 +62,7 @@ public class HandShake {
 
 				int receivedHandShakeFromPeer = utilInstance
 						.intFromByteArray(Arrays.copyOfRange(messageBytes, 28, messageBytes.length));
-				//make sure handshake is from expected peer
+				// make sure handshake is from expected peer
 				if (receivedHandShakeFromPeer != Integer.parseInt(remoteServerPeerID)) {
 					System.out.println("ERROR! " + localClientPeerID + " local client Received handshake from Peer "
 							+ receivedHandShakeFromPeer + "instead of from server " + remoteServerPeerID);
@@ -106,9 +107,10 @@ public class HandShake {
 		return streamToCombineByteArrays.toByteArray();
 	}
 
-	
 	/**
-	 * This is called by the server socket. Waits for handshake from client and sends one back.
+	 * This is called by the server socket. Waits for handshake from client and
+	 * sends one back.
+	 * 
 	 * @param localServerPeerID
 	 * @param remoteClientPeerID
 	 */
@@ -118,7 +120,7 @@ public class HandShake {
 			int messageLength;
 			byte[] messageBytes = null;
 
-			/*Blocking call!*/
+			/* Blocking call! */
 			// receive the HandShake message sent from the client
 			messageLength = TCPConnectionManager.getDataInputStream(remoteClientPeerID).readInt();
 
@@ -142,7 +144,7 @@ public class HandShake {
 
 				int receivedHandShakeFromPeer = utilInstance.intFromByteArray(peerIDBytes);
 
-				//make sure handshake is from expected peer
+				// make sure handshake is from expected peer
 				if (receivedHandShakeFromPeer != Integer.parseInt(remoteClientPeerID)) {
 					System.out.println("ERROR! " + localServerPeerID + " local Server Received handshake from Peer "
 							+ receivedHandShakeFromPeer + "instead of from client " + remoteClientPeerID);
@@ -160,6 +162,7 @@ public class HandShake {
 
 			// send HandShake back to the listening client
 			Message.sendMessage(handshakeMessageBytes, localServerPeerID, remoteClientPeerID);
+
 		} catch (IOException ioException) {
 			System.out.println("Disconnect with client after handshake " + remoteClientPeerID);
 		}

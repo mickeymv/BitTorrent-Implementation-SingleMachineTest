@@ -62,9 +62,10 @@ public class EventProcessor {
 			 * complete file, or that remote peer has no interesting pieces,
 			 * then this was receieved in error;
 			 */
-
+			System.out.println("in peer: " + this.localPeerID + ", got CHOKE message from peer: "
+					+ this.remotePeerID);
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID)) {
-				System.out.println("in peer: " + this.localPeerID + ", got CHOKE message from peer: "
+				System.err.println("ERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
 						+ this.remotePeerID
 						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 				Message.sendMessage(Message.MESSAGETYPE_NOTINTERESTED, remotePeerID);
@@ -92,8 +93,10 @@ public class EventProcessor {
 			 * B. else, send "request" to B, if B has pieces that local peer
 			 * doesn't have and hasen't requested.
 			 */
+			System.out.println("in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
+					+ this.remotePeerID);
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID)) {
-				System.out.println("in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
+				System.err.println("ERROR! in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
 						+ this.remotePeerID
 						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 				Message.sendMessage(Message.MESSAGETYPE_NOTINTERESTED, remotePeerID);
@@ -101,7 +104,7 @@ public class EventProcessor {
 			} else {
 				int pieceToBeRequestedFromPeer = localPeerProcessInstance.getPieceToBeRequested(remotePeerID);
 				if (pieceToBeRequestedFromPeer == -1) {
-					System.out.println("in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
+					System.err.println("ERROR! in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
 							+ this.remotePeerID
 							+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 					return;
@@ -130,6 +133,9 @@ public class EventProcessor {
 			 * 2). if B is not there, add B into interesetd_peer_list
 			 */
 
+			System.out.println("in peer: " + this.localPeerID + ", got INTERESTED message from peer: "
+					+ this.remotePeerID);
+			
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getPieceIndexToSendToPeer(remotePeerID);
 			byte[] pieceMessagePayload = Util.getPieceAsByteArray(pieceIndexToBeSent);
@@ -147,6 +153,10 @@ public class EventProcessor {
 			/*
 			 * update interested peers list.
 			 */
+			
+			System.out.println("in peer: " + this.localPeerID + ", got NOT_INTERESTED message from peer: "
+					+ this.remotePeerID);
+			
 			localPeerProcessInstance.removeNeighborWhoIsNotInterested(remotePeerID);
 			break;
 		case Message.MESSAGETYPE_HAVE:
@@ -164,6 +174,9 @@ public class EventProcessor {
 			 */
 
 			pieceIndex = Util.intFromByteArray(payload);
+			
+			System.out.println("in peer: " + this.localPeerID + ", got 'HAVE' piece#" +pieceIndex+ " message from peer: "
+					+ this.remotePeerID);
 
 			if (this.localPeerProcessInstance.isPieceNotAvailableOrNotRequested(pieceIndex)) {
 				Message.sendMessage(Message.MESSAGETYPE_INTERESTED, remotePeerID);
@@ -188,6 +201,9 @@ public class EventProcessor {
 			 * pieces.
 			 */
 			pieceIndex = Util.intFromByteArray(payload);
+			
+			System.out.println("in peer: " + this.localPeerID + ", got 'REQUEST' piece#" +pieceIndex+ " message from peer: "
+					+ this.remotePeerID);
 
 			// Safety check: check if piece is available in local peer
 
@@ -222,6 +238,9 @@ public class EventProcessor {
 			byte[] pieceDataBytesArray = Arrays.copyOfRange(payload, 4, payload.length);
 			
 			pieceIndex = Util.intFromByteArray(pieceIndexBytesArray);
+			
+			System.out.println("in peer: " + this.localPeerID + ", got 'PIECE' piece#" +pieceIndex+ " message from peer: "
+					+ this.remotePeerID);
 			
 			Util.savePieceFile(pieceDataBytesArray, String.valueOf(pieceIndex));
 			

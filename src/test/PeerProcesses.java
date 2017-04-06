@@ -28,7 +28,9 @@ public class PeerProcesses {
 			peerProcesses.put(peerID, localPeer);
 			// start logging
 			//FileLogger.initialize(peerID);
+			//System.out.println("Going to create connections for peer# "+peerID);
 			localPeer.initiatePeerProcess();
+			//System.out.println("Done creating connections for peer# "+peerID);
 		}
 		
 		try {
