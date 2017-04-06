@@ -272,29 +272,6 @@ public class EventProcessor {
 
 	}
 
-	public void preferredNeighborsUpdated() {
-		// Only choose preferred and Unchoked neighbor from this
-		// PeerProcess.interestedNeighbors list!
-
-		/*
-		 * re-select k preferred neighbors from interested neighbors.
-		 * 
-		 * If B is an interested neighbor, then; Send unchoke message to B if B
-		 * was choked before. send choke message to B if B was unchoked.
-		 */
-	}
-
-	public void optimiticallyUnchokedNeighborUpdated() {
-		// Only choose preferred and Unchoked neighbor from this
-		// PeerProcess.interestedNeighbors list!
-
-		/*
-		 * re-select one optimistically unchoked neighbor from interested
-		 * neighbors. send choked to previous "optimistically unchoked neighbor"
-		 * if it is not preferred neighbor now. send unchoke to the new
-		 * "optimistically unchoked neighbor"
-		 */
-	}
 
 	private boolean hasCompleteFile() {
 		return localPeerProcessInstance.getGotCompletedFile();

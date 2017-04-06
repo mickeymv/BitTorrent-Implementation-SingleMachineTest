@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -47,7 +48,8 @@ public class PeerProcess {
 
 	/** the index of the preferred neighbor set. */
 	private HashMap<String, Boolean> preferred_neighbors = new HashMap<>();
-
+	private String optimistically_unchoked_neighbor = null;
+	
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
 
@@ -105,8 +107,8 @@ public class PeerProcess {
 		localPeerBitField = utilInstance.getPeerBitfield(localPeerInfo.isHasFileInitially());
 		// System.out.println("the bitfield for peer: "+localPeerID+" is:");
 		// utilInstance.printBitfield(localPeerBitField);
-		time_interval_p_preferred_neighbor = ConfigurationSetup.getInstance().getUnchokingInterval();
-		time_interval_m_unchoked_neighbor = ConfigurationSetup.getInstance().getOptimisticUnchokingInterval();
+		time_interval_p_preferred_neighbor = ConfigurationSetup.getUnchokingInterval();
+		time_interval_m_unchoked_neighbor = ConfigurationSetup.getOptimisticUnchokingInterval();
 		k_preferred_neighbors = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
 		findNeighbors();
 		setPeersBitfields();
@@ -133,7 +135,7 @@ public class PeerProcess {
 
 	private void initializePiecesRemainingMap() {
 		if (!gotCompletedFile) {
-			for (int i = 0; i < ConfigurationSetup.getInstance().getNumberOfPieces(); i++) {
+			for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 				this.piecesRemainingToBeRequested.put(i, i);
 			}
 		}
@@ -172,7 +174,7 @@ public class PeerProcess {
 	 */
 	private void findNeighbors() {
 
-		neighbors = Util.initializeUtil().getMyPeerList(localPeerID);
+		neighbors = Util.getMyPeerList(localPeerID);
 		
 		for (PeerInfo peer : Util.getPeerList()) {
 			if (!peer.getPeerID().equals(getPeerID())) {
@@ -188,7 +190,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void choke(String peerID) {
-		Message.sendMessage(Message.MESSAGETYPE_CHOKE, null, peerID);
+		Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
 	}
 
 	/**
@@ -197,7 +199,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void unchoke(String peerID) {
-		Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, null, peerID);
+		Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
 	/**
@@ -232,6 +234,7 @@ public class PeerProcess {
 	 * 1). select at most K preferred neighbors from interested_peer_list
 	 * 2). choke peers that are not in the newPreferredKNeighbors
 	 * 3). unchoke peers that were not in preferredKNeighbors and now in newPreferredKNeighbors
+	 * 
 	 */
 	public void updatePreferredNeighbors(ArrayList<String> myPeers, int k) {
 		
@@ -300,8 +303,39 @@ public class PeerProcess {
 	 */
 	public void updateUnchokedNeighbor() {
 		
+		ArrayList<String> interested_choked_peers = new ArrayList<String>();
+		Set<String> peerSet = null;
+		synchronized(interested_peer_list) {
+			peerSet = interested_peer_list.keySet();
+		}
+		
+		for (String peer : peerSet) {
+			
+			if (interested_peer_list.get(peer) == true && ! preferred_neighbors.containsKey(peer)) {
+				
+				interested_choked_peers.add(peer);
+			}
+		}
+		
+		if (! interested_choked_peers.isEmpty()) {
+			Collections.shuffle(interested_choked_peers);
+			
+			synchronized(optimistically_unchoked_neighbor) {
+				optimistically_unchoked_neighbor = interested_choked_peers.get(0);
+			}
+		} else {
+			Random random = new Random();
+			int idx = random.nextInt(neighbors.size());
+			
+			synchronized(optimistically_unchoked_neighbor) {
+				optimistically_unchoked_neighbor = neighbors.get(idx).getPeerID();
+			}
+		}
+		// unchoke the new optimistically unchoked neighbor
+		unchoke(optimistically_unchoked_neighbor);
 	}
 
+	
 	/**
 	 * Peer starts running from here
 	 * 
