@@ -37,6 +37,9 @@ public class MessageListener {
 
 			// receive the message sent from the peer
 			try {
+				
+				System.out.println("In peer#" + localPeerID+" and started listening for messages from peer#" + remotePeerID);
+				
 				messageLength = in.readInt();
 
 				/*
@@ -49,7 +52,11 @@ public class MessageListener {
 				 */
 
 				if (messageLength >= 1) {
+					messageBytes = new byte[messageLength];
 					in.readFully(messageBytes, 0, messageBytes.length); // read
+					
+					System.out.println("In peer#" + localPeerID+" and received a message from peer#" + remotePeerID);
+					
 					messageProcessor.processMessage(messageBytes);
 				} else {
 					System.out.println("ERROR! " + localPeerID
