@@ -210,18 +210,21 @@ public class PeerProcess {
 		int k = k_preferred_neighbors;
 		
 		ArrayList<String> peerIDs = new ArrayList<String>();
-		// get peerID list of all interested neighbors
-		for (PeerInfo peer : neighbors) {
-			if (interested_peer_list.containsKey(peer.getPeerID())) {
-				
-				peerIDs.add(peer.getPeerID());
-			}	
-		}
 		
-		Collections.shuffle(peerIDs);
-		for (int i = 0; i < k && i < peerIDs.size(); i++) {
-
-			preferred_neighbors.put(peerIDs.get(i), true);
+		synchronized(interested_peer_list) {
+			// get peerID list of all interested neighbors
+			for (PeerInfo peer : neighbors) {
+				if (interested_peer_list.containsKey(peer.getPeerID())) {
+					
+					peerIDs.add(peer.getPeerID());
+				}	
+			}
+			
+			Collections.shuffle(peerIDs);
+			for (int i = 0; i < k && i < peerIDs.size(); i++) {
+	
+				preferred_neighbors.put(peerIDs.get(i), true);
+			}
 		}
 	}
 
@@ -236,40 +239,61 @@ public class PeerProcess {
 	 * 3). unchoke peers that were not in preferredKNeighbors and now in newPreferredKNeighbors
 	 * 
 	 */
-	public void updatePreferredNeighbors(ArrayList<String> myPeers, int k) {
+	public void updatePreferredNeighbors(ArrayList<String> myPeers, int k) throws Exception{
 		
 		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
 		
-		download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
-
-		// use the first k peers in the interested_peer_list
-		int index = 0;
-		for (Map.Entry<String, Integer> entry : download_speed.entrySet()) {
-			if (index >= k) break;
-			if (interested_peer_list.containsKey(entry.getKey())) {
-				newPreferredKNeighbors.put(entry.getKey(), true);
+		synchronized(download_speed) {
+			download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
+		}
+		
+		boolean noOneInterested = true;
+		
+		synchronized(interested_peer_list) {
+			
+			// use the first k peers in the interested_peer_list
+			int index = 0;
+			for (Map.Entry<String, Integer> entry : download_speed.entrySet()) {
+				if (index >= k) break;
+				
+				if (interested_peer_list.containsKey(entry.getKey())) {
+					newPreferredKNeighbors.put(entry.getKey(), true);
+					noOneInterested = false;
+					index ++;
+				}
 			}
 		}
+		if (noOneInterested) {
+			
+			throw new Exception("no one is interested!");
+		}
+		
 		HashMap<String, String> needToNotify = new HashMap<String, String>();
 		
 		// choke peers that is not in newPreferredKNeighbors
 		// unchoke peers that were not in preferredKNeighbors and now selected.
-		for (PeerInfo peer : neighbors) {
-			String id = peer.getPeerID();
-			if (! newPreferredKNeighbors.containsKey(id)) { // if id is selected this time
-				needToNotify.put(id, "choke");
-				//choke(id); // choke peer
-			} else if(! preferred_neighbors.containsKey(id)) { // 
-				needToNotify.put(id, "unchoke");
+		
+		synchronized(preferred_neighbors) {
+			for (PeerInfo peer : neighbors) {
+				String id = peer.getPeerID();
+				if (! newPreferredKNeighbors.containsKey(id)) { // if id is selected this time
+					needToNotify.put(id, "choke");
+					//choke(id); // choke peer
+				} else if(! preferred_neighbors.containsKey(id)) { // 
+					needToNotify.put(id, "unchoke");
+				}
 			}
 		}
-		// update preferred_neighbors
-		for (String peerid : preferred_neighbors.keySet()) {
-			
-			if (newPreferredKNeighbors.containsKey(peerid)) {
-				preferred_neighbors.put(peerid, true);
-			} else {
-				preferred_neighbors.put(peerid, false);
+		
+		synchronized(preferred_neighbors) {
+			// update preferred_neighbors
+			for (String peerid : preferred_neighbors.keySet()) {
+				
+				if (newPreferredKNeighbors.containsKey(peerid)) {
+					preferred_neighbors.put(peerid, true);
+				} else {
+					preferred_neighbors.put(peerid, false);
+				}
 			}
 		}
 		
@@ -301,7 +325,7 @@ public class PeerProcess {
 	 * neighbor randomly among neighbors that are choked at that moment but are
 	 * interested in its data.
 	 */
-	public void updateUnchokedNeighbor() {
+	public void updateUnchokedNeighbor() throws Exception{
 		
 		ArrayList<String> interested_choked_peers = new ArrayList<String>();
 		Set<String> peerSet = null;
@@ -309,6 +333,9 @@ public class PeerProcess {
 			peerSet = interested_peer_list.keySet();
 		}
 		
+		if (peerSet.isEmpty())
+			throw new Exception("interested_peer_list is empty!");
+			
 		for (String peer : peerSet) {
 			
 			if (interested_peer_list.get(peer) == true && ! preferred_neighbors.containsKey(peer)) {
