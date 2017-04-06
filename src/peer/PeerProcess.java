@@ -472,7 +472,6 @@ public class PeerProcess {
 		for(int i = 0; i < neighbors.size(); i++){
 			ArrayList<Byte> remotePeerBitField = peersBitfields.get(neighbors.get(i));
 			for(int j=0; j<remotePeerBitField.size();j++){
-				
 				for(int k = 0; k < 8; k++){
 					if(Integer.toBinaryString(localPeerBitField.get(j)).charAt(k)== 0){
 						if(Integer.toBinaryString(remotePeerBitField.get(j)).charAt(k)!= 0){
