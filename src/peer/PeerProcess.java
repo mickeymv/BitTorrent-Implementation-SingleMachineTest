@@ -102,7 +102,10 @@ public class PeerProcess {
 		setPeersBitfields();
 		this.gotCompletedFile = localPeerInfo.isHasFileInitially();
 		initializePiecesRemainingMap();
-		//TODO: if local peer has complete file, divide file into required pieces and place into correct peer sub-directory.
+		//if local peer has complete file, divide file into required pieces and place into correct peer sub-directory.
+		if(gotCompletedFile) {
+			Util.splitDataFile(localPeerID);
+		}
 	}
 
 	/**
