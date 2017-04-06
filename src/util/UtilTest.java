@@ -19,7 +19,7 @@ public class UtilTest {
 		Util inst = Util.initializeUtil();
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
 		
-		Util.initiateBitfield();
+		//Util.initiateBitfield();
 		//Util.createRandomDataFile(instance.getFileSize());
 		//Util.splitDataFile();
 		//Util.mergeDataPieces("project/");

@@ -32,6 +32,10 @@ public class Util {
 	private static ArrayList<PeerInfo> peerList;
 	private static Map<String, Integer> peerIDToPositionMap;
 	private static ConfigurationSetup configInstance = null;
+	
+	private static final String PROJECT_TOP_LEVEL_DIRECTORY = "project";
+	private static final String PEER_DIRECTORY_PREFIX = "peer_";
+	private static final String PIECE_PREFIX = "_piece_";
 
 	private Util() {
 	}
@@ -49,13 +53,13 @@ public class Util {
 	/*
 	 * Converts an integer to its 4 byte representation.
 	 */
-	public final byte[] intToByteArray(int peerIDIntegerValue) {
+	public static final byte[] intToByteArray(int peerIDIntegerValue) {
 		ByteBuffer b = ByteBuffer.allocate(4);
 		b.putInt(peerIDIntegerValue);
 		return b.array();
 	}
 
-	public final int intFromByteArray(byte[] integerBytes) {
+	public static final int intFromByteArray(byte[] integerBytes) {
 		return ByteBuffer.wrap(integerBytes).getInt(0);
 	}
 
@@ -127,7 +131,7 @@ public class Util {
 
 			int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 
-			System.out.println("length of bitfield:" + lengthOfBitfield);
+			//System.out.println("length of bitfield:" + lengthOfBitfield);
 			// set all full bytes
 			for (int i = 0; i < lengthOfBitfield; i++) {
 
@@ -153,8 +157,8 @@ public class Util {
 			if (hasFileInitially) {
 				// set remaining bits of the last byte.
 				int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
-				System.out.println("number of pieces:" + ConfigurationSetup.getNumberOfPieces() + " \n" + "remaining:"
-						+ remaining);
+//				System.out.println("number of pieces:" + ConfigurationSetup.getNumberOfPieces() + " \n" + "remaining:"
+//						+ remaining);
 				Byte b = setFirstNDigits(remaining);
 				bitField.add(b);
 			}
@@ -165,17 +169,18 @@ public class Util {
 	/**
 	 * split the data file into pieces. Directory: project/peer_[peerID]
 	 */
-	public static void splitDataFile() {
+	public static void splitDataFile(String localPeerID) {
 
 		Path path = Paths.get(ConfigurationSetup.getInstance().getFileName());
 		// String pieceDir = "project/peer_" +
 		// PeerProcess.getLocalPeerInstance().getPeerID();
-		String pieceDir = "project" + File.pathSeparator + "peer_xxxxxx";
+		File temp_path = new File(PROJECT_TOP_LEVEL_DIRECTORY);
+		String pieceDir = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/"; //File.pathSeparator giving ':' ?
 
 		byte[] byteChunk;
 		FileOutputStream outputStream = null;
 		int pieceSize = ConfigurationSetup.getInstance().getPieceSize();
-		File temp_path = new File("project");
+		temp_path = new File(pieceDir);
 		temp_path.mkdirs();
 
 		try {
@@ -201,7 +206,7 @@ public class Util {
 
 				byteChunk = Arrays.copyOfRange(data, from, to);
 				chunkIdx++;
-				pieceFileName = pieceDir + "_piece_" + Integer.toString(chunkIdx);
+				pieceFileName = pieceDir + PIECE_PREFIX + Integer.toString(chunkIdx);
 				outputStream = new FileOutputStream(new File(pieceFileName));
 				outputStream.write(byteChunk);
 				outputStream.flush();
@@ -234,7 +239,7 @@ public class Util {
 
 		for (int i = 1; i <= ConfigurationSetup.getNumberOfPieces(); i++) {
 
-			String pieceFileName = directory + File.separator + "peer_xxxxxx_piece_" + i;
+			String pieceFileName = directory + "/" + "peer_xxxxxx_piece_" + i; //File.separator giving ':' ?
 			File file = new File(pieceFileName);
 			if (file.exists()) {
 
@@ -323,7 +328,7 @@ public class Util {
 		for (int i = 0; i < n; i++) {
 			b = (byte) (b >> 1);
 			b = (byte) (b | 0b10000000);
-			System.out.println("b:" + b + '\t');
+			//System.out.println("b:" + b + '\t');
 		}
 		return new Byte(b);
 	}
@@ -427,5 +432,9 @@ public class Util {
 		for (Byte b : bitField) {
 			printByteToBinaryString(b);
 		}
+	}
+
+	public static void setPieceIndexInBitField(ArrayList<Byte> remotePeerBitField, int pieceIndex) {
+		// TODO Auto-generated method stub
 	}
 }

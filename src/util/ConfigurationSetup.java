@@ -97,7 +97,6 @@ public class ConfigurationSetup {
 	public static ConfigurationSetup getInstance() {
 		if (instance == null) {
 			instance = new ConfigurationSetup();
-			readCommonInfoConfigFile();
 		}
 		return instance;
 	}

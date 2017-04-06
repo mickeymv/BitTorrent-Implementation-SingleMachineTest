@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import connection.TCPConnectionManager;
-import processor.MessageProcessor;
+import processor.EventProcessor;
 
 /**
  * @author Mickey Vellukunnel
@@ -17,14 +17,14 @@ import processor.MessageProcessor;
 public class MessageListener {
 	private String localPeerID, remotePeerID;
 	private DataInputStream in;
-	MessageProcessor messageProcessor;
+	EventProcessor messageProcessor;
 	private boolean listeningSocketOpen = true;
 
 	public MessageListener(String localPeerID, String remotePeerID, DataInputStream in) {
 		this.localPeerID = localPeerID;
 		this.remotePeerID = remotePeerID;
 		this.in = in;
-		messageProcessor = new MessageProcessor();
+		messageProcessor = new EventProcessor(localPeerID, remotePeerID);
 	}
 
 	/**

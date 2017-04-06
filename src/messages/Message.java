@@ -3,6 +3,7 @@ package messages;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import connection.TCPConnectionManager;
@@ -16,13 +17,13 @@ public class Message {
 	private Message() {
 	}
 	
-	private static final int MESSAGETYPE_CHOKE = 0;
-	private static final int MESSAGETYPE_UNCHOKE = 1;
-	private static final int MESSAGETYPE_INTERESTED = 2;
-	private static final int MESSAGETYPE_NOTINTERESTED = 3;
-	private static final int MESSAGETYPE_HAVE = 4;
-	private static final int MESSAGETYPE_BITFIELD = 5;
-	private static final int MESSAGETYPE_REQUEST = 6;
+	public static final int MESSAGETYPE_CHOKE = 0;
+	public static final int MESSAGETYPE_UNCHOKE = 1;
+	public static final int MESSAGETYPE_INTERESTED = 2;
+	public static final int MESSAGETYPE_NOTINTERESTED = 3;
+	public static final int MESSAGETYPE_HAVE = 4;
+	public static final int MESSAGETYPE_BITFIELD = 5;
+	public static final int MESSAGETYPE_REQUEST = 6;
 	public static final int MESSAGETYPE_PIECE = 7;
 
 	/**
@@ -113,5 +114,24 @@ public class Message {
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
 		}
+	}
+
+	/**
+	 * Broadcast to all peers of the local peer that this peer
+	 * "has" the specified piece.
+	 * @param pieceIndex
+	 */
+	public static void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * Send "NOT_INTERESTED" message to the peers who the local peer
+	 * is not interested in.
+	 * @param notInterestingPeers
+	 */
+	public static void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
+		// TODO Auto-generated method stub
+		
 	}
 }
