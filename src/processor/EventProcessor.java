@@ -62,13 +62,13 @@ public class EventProcessor {
 			 * complete file, or that remote peer has no interesting pieces,
 			 * then this was receieved in error;
 			 */
-			System.out.println("in peer: " + this.localPeerID + ", got CHOKE message from peer: "
-					+ this.remotePeerID);
+			System.out.println("in peer: " + this.localPeerID + ", got CHOKE message from peer: " + this.remotePeerID);
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID)) {
-				System.err.println("ERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
+				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
 						+ this.remotePeerID
 						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 				Message.sendMessage(Message.MESSAGETYPE_NOTINTERESTED, remotePeerID);
+
 				return;
 			} else {
 				// do nothing
@@ -93,10 +93,10 @@ public class EventProcessor {
 			 * B. else, send "request" to B, if B has pieces that local peer
 			 * doesn't have and hasen't requested.
 			 */
-			System.out.println("in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
-					+ this.remotePeerID);
+			System.out
+					.println("in peer: " + this.localPeerID + ", got UNCHOKE message from peer: " + this.remotePeerID);
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID)) {
-				System.err.println("ERROR! in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
+				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
 						+ this.remotePeerID
 						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 				Message.sendMessage(Message.MESSAGETYPE_NOTINTERESTED, remotePeerID);
@@ -104,13 +104,15 @@ public class EventProcessor {
 			} else {
 				int pieceToBeRequestedFromPeer = localPeerProcessInstance.getPieceToBeRequested(remotePeerID);
 				if (pieceToBeRequestedFromPeer == -1) {
-					System.err.println("ERROR! in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
+					System.err.println("\nERROR! in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
 							+ this.remotePeerID
 							+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 					return;
 				} else {
 					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 					Message.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload, remotePeerID);
+					System.out.println("peer#: " + this.localPeerID + " sent a request for piece# "
+							+ pieceToBeRequestedFromPeer + " to peer#" + this.remotePeerID);
 					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 				}
 			}
@@ -134,13 +136,15 @@ public class EventProcessor {
 			 * 2). if B is not there, add B into interesetd_peer_list
 			 */
 
-			System.out.println("in peer: " + this.localPeerID + ", got INTERESTED message from peer: "
-					+ this.remotePeerID);
-			
+			System.out.println(
+					"in peer: " + this.localPeerID + ", got INTERESTED message from peer: " + this.remotePeerID);
+
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getPieceIndexToSendToPeer(remotePeerID);
 			byte[] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndexToBeSent);
-			Message.sendMessage(Message.MESSAGETYPE_PIECE, pieceMessagePayload, remotePeerID);
+			Message.sendPieceMessage(pieceIndex, pieceMessagePayload, remotePeerID);
+			System.out.println("peer#: " + this.localPeerID + " sent piece message Piece# " + pieceIndexToBeSent
+					+ " to peer#" + this.remotePeerID);
 
 			break;
 		case Message.MESSAGETYPE_NOTINTERESTED:
@@ -154,10 +158,10 @@ public class EventProcessor {
 			/*
 			 * update interested peers list.
 			 */
-			
-			System.out.println("in peer: " + this.localPeerID + ", got NOT_INTERESTED message from peer: "
-					+ this.remotePeerID);
-			
+
+			System.out.println(
+					"in peer: " + this.localPeerID + ", got NOT_INTERESTED message from peer: " + this.remotePeerID);
+
 			localPeerProcessInstance.removeNeighborWhoIsNotInterested(remotePeerID);
 			break;
 		case Message.MESSAGETYPE_HAVE:
@@ -175,12 +179,16 @@ public class EventProcessor {
 			 */
 
 			pieceIndex = Util.intFromByteArray(payload);
-			
-			System.out.println("in peer: " + this.localPeerID + ", got 'HAVE' piece#" +pieceIndex+ " message from peer: "
-					+ this.remotePeerID);
+
+			System.out.println("in peer: " + this.localPeerID + ", got 'HAVE' piece#" + pieceIndex
+					+ " message from peer: " + this.remotePeerID);
 
 			if (this.localPeerProcessInstance.isPieceNotAvailableOrNotRequested(pieceIndex)) {
 				Message.sendMessage(Message.MESSAGETYPE_INTERESTED, remotePeerID);
+				System.out.println(
+						"peer#: " + this.localPeerID + " sent an INTERESTED (after receieving a HAVE ) for piece# "
+								+ pieceIndex + " to peer#" + this.remotePeerID);
+
 			} else {
 				Message.sendMessage(Message.MESSAGETYPE_NOTINTERESTED, remotePeerID);
 			}
@@ -202,15 +210,18 @@ public class EventProcessor {
 			 * pieces.
 			 */
 			pieceIndex = Util.intFromByteArray(payload);
-			
-			System.out.println("in peer: " + this.localPeerID + ", got 'REQUEST' piece#" +pieceIndex+ " message from peer: "
-					+ this.remotePeerID);
+
+			System.out.println("in peer: " + this.localPeerID + ", got 'REQUEST' piece#" + pieceIndex
+					+ " message from peer: " + this.remotePeerID);
 
 			// Safety check: check if piece is available in local peer
 
 			if (this.localPeerProcessInstance.isPieceAvailableLocally(pieceIndex)) {
 				pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndex);
-				Message.sendMessage(Message.MESSAGETYPE_PIECE, pieceMessagePayload, remotePeerID);
+				Message.sendPieceMessage(pieceIndex, pieceMessagePayload, remotePeerID);
+				System.out.println("peer#: " + this.localPeerID + " sent a Piece message piece# " + pieceIndex
+						+ " to peer#" + this.remotePeerID);
+
 			} else {
 				System.out.println("in peer: " + this.localPeerID + ", got REQUEST of piece '" + pieceIndex
 						+ "' message from peer: " + this.remotePeerID
@@ -219,9 +230,10 @@ public class EventProcessor {
 			}
 
 		case Message.MESSAGETYPE_PIECE:
-			/**	This happens when;
-			 * 1. The remote peer sents a "Have" message, and the local responds with "Intereted".
-			 * 2. The local peer sends a "request" message.
+			/**
+			 * This happens when; 1. The remote peer sents a "Have" message, and
+			 * the local responds with "Intereted". 2. The local peer sends a
+			 * "request" message.
 			 * 
 			 */
 			/*
@@ -234,48 +246,49 @@ public class EventProcessor {
 			 * program. ii). if we do not, send "request" about another piece,
 			 * we don't have and not requested.
 			 */
-			
+
 			byte[] pieceIndexBytesArray = Arrays.copyOfRange(payload, 0, 4);
 			byte[] pieceDataBytesArray = Arrays.copyOfRange(payload, 4, payload.length);
-			
+
 			pieceIndex = Util.intFromByteArray(pieceIndexBytesArray);
-			
-			System.out.println("in peer: " + this.localPeerID + ", got 'PIECE' piece#" +pieceIndex+ " message from peer: "
-					+ this.remotePeerID);
-			
-			Util.savePieceFile(pieceDataBytesArray, String.valueOf(pieceIndex));
-			
+
+			System.out.println("in peer: " + this.localPeerID + ", got 'PIECE' piece#" + pieceIndex
+					+ " message from peer: " + this.remotePeerID);
+
+			Util.savePieceFile(pieceDataBytesArray, this.localPeerID, String.valueOf(pieceIndex));
+
 			this.localPeerProcessInstance.updatePieceRecieved(pieceIndex);
-			
+
 			Message.broadcastHavePieceIndexMessageToAllPeers(pieceIndex);
-			
+
 			ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
 			Message.broadcastNotInterestedToUnInterestingPeers(notInterestingPeers);
-			
-			/*//TODO
-			 *  1. check for complete file
-			 *  		i. Make complete file
-			 *  			ii. Check if all other peers are complete.
-			 *  				iii. End all processes. 
-			 * */
-			
-			if(!this.localPeerProcessInstance.getGotCompletedFile()) {
+
+			/*
+			 * //TODO 1. check for complete file i. Make complete file ii. Check
+			 * if all other peers are complete. iii. End all processes.
+			 */
+
+			if (!this.localPeerProcessInstance.getGotCompletedFile()) {
 				int pieceToBeRequestedFromPeer = localPeerProcessInstance.getPieceToBeRequested(remotePeerID);
 				if (pieceToBeRequestedFromPeer == -1) {
-					//this peer is no longer interested in the remote peer (does not any interesting pieces)
+					// this peer is no longer interested in the remote peer
+					// (does not any interesting pieces)
 					Message.sendMessage(Message.MESSAGETYPE_NOTINTERESTED, remotePeerID);
 					return;
 				} else {
 					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 					Message.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload, remotePeerID);
+					System.out.println("peer#: " + this.localPeerID + " sent a REQUEST message for piece# " + pieceIndex
+							+ " to peer#" + this.remotePeerID);
+
 					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 				}
 			}
-			 
+
 		}
 
 	}
-
 
 	private boolean hasCompleteFile() {
 		return localPeerProcessInstance.getGotCompletedFile();

@@ -117,6 +117,8 @@ public class PeerProcess {
 		//if local peer has complete file, divide file into required pieces and place into correct peer sub-directory.
 		if(gotCompletedFile) {
 			Util.splitDataFile(localPeerID);
+		} else {
+			Util.makePeerDirectory(localPeerID);
 		}
 	}
 
@@ -401,9 +403,9 @@ public class PeerProcess {
 	public int getPieceToBeRequested(String remotePeerID) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
 		//System.out.println("The bitfield for peer#" + remotePeerID);
-		Util.printBitfield(remotePeerBitField);
+		//Util.printBitfield(remotePeerBitField);
 		//System.out.println("The local bitfield for peer#" + this.localPeerID);
-		Util.printBitfield(this.localPeerBitField);
+		//Util.printBitfield(this.localPeerBitField);
 		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 			//System.out.println("Checking pieice#"+i+" for local bitfield for peer#" + this.localPeerID);
 			if (piecesRemainingToBeRequested.containsKey(i) && !this.piecesRequested.containsKey(i)) {

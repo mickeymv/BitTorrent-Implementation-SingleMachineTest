@@ -64,7 +64,7 @@ public class HandShake {
 						.intFromByteArray(Arrays.copyOfRange(messageBytes, 28, messageBytes.length));
 				// make sure handshake is from expected peer
 				if (receivedHandShakeFromPeer != Integer.parseInt(remoteServerPeerID)) {
-					System.out.println("ERROR! " + localClientPeerID + " local client Received handshake from Peer "
+					System.err.println("\nERROR! " + localClientPeerID + " local client Received handshake from Peer "
 							+ receivedHandShakeFromPeer + "instead of from server " + remoteServerPeerID);
 				} else {
 
@@ -73,7 +73,7 @@ public class HandShake {
 				}
 
 			} else {
-				System.out.println("ERROR!" + localClientPeerID
+				System.err.println("\nERROR!" + localClientPeerID
 						+ " local client Received something other than a handshake from server " + remoteServerPeerID);
 			}
 		} catch (IOException ioException) {
@@ -146,7 +146,7 @@ public class HandShake {
 
 				// make sure handshake is from expected peer
 				if (receivedHandShakeFromPeer != Integer.parseInt(remoteClientPeerID)) {
-					System.out.println("ERROR! " + localServerPeerID + " local Server Received handshake from Peer "
+					System.err.println("\nERROR! " + localServerPeerID + " local Server Received handshake from Peer "
 							+ receivedHandShakeFromPeer + "instead of from client " + remoteClientPeerID);
 				} else {
 
@@ -154,7 +154,7 @@ public class HandShake {
 							+ new String(messageBytes) + " from client " + remoteClientPeerID);
 				}
 			} else {
-				System.out.println("ERROR! " + localServerPeerID
+				System.err.println("\nERROR! " + localServerPeerID
 						+ " server received something other than expected handshake from client " + remoteClientPeerID);
 			}
 

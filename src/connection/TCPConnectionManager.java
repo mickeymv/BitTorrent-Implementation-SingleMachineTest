@@ -328,6 +328,20 @@ public class TCPConnectionManager {
 	}
 
 	public static DataInputStream getDataInputStream(String remotePeerID) {
+		
+		while (!connMap.containsKey(remotePeerID)) {
+			// wait for the connection socket to be created from the thread.
+
+			System.err.println("Wait for the connMap to have a socket for the remotePeer#" + remotePeerID);
+
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		return connMap.get(remotePeerID).getDataInputStream();
 	}
 

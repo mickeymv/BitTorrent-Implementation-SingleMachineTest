@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import connection.TCPConnectionManager;
+import util.Util;
 
 /**
  * @author Mickey Vellukunnel
@@ -133,5 +134,23 @@ public class Message {
 	public static void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public static void sendPieceMessage(int pieceIndex, byte[] pieceDataMessagePayload, String toRemotePeerID) {
+		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
+		try {
+			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_PIECE);
+			byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceIndex);
+			streamToCombineByteArrays.write(pieceIndexMessagePayload);
+			streamToCombineByteArrays.write(pieceDataMessagePayload);
+			byte[] message = streamToCombineByteArrays.toByteArray();
+			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toRemotePeerID);
+			out.writeInt(message.length);
+			out.write(message);
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -208,6 +208,13 @@ public class Util {
 			return bitField;
 		}
 	}
+	
+	public static void makePeerDirectory(String localPeerID) {
+		File temp_path = new File(PROJECT_TOP_LEVEL_DIRECTORY);
+		String pieceDir = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/"; 
+		temp_path = new File(pieceDir);
+		temp_path.mkdirs();
+	}
 
 	/**
 	 * split the data file into pieces. Directory: project/peer_[peerID]
@@ -236,7 +243,7 @@ public class Util {
 			// System.out.println("size of data:" + data.length);
 			int from = 0;
 			int to = 0;
-			int chunkIdx = 0;
+			int chunkIdx = -1;
 			String pieceFileName = null;
 
 			while (remaining > 0) { // if there is more data
@@ -319,12 +326,14 @@ public class Util {
 	 * 
 	 * @param data
 	 */
-	public static void savePieceFile(byte[] data, String name) {
+	public static void savePieceFile(byte[] data, String localPeerID, String pieceNumber) {
 
 		FileOutputStream outputStream = null;
 
+		String filePath = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/" + PIECE_PREFIX + pieceNumber;
+		
 		try {
-			outputStream = new FileOutputStream(new File(name));
+			outputStream = new FileOutputStream(new File(filePath));
 			outputStream.write(data);
 			outputStream.flush();
 			outputStream.close();
