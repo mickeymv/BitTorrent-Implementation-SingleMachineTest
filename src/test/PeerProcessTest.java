@@ -13,6 +13,7 @@ import logging.FileLogger;
 import messages.Message;
 import peer.PeerProcess;
 import type.PeerInfo;
+import util.ConfigurationSetup;
 import util.Util;
 
 /**
@@ -26,6 +27,8 @@ public class PeerProcessTest {
 
 	@Before
 	public void preTest(String localPeerID, String remotePeerID) {
+		ConfigurationSetup instance = ConfigurationSetup.getInstance();
+		Util testInstance = Util.initializeUtil();		
 		this.localPeerID = localPeerID;
 		this.remotePeerID = remotePeerID;
 		localPeerProcessInstance = PeerProcesses.peerProcesses.get(localPeerID);
