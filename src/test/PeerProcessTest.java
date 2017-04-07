@@ -35,7 +35,6 @@ public class PeerProcessTest {
 	}
 	
 	public void testUninterestedPeerList(){
-		test();
 		ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
 		for(int i = 0; i < notInterestingPeers.size();i++){
 			System.out.println(notInterestingPeers.get(i).toString());
@@ -43,7 +42,6 @@ public class PeerProcessTest {
 		}
 	
 	public void testUpdateInterestedPeerList(){
-		test();
 		try {
 			this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
 			this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_NOTINTERESTED);
