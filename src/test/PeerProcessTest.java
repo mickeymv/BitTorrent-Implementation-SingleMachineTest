@@ -1,6 +1,10 @@
 package test;
 
 import static org.junit.Assert.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +25,9 @@ import util.Util;
  */
 
 public class PeerProcessTest {
-
-	private PeerProcess localPeerProcessInstance = null;
-	private String localPeerID, remotePeerID;
+	PeerProcess peerProcess = null;
+	PeerProcess localPeerProcessInstance = null;
+	String localPeerID, remotePeerID;
 
 	@Before
 	public void preTest(String localPeerID, String remotePeerID) {
@@ -34,14 +38,36 @@ public class PeerProcessTest {
 		localPeerProcessInstance = PeerProcesses.peerProcesses.get(localPeerID);
 	}
 	
+	@Test
+	public void test() {
+		
+		System.out.println("local peer id: " + peerProcess.getLocalPeerID());
+		
+		// print the size of neighbors
+		System.out.println("size of neighbors: " 
+				+ peerProcess.getNeighbors().size());
+		for (PeerInfo peer : peerProcess.getNeighbors()) {
+			
+			System.out.println(peer.getPeerID());
+		}
+		assertTrue(1 == peerProcess.getNeighbors().size());
+		
+		
+		
+		
+	}
+
+	@Test
 	public void testUninterestedPeerList(){
+		test();
 		ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
 		for(int i = 0; i < notInterestingPeers.size();i++){
 			System.out.println(notInterestingPeers.get(i).toString());
 		}
 		}
-	
+	@Test
 	public void testUpdateInterestedPeerList(){
+		test();
 		try {
 			this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
 			this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_NOTINTERESTED);
