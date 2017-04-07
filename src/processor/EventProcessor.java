@@ -172,7 +172,7 @@ public class EventProcessor {
 
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getPieceIndexToSendToPeer(remotePeerID);
-			
+
 			try {
 				this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
 			} catch (Exception e) {
