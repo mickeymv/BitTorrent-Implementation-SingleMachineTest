@@ -84,17 +84,13 @@ public class Util {
 		int positionOfPieceWithinByte = pieceIndex % 8;
 		// System.out.println("positionOfPieceWithinByte is:" +
 		// positionOfPieceWithinByte);
-		byte checkByte = getByteContainingPiece(pieceIndex, bitField);
+		// System.out.println("the piece# to check for is:" + pieceIndex);
+		int byteContainingPiece = pieceIndex / 8;
+		// System.out.println("byteContainingPiece# is:" + byteContainingPiece);
+		byte checkByte = bitField.get(byteContainingPiece);
 		// System.out.println("the byte containing piece is:" +
 		// String.valueOf(checkByte));
 		return isBitSetInPosition(positionOfPieceWithinByte, checkByte);
-	}
-
-	private static byte getByteContainingPiece(int pieceIndex, ArrayList<Byte> bitField) {
-		// System.out.println("the piece# to check for is:" + pieceIndex);
-		int byteContainingPiece = pieceIndex / 8;
-		// System.out.println("byteContainingPiece is:" + byteContainingPiece);
-		return bitField.get(byteContainingPiece);
 	}
 
 	public static boolean isBitSetInPosition(int position, byte checkByte) {
@@ -208,10 +204,10 @@ public class Util {
 			return bitField;
 		}
 	}
-	
+
 	public static void makePeerDirectory(String localPeerID) {
 		File temp_path = new File(PROJECT_TOP_LEVEL_DIRECTORY);
-		String pieceDir = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/"; 
+		String pieceDir = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/";
 		temp_path = new File(pieceDir);
 		temp_path.mkdirs();
 	}
@@ -292,10 +288,10 @@ public class Util {
 
 		for (int i = 1; i <= ConfigurationSetup.getNumberOfPieces(); i++) {
 
-			String pieceFileName = directory + "/" + "peer_"+localPeerID+"/_piece_" + i; // File.separator
-																				// giving
-																				// ':'
-																				// ?
+			String pieceFileName = directory + "/" + "peer_" + localPeerID + "/_piece_" + i; // File.separator
+			// giving
+			// ':'
+			// ?
 			File file = new File(pieceFileName);
 			if (file.exists()) {
 
@@ -330,8 +326,9 @@ public class Util {
 
 		FileOutputStream outputStream = null;
 
-		String filePath = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/" + PIECE_PREFIX + pieceNumber;
-		
+		String filePath = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/" + PIECE_PREFIX
+				+ pieceNumber;
+
 		try {
 			outputStream = new FileOutputStream(new File(filePath));
 			outputStream.write(data);
@@ -351,7 +348,7 @@ public class Util {
 	 */
 	public static String getPieceFileName(String localPeerID, int pieceNum) {
 
-		return "project/peer_" + localPeerID + "/_piece_" + pieceNum; //File.separator
+		return "project/peer_" + localPeerID + "/_piece_" + pieceNum; // File.separator
 	}
 
 	/**
@@ -492,13 +489,26 @@ public class Util {
 		}
 	}
 
-	public static void setPieceIndexInBitField(int pieceIndex, ArrayList<Byte> bitField) {
+	/**
+	 * Set the corresponding bit in the bitfield for the piece.
+	 * 
+	 * @param pieceIndex
+	 * @param bitField
+	 */
+	public static synchronized void setPieceIndexInBitField(int pieceIndex, ArrayList<Byte> bitField) {
 		int positionOfPieceWithinByte = pieceIndex % 8;
-		byte checkByte = getByteContainingPiece(pieceIndex, bitField);
+		//System.out.println("the piece# to check for is:" + pieceIndex);
 		int byteContainingPiece = pieceIndex / 8;
+		//System.out.println("byteContainingPiece is:" + byteContainingPiece);
+		//System.out.println("size of bitfield is:" + bitField.size());
+		if (bitField.size() == 0) {
+			//TODO: Remove this. figure out why this is happening!
+			return;
+		}
+		byte checkByte = bitField.get(byteContainingPiece);
 		bitField.add(byteContainingPiece, setBitInPosition(positionOfPieceWithinByte, checkByte));
 	}
-	
+
 	public static byte setBitInPosition(int position, byte checkByte) {
 		switch (position) {
 		case 0:

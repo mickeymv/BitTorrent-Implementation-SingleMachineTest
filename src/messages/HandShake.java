@@ -15,9 +15,6 @@ import util.Util;
  */
 public class HandShake {
 
-	private HandShake() {
-	}
-
 	private static final String HANDSHAKE_HEADER = "P2PFILESHARINGPROJ";
 
 	private static Util utilInstance = Util.initializeUtil();
@@ -29,7 +26,7 @@ public class HandShake {
 	 * @param localClientPeerID
 	 * @param remoteServerPeerID
 	 */
-	public static void establishClientHandShakeTwoWayStream(String localClientPeerID, String remoteServerPeerID) {
+	public  void establishClientHandShakeTwoWayStream(String localClientPeerID, String remoteServerPeerID) {
 		try {
 			byte handshakeMessageBytes[] = getHandShakeBytes(localClientPeerID);
 
@@ -43,7 +40,7 @@ public class HandShake {
 			// String(peerIDBytes));
 
 			// send HandShake to the listening server
-			Message.sendMessage(handshakeMessageBytes, localClientPeerID, remoteServerPeerID);
+			new Message().sendMessage(handshakeMessageBytes, localClientPeerID, remoteServerPeerID);
 
 			int messageLength;
 			byte[] messageBytes = null; // message received back from the server
@@ -81,7 +78,7 @@ public class HandShake {
 		}
 	}
 
-	private static byte[] getHandShakeBytes(String fromPeerID) {
+	private  byte[] getHandShakeBytes(String fromPeerID) {
 		byte[] handshakeHeaderbyteArray = HANDSHAKE_HEADER.getBytes(); // 18
 																		// bytes
 		byte[] tenByteZeroBits = new byte[10]; // 10 bytes
@@ -114,7 +111,7 @@ public class HandShake {
 	 * @param localServerPeerID
 	 * @param remoteClientPeerID
 	 */
-	public static void establishServerHandShakeTwoWayStream(String localServerPeerID, String remoteClientPeerID) {
+	public  void establishServerHandShakeTwoWayStream(String localServerPeerID, String remoteClientPeerID) {
 		try {
 
 			int messageLength;
@@ -161,7 +158,7 @@ public class HandShake {
 			byte handshakeMessageBytes[] = getHandShakeBytes(localServerPeerID);
 
 			// send HandShake back to the listening client
-			Message.sendMessage(handshakeMessageBytes, localServerPeerID, remoteClientPeerID);
+			new Message().sendMessage(handshakeMessageBytes, localServerPeerID, remoteClientPeerID);
 
 		} catch (IOException ioException) {
 			System.out.println("Disconnect with client after handshake " + remoteClientPeerID);

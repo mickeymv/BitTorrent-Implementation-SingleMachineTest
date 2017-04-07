@@ -106,7 +106,7 @@ public class TCPConnectionManager {
 				public void run() {
 					for (PeerInfo peer : peerList) {
 						if (localPeerID != peer.getPeerID()) {
-							Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peer.getPeerID());
+							new Message().sendMessage(Message.MESSAGETYPE_UNCHOKE, peer.getPeerID());
 							System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
 									+ peer.getPeerID());
 						}
@@ -141,7 +141,7 @@ public class TCPConnectionManager {
 						peerAddressToPeerIDMap.put(localHostname + ":" + localPeerClientSocket.getLocalPort(),
 								localPeerID);
 
-						HandShake.establishClientHandShakeTwoWayStream(localPeerID, remotePeerServer.getPeerID());
+						new HandShake().establishClientHandShakeTwoWayStream(localPeerID, remotePeerServer.getPeerID());
 
 						MessageListener localPeerMessageListener = new MessageListener(localPeerID,
 								remotePeerServer.getPeerID(),
@@ -298,7 +298,7 @@ public class TCPConnectionManager {
 		public void run() {
 			// System.out.println("Inside the server " + localServerPeerID + "
 			// thread,after accepted a client request...");
-			HandShake.establishServerHandShakeTwoWayStream(localServerPeerID, remoteClientPeerID);
+			new HandShake().establishServerHandShakeTwoWayStream(localServerPeerID, remoteClientPeerID);
 
 			MessageListener localPeerMessageListener = new MessageListener(localServerPeerID, remoteClientPeerID,
 					TCPConnectionManager.getDataInputStream(remoteClientPeerID));

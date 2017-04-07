@@ -193,7 +193,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void choke(String peerID) {
-		Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
+		//Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
 	}
 
 	/**
@@ -202,7 +202,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void unchoke(String peerID) {
-		Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
+		//Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
 	/**
@@ -411,7 +411,7 @@ public class PeerProcess {
 			if (piecesRemainingToBeRequested.containsKey(i) && !this.piecesRequested.containsKey(i)) {
 				//System.out.println("pieice#"+i+"is not in local bitfield for peer#" + this.localPeerID);
 				if(Util.isPieceIndexSetInBitField(i, remotePeerBitField)) {
-					System.out.println("local peer#" + this.localPeerID + " does not have piece#" + i + " that remote peer#" + remotePeerID + " has!");
+					System.out.println("local peer#" + this.localPeerID + " NEEDS piece#" + i + " that remote peer#" + remotePeerID + " has!");
 					return i;
 				}
 			}

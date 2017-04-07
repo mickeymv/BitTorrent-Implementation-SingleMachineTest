@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import connection.TCPConnectionManager;
+import peer.PeerProcess;
 import util.Util;
 
 /**
@@ -14,9 +15,6 @@ import util.Util;
  *
  */
 public class Message {
-
-	private Message() {
-	}
 	
 	public static final int MESSAGETYPE_CHOKE = 0;
 	public static final int MESSAGETYPE_UNCHOKE = 1;
@@ -26,6 +24,19 @@ public class Message {
 	public static final int MESSAGETYPE_BITFIELD = 5;
 	public static final int MESSAGETYPE_REQUEST = 6;
 	public static final int MESSAGETYPE_PIECE = 7;
+	
+	private String localPeerID, remotePeerID;
+	private PeerProcess localPeerProcessInstance = null;
+
+	public Message(String localPeerID, String remotePeerID, PeerProcess localPeerProcessInstance) {
+		this.localPeerID = localPeerID;
+		this.remotePeerID = remotePeerID;
+		this.localPeerProcessInstance = localPeerProcessInstance;
+	}
+
+	public Message() {
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * 
@@ -33,7 +44,7 @@ public class Message {
 	 * @param messagePayload, the payload
 	 * @return the byte array to be sent across as the complete message, which is the messageType + Payload
 	 */
-	public static byte[] getMessage(int messageType, byte[] messagePayload) {
+	public byte[] getMessage(int messageType, byte[] messagePayload) {
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
 			streamToCombineByteArrays.write((byte)messageType);
@@ -50,7 +61,7 @@ public class Message {
 	 * @param message, the received byte array
 	 * @return, the byte array payload
 	 */
-	public static byte[] getMessagePayload(byte[] message) {		
+	public byte[] getMessagePayload(byte[] message) {		
 		return Arrays.copyOfRange(message, 1, message.length);
 	}
 	
@@ -59,7 +70,7 @@ public class Message {
 	 * @param message, the received byte array
 	 * @return, the message type
 	 */
-	public static int getMessageType(byte[] message) {		
+	public  int getMessageType(byte[] message) {		
 		return message[0];
 	}
 	
@@ -69,7 +80,7 @@ public class Message {
 	 * @param messagePayload, the required payload
 	 * @param toPeerID, which peer to sent it to
 	 */
-	public static void sendMessage(int messageType, byte[] messagePayload, String toPeerID) {
+	public  void sendMessage(int messageType, byte[] messagePayload, String toPeerID) {
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
 			streamToCombineByteArrays.write((byte)messageType);
@@ -91,7 +102,7 @@ public class Message {
 	 * @param messageType, the type of message to sent
 	 * @param toPeerID, which peer to sent it to
 	 */
-	public static void sendMessage(int messageType, String toPeerID) {
+	public  void sendMessage(int messageType, String toPeerID) {
 		try {
 			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
 			out.writeInt(1);
@@ -104,7 +115,7 @@ public class Message {
 	}
 	
 	// send a message to the output stream
-	public static void sendMessage(byte[] msg, String fromPeerID, String toPeerID) {
+	public  void sendMessage(byte[] msg, String fromPeerID, String toPeerID) {
 		try {
 			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
 			out.writeInt(msg.length);
@@ -122,7 +133,7 @@ public class Message {
 	 * "has" the specified piece.
 	 * @param pieceIndex
 	 */
-	public static void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
+	public  void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
 		// TODO Auto-generated method stub
 	}
 
@@ -131,12 +142,12 @@ public class Message {
 	 * is not interested in.
 	 * @param notInterestingPeers
 	 */
-	public static void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
+	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public static void sendPieceMessage(int pieceIndex, byte[] pieceDataMessagePayload, String toRemotePeerID) {
+	public  void sendPieceMessage(int pieceIndex, byte[] pieceDataMessagePayload, String toRemotePeerID) {
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
 			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_PIECE);
