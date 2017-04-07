@@ -638,10 +638,6 @@ public class PeerProcess {
 		this.peersBitfields = peersBitfields;
 	}
 
-	public TCPConnectionManager getConnManager() {
-		return connManager;
-	}
-
 	public void setConnManager(TCPConnectionManager connManager) {
 		this.connManager = connManager;
 	}
