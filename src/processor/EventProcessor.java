@@ -172,10 +172,7 @@ public class EventProcessor {
 
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getPieceIndexToSendToPeer(remotePeerID);
-<<<<<<< HEAD
-			byte[] pieceMessagePayload = Util.getPieceAsByteArray(pieceIndexToBeSent);
-			Message.sendMessage(Message.MESSAGETYPE_PIECE, pieceMessagePayload, remotePeerID);
-			
+
 			try {
 				this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
 			} catch (Exception e) {
@@ -183,12 +180,10 @@ public class EventProcessor {
 				e.printStackTrace();
 			}
 			
-=======
 			byte[] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndexToBeSent);
 			messageHandler.sendPieceMessage(pieceIndex, pieceMessagePayload, remotePeerID);
 			System.out.println("peer#: " + this.localPeerID + " sent piece message Piece# " + pieceIndexToBeSent
 					+ " to peer#" + this.remotePeerID);
->>>>>>> 3d7b21840255df1a2d4136443d5f265332dfac6a
 
 			break;
 		case Message.MESSAGETYPE_NOTINTERESTED:

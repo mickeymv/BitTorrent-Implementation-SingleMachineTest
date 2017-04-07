@@ -26,7 +26,7 @@ public class PeerProcessTest {
 		
 		Util inst = Util.initializeUtil();
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
-		
+		System.out.println("peer list size: " + instance.getPeerList().size());
 		peerProcess = new PeerProcess("2");
 	}
 	
@@ -44,6 +44,7 @@ public class PeerProcessTest {
 			System.out.println(peer.getPeerID());
 		}
 		assertTrue(1 == peerProcess.getNeighbors().size());
+		
 		
 		
 		
