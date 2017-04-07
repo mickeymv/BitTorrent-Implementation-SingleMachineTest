@@ -73,12 +73,12 @@ public class PeerProcess {
 	 * peer. remotePeerID -> PieceIndex
 	 */
 	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
-
+	
 	/*
 	 * map of neighbors who are interested in local pieces. Only choose
 	 * preferred and Unchoked neighbor from this list!
 	 */
-	private ArrayList<String> interestedNeighbors = new ArrayList<>();
+	//private ArrayList<String> interestedNeighbors = new ArrayList<>();
 
 	/*
 	 * piecesRemainingToBeRequested + piecesRequested are the pieces the local
@@ -130,7 +130,8 @@ public class PeerProcess {
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
-		this.interestedNeighbors.add(remotePeerID);
+		this.interested_peer_list.put(remotePeerID, true);
+		//this.interestedNeighbors.add(remotePeerID);
 	}
 
 	private void initializePiecesRemainingMap() {
@@ -433,7 +434,8 @@ public class PeerProcess {
 	}
 
 	public void removeNeighborWhoIsNotInterested(String remotePeerID) {
-		this.interestedNeighbors.remove(remotePeerID);
+		this.interested_peer_list.put(remotePeerID, false);
+		//this.interestedNeighbors.remove(remotePeerID);
 	}
 
 	/**
