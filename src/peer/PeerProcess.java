@@ -73,12 +73,12 @@ public class PeerProcess {
 	 * peer. remotePeerID -> PieceIndex
 	 */
 	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
-
+	
 	/*
 	 * map of neighbors who are interested in local pieces. Only choose
 	 * preferred and Unchoked neighbor from this list!
 	 */
-	private ArrayList<String> interestedNeighbors = new ArrayList<>();
+	//private ArrayList<String> interestedNeighbors = new ArrayList<>();
 
 	/*
 	 * piecesRemainingToBeRequested + piecesRequested are the pieces the local
@@ -117,6 +117,8 @@ public class PeerProcess {
 		//if local peer has complete file, divide file into required pieces and place into correct peer sub-directory.
 		if(gotCompletedFile) {
 			Util.splitDataFile(localPeerID);
+		} else {
+			Util.makePeerDirectory(localPeerID);
 		}
 	}
 
@@ -130,7 +132,8 @@ public class PeerProcess {
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
-		this.interestedNeighbors.add(remotePeerID);
+		this.interested_peer_list.put(remotePeerID, true);
+		//this.interestedNeighbors.add(remotePeerID);
 	}
 
 	private void initializePiecesRemainingMap() {
@@ -190,7 +193,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void choke(String peerID) {
-		Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
+		//Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
 	}
 
 	/**
@@ -199,7 +202,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void unchoke(String peerID) {
-		Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
+		//Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
 	/**
@@ -409,7 +412,22 @@ public class PeerProcess {
 	 *         peer.
 	 */
 	public int getPieceToBeRequested(String remotePeerID) {
-		// TODO: IMPLEMENT!
+		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
+		//System.out.println("The bitfield for peer#" + remotePeerID);
+		//Util.printBitfield(remotePeerBitField);
+		//System.out.println("The local bitfield for peer#" + this.localPeerID);
+		//Util.printBitfield(this.localPeerBitField);
+		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
+			//System.out.println("Checking pieice#"+i+" for local bitfield for peer#" + this.localPeerID);
+			if (piecesRemainingToBeRequested.containsKey(i) && !this.piecesRequested.containsKey(i)) {
+				//System.out.println("pieice#"+i+"is not in local bitfield for peer#" + this.localPeerID);
+				if(Util.isPieceIndexSetInBitField(i, remotePeerBitField)) {
+					System.out.println("local peer#" + this.localPeerID + " NEEDS piece#" + i + " that remote peer#" + remotePeerID + " has!");
+					return i;
+				}
+			}
+		}
+
 		return -1; // if the remote peer does not have any piece which this
 					// local peer requires.
 	}
@@ -429,7 +447,8 @@ public class PeerProcess {
 	}
 
 	public void removeNeighborWhoIsNotInterested(String remotePeerID) {
-		this.interestedNeighbors.remove(remotePeerID);
+		this.interested_peer_list.put(remotePeerID, false);
+		//this.interestedNeighbors.remove(remotePeerID);
 	}
 
 	/**
@@ -454,7 +473,7 @@ public class PeerProcess {
 	 */
 	public void updateBitField(String remotePeerID, int pieceIndex) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
-		Util.setPieceIndexInBitField(remotePeerBitField, pieceIndex);
+		Util.setPieceIndexInBitField(pieceIndex, remotePeerBitField);
 	}
 
 	/**
@@ -495,6 +514,25 @@ public class PeerProcess {
 		}
 		
 		return uninterestedPeerList;
+	}
+
+	/**
+	 * This is called when a piece has been requested from a remote peer.
+	 * @param pieceToBeRequestedFromPeer
+	 */
+	public void updatePieceRequested(int pieceToBeRequestedFromPeer) {
+		this.piecesRemainingToBeRequested.remove(pieceToBeRequestedFromPeer);
+		this.piecesRequested.put(pieceToBeRequestedFromPeer, pieceToBeRequestedFromPeer);
+	}
+
+	/**
+	 * This is called when a piece is received from a remote peer.
+	 * Also update the local bitfield.
+	 * @param pieceIndex
+	 */
+	public void updatePieceRecieved(int pieceIndex) {
+		this.piecesRequested.remove(pieceIndex);
+		Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
 	}
 
 }

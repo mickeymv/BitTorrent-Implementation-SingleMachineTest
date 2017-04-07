@@ -2,6 +2,8 @@ package util;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
 import org.junit.Test;
 
 public class UtilTest {
@@ -16,6 +18,7 @@ public class UtilTest {
 //		
 //		int n = Util.getFirstNDigits(new Byte((byte)0XF8));
 //		System.out.println(n);
+		
 		Util inst = Util.initializeUtil();
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
 		
@@ -27,11 +30,11 @@ public class UtilTest {
 		
 		//System.out.println(ConfigurationSetup.numberOfPieces);
 		//Util.printBitfield();
-		byte[] data = Util.getPieceAsByteArray(1);
-		for (byte b : data) {
-			
-			Util.printByteToBinaryString(b);
-		}		
+//		byte[] data = Util.getPieceAsByteArray(1);
+//		for (byte b : data) {
+//			
+//			Util.printByteToBinaryString(b);
+//		}		
 		
 	}
 
