@@ -111,6 +111,7 @@ public class EventProcessor {
 				} else {
 					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 					Message.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload, remotePeerID);
+					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 				}
 			}
 
@@ -138,7 +139,7 @@ public class EventProcessor {
 			
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getPieceIndexToSendToPeer(remotePeerID);
-			byte[] pieceMessagePayload = Util.getPieceAsByteArray(pieceIndexToBeSent);
+			byte[] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndexToBeSent);
 			Message.sendMessage(Message.MESSAGETYPE_PIECE, pieceMessagePayload, remotePeerID);
 
 			break;
@@ -208,7 +209,7 @@ public class EventProcessor {
 			// Safety check: check if piece is available in local peer
 
 			if (this.localPeerProcessInstance.isPieceAvailableLocally(pieceIndex)) {
-				pieceMessagePayload = Util.getPieceAsByteArray(pieceIndex);
+				pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndex);
 				Message.sendMessage(Message.MESSAGETYPE_PIECE, pieceMessagePayload, remotePeerID);
 			} else {
 				System.out.println("in peer: " + this.localPeerID + ", got REQUEST of piece '" + pieceIndex
@@ -244,6 +245,8 @@ public class EventProcessor {
 			
 			Util.savePieceFile(pieceDataBytesArray, String.valueOf(pieceIndex));
 			
+			this.localPeerProcessInstance.updatePieceRecieved(pieceIndex);
+			
 			Message.broadcastHavePieceIndexMessageToAllPeers(pieceIndex);
 			
 			ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
@@ -265,6 +268,7 @@ public class EventProcessor {
 				} else {
 					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 					Message.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload, remotePeerID);
+					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 				}
 			}
 			 

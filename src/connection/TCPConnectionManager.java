@@ -287,8 +287,8 @@ public class TCPConnectionManager {
 			this.localPeerSocket = connection;
 			String clientHostname = connection.getInetAddress().getHostName();
 			remoteClientPeerID = peerAddressToPeerIDMap.get(clientHostname + ":" + connection.getPort());
-			System.out.println("Server: " + localServerPeerID + ", connected to a client with address: "
-					+ clientHostname + ":" + connection.getPort() + " and ID: " + remoteClientPeerID);
+//			System.out.println("Server: " + localServerPeerID + ", connected to a client with address: "
+//					+ clientHostname + ":" + connection.getPort() + " and ID: " + remoteClientPeerID);
 			populateConnMap(localPeerSocket, remoteClientPeerID, clientHostname, connection.getPort());
 			this.localServerPeerID = localServerPeerID;
 			// System.out.println("123inside after server connected to client: "

@@ -32,7 +32,7 @@ public class Util {
 	private static ArrayList<PeerInfo> peerList;
 	private static Map<String, Integer> peerIDToPositionMap;
 	private static ConfigurationSetup configInstance = null;
-	
+
 	private static final String PROJECT_TOP_LEVEL_DIRECTORY = "project";
 	private static final String PEER_DIRECTORY_PREFIX = "peer_";
 	private static final String PIECE_PREFIX = "_piece_";
@@ -76,6 +76,48 @@ public class Util {
 			}
 		}
 		return myPeerList;
+	}
+
+	public static boolean isPieceIndexSetInBitField(int pieceIndex, ArrayList<Byte> bitField) {
+		// System.out.println("the bitfield to check in is:");
+		// Util.printBitfield(bitField);
+		int positionOfPieceWithinByte = pieceIndex % 8;
+		// System.out.println("positionOfPieceWithinByte is:" +
+		// positionOfPieceWithinByte);
+		byte checkByte = getByteContainingPiece(pieceIndex, bitField);
+		// System.out.println("the byte containing piece is:" +
+		// String.valueOf(checkByte));
+		return isBitSetInPosition(positionOfPieceWithinByte, checkByte);
+	}
+
+	private static byte getByteContainingPiece(int pieceIndex, ArrayList<Byte> bitField) {
+		// System.out.println("the piece# to check for is:" + pieceIndex);
+		int byteContainingPiece = pieceIndex / 8;
+		// System.out.println("byteContainingPiece is:" + byteContainingPiece);
+		return bitField.get(byteContainingPiece);
+	}
+
+	public static boolean isBitSetInPosition(int position, byte checkByte) {
+		switch (position) {
+		case 0:
+			return (checkByte & 128) == 128;
+		case 1:
+			return (checkByte & 64) == 64;
+		case 2:
+			return (checkByte & 32) == 32;
+		case 3:
+			return (checkByte & 16) == 16;
+		case 4:
+			return (checkByte & 8) == 8;
+		case 5:
+			return (checkByte & 4) == 4;
+		case 6:
+			return (checkByte & 2) == 2;
+		case 7:
+			return (checkByte & 1) == 1;
+		}
+
+		return false;
 	}
 
 	public static ArrayList<PeerInfo> getMyPreviousPeers(String peerID) {
@@ -131,7 +173,7 @@ public class Util {
 
 			int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 
-			//System.out.println("length of bitfield:" + lengthOfBitfield);
+			// System.out.println("length of bitfield:" + lengthOfBitfield);
 			// set all full bytes
 			for (int i = 0; i < lengthOfBitfield; i++) {
 
@@ -157,8 +199,9 @@ public class Util {
 			if (hasFileInitially) {
 				// set remaining bits of the last byte.
 				int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
-//				System.out.println("number of pieces:" + ConfigurationSetup.getNumberOfPieces() + " \n" + "remaining:"
-//						+ remaining);
+				// System.out.println("number of pieces:" +
+				// ConfigurationSetup.getNumberOfPieces() + " \n" + "remaining:"
+				// + remaining);
 				Byte b = setFirstNDigits(remaining);
 				bitField.add(b);
 			}
@@ -175,7 +218,10 @@ public class Util {
 		// String pieceDir = "project/peer_" +
 		// PeerProcess.getLocalPeerInstance().getPeerID();
 		File temp_path = new File(PROJECT_TOP_LEVEL_DIRECTORY);
-		String pieceDir = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/"; //File.pathSeparator giving ':' ?
+		String pieceDir = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/"; // File.pathSeparator
+																											// giving
+																											// ':'
+																											// ?
 
 		byte[] byteChunk;
 		FileOutputStream outputStream = null;
@@ -187,7 +233,7 @@ public class Util {
 			byte[] data = Files.readAllBytes(path);
 			long fileLength = data.length;
 			long remaining = fileLength;
-			System.out.println("size of data:" + data.length);
+			// System.out.println("size of data:" + data.length);
 			int from = 0;
 			int to = 0;
 			int chunkIdx = 0;
@@ -202,7 +248,7 @@ public class Util {
 					remaining -= pieceSize;
 				}
 
-				System.out.println("from:" + from + " to:" + to);
+				// System.out.println("from:" + from + " to:" + to);
 
 				byteChunk = Arrays.copyOfRange(data, from, to);
 				chunkIdx++;
@@ -225,7 +271,7 @@ public class Util {
 	 * Merge all pieces of data file into a single file.
 	 * 
 	 */
-	public static void mergeDataPieces(String directory) {
+	public static void mergeDataPieces(String localPeerID, String directory) {
 
 		File path = new File(directory);
 		FileOutputStream outputStream = null;
@@ -239,7 +285,10 @@ public class Util {
 
 		for (int i = 1; i <= ConfigurationSetup.getNumberOfPieces(); i++) {
 
-			String pieceFileName = directory + "/" + "peer_xxxxxx_piece_" + i; //File.separator giving ':' ?
+			String pieceFileName = directory + "/" + "peer_"+localPeerID+"/_piece_" + i; // File.separator
+																				// giving
+																				// ':'
+																				// ?
 			File file = new File(pieceFileName);
 			if (file.exists()) {
 
@@ -291,9 +340,9 @@ public class Util {
 	 * @param pieceNum
 	 * @return
 	 */
-	public static String getPieceFileName(int pieceNum) {
+	public static String getPieceFileName(String localPeerID, int pieceNum) {
 
-		return "project" + File.separator + "peer_xxxxxx_piece_" + pieceNum;
+		return "project/peer_" + localPeerID + "/_piece_" + pieceNum; //File.separator
 	}
 
 	/**
@@ -301,8 +350,8 @@ public class Util {
 	 * 
 	 * @param pieceNum
 	 */
-	public static byte[] getPieceAsByteArray(int pieceNum) {
-		Path path = Paths.get(getPieceFileName(pieceNum));
+	public static byte[] getPieceAsByteArray(String localPeerID, int pieceNum) {
+		Path path = Paths.get(getPieceFileName(localPeerID, pieceNum));
 		byte[] data = null;
 
 		try {
@@ -328,7 +377,7 @@ public class Util {
 		for (int i = 0; i < n; i++) {
 			b = (byte) (b >> 1);
 			b = (byte) (b | 0b10000000);
-			//System.out.println("b:" + b + '\t');
+			// System.out.println("b:" + b + '\t');
 		}
 		return new Byte(b);
 	}
@@ -434,7 +483,33 @@ public class Util {
 		}
 	}
 
-	public static void setPieceIndexInBitField(ArrayList<Byte> remotePeerBitField, int pieceIndex) {
-		// TODO Auto-generated method stub
+	public static void setPieceIndexInBitField(int pieceIndex, ArrayList<Byte> bitField) {
+		int positionOfPieceWithinByte = pieceIndex % 8;
+		byte checkByte = getByteContainingPiece(pieceIndex, bitField);
+		int byteContainingPiece = pieceIndex / 8;
+		bitField.add(byteContainingPiece, setBitInPosition(positionOfPieceWithinByte, checkByte));
+	}
+	
+	public static byte setBitInPosition(int position, byte checkByte) {
+		switch (position) {
+		case 0:
+			return (byte) (checkByte | 128);
+		case 1:
+			return (byte) (checkByte | 64);
+		case 2:
+			return (byte) (checkByte | 32);
+		case 3:
+			return (byte) (checkByte | 16);
+		case 4:
+			return (byte) (checkByte | 8);
+		case 5:
+			return (byte) (checkByte | 4);
+		case 6:
+			return (byte) (checkByte | 2);
+		case 7:
+			return (byte) (checkByte | 1);
+		}
+
+		return (Byte) null;
 	}
 }
