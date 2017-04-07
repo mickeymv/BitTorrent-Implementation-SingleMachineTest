@@ -83,12 +83,7 @@ public class PeerProcess {
 	HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
 	/** track the download speed from each peers, in number of pieces. */
 	HashMap<String, Integer> download_speed = new HashMap<String, Integer>();
-	
-	/*
-	 * Map of which piece index was sent as a "have" message to which remote
-	 * peer. remotePeerID -> PieceIndex
-	 */
-	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
+
 	
 	/*
 	 * map of neighbors who are interested in local pieces. Only choose
@@ -136,15 +131,6 @@ public class PeerProcess {
 		} else {
 			Util.makePeerDirectory(localPeerID);
 		}
-	}
-
-	/**
-	 * 
-	 * @return piece index of the piece which this local peer said it had (via a
-	 *         "have" message sent previously).
-	 */
-	public int getPieceIndexToSendToPeer(String remotePeerID) {
-		return this.sentHaveMap.get(remotePeerID);
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
@@ -585,7 +571,6 @@ public class PeerProcess {
 	public void updatePieceRecieved(int pieceIndex) {
 		this.piecesRequested.remove(pieceIndex);
 		Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
-		
 	}
 	
 	/**

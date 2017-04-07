@@ -48,7 +48,7 @@ public class HandShake {
 			// String(peerIDBytes));
 
 			// send HandShake to the listening server
-			new Message(localClientPeerID, remoteServerPeerID, connManager.localPeerProcessInstance).sendMessage(handshakeMessageBytes, localClientPeerID, remoteServerPeerID);
+			new Message(localClientPeerID, remoteServerPeerID, connManager.localPeerProcessInstance).sendMessage(handshakeMessageBytes);
 
 			int messageLength;
 			byte[] messageBytes = null; // message received back from the server
@@ -166,7 +166,7 @@ public class HandShake {
 			byte handshakeMessageBytes[] = getHandShakeBytes(localServerPeerID);
 
 			// send HandShake back to the listening client
-			new Message(localServerPeerID, remoteClientPeerID, connManager.localPeerProcessInstance).sendMessage(handshakeMessageBytes, localServerPeerID, remoteClientPeerID);
+			new Message(localServerPeerID, remoteClientPeerID, connManager.localPeerProcessInstance).sendMessage(handshakeMessageBytes);
 
 		} catch (IOException ioException) {
 			System.out.println("Disconnect with client after handshake " + remoteClientPeerID);

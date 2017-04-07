@@ -82,9 +82,8 @@ public class Message {
 	 * 
 	 * @param messageType, the type of message to sent
 	 * @param messagePayload, the required payload
-	 * @param toPeerID, which peer to sent it to
 	 */
-	public  void sendMessage(int messageType, byte[] messagePayload, String toPeerID) {
+	public  void sendMessage(int messageType, byte[] messagePayload) {
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
 			streamToCombineByteArrays.write((byte)messageType);
@@ -103,9 +102,8 @@ public class Message {
 	 * For messages without a payload.
 	 * 
 	 * @param messageType, the type of message to sent
-	 * @param toPeerID, which peer to sent it to
 	 */
-	public  void sendMessage(int messageType, String toPeerID) {
+	public  void sendMessage(int messageType) {
 		try {
 			out.writeInt(1);
 			out.write((byte)messageType);
@@ -117,7 +115,7 @@ public class Message {
 	}
 	
 	// send a message to the output stream
-	public  void sendMessage(byte[] msg, String fromPeerID, String toPeerID) {
+	public  void sendMessage(byte[] msg) {
 		try {
 			out.writeInt(msg.length);
 			out.write(msg);
@@ -129,26 +127,7 @@ public class Message {
 		}
 	}
 
-	/**
-	 * Broadcast to all peers of the local peer that this peer
-	 * "has" the specified piece.
-	 * @param pieceIndex
-	 */
-	public  void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
-		// TODO Auto-generated method stub
-	}
-
-	/**
-	 * Send "NOT_INTERESTED" message to the peers who the local peer
-	 * is not interested in.
-	 * @param notInterestingPeers
-	 */
-	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public  void sendPieceMessage(int pieceIndex, byte[] pieceDataMessagePayload, String toRemotePeerID) {
+	public  void sendPieceMessage(int pieceIndex, byte[] pieceDataMessagePayload) {
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
 			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_PIECE);

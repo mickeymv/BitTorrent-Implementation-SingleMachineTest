@@ -68,6 +68,12 @@ public class TCPConnectionManager {
 	public PeerProcess localPeerProcessInstance;
 
 	/**
+	 * Map of which piece index was sent as a "have" message to which remote
+	 * peer. remotePeerID -> PieceIndex
+	 */
+	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
+	
+	/**
 	 * TODO: Remove this after local testing.
 	 * This is required for local testing. the map has as key the peer's
 	 * address, formatted as 'hostName:portNumber'; and value as the peerID.
@@ -144,7 +150,7 @@ public class TCPConnectionManager {
 					for (PeerInfo peer : peerList) {
 						if (!localPeerID.equals(peer.getPeerID())) {
 							new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
-									.sendMessage(Message.MESSAGETYPE_UNCHOKE, peer.getPeerID());
+									.sendMessage(Message.MESSAGETYPE_UNCHOKE);
 							System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
 									+ peer.getPeerID());
 						}
@@ -409,8 +415,8 @@ public class TCPConnectionManager {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
 			// System.err.println("OUT");
-			System.err.println("\nWait for the local peer# " + localPeerID
-					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
+//			System.err.println("\nWait for the local peer# " + localPeerID
+//					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
 
 			try {
 				Thread.sleep(10000);
@@ -431,8 +437,8 @@ public class TCPConnectionManager {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
 			// System.err.println("IN");
-			System.err.println("\nWait for the local peer# " + localPeerID
-					+ ", connMap to have a socket for the remotePeer# " + remotePeerID + "\n");
+//			System.err.println("\nWait for the local peer# " + localPeerID
+//					+ ", connMap to have a socket for the remotePeer# " + remotePeerID + "\n");
 
 			try {
 				Thread.sleep(10000);
@@ -443,6 +449,84 @@ public class TCPConnectionManager {
 		}
 
 		return connMap.get(localPeerID + ":" + remotePeerID).getDataInputStream();
+	}
+	
+	/**
+	 * Broadcast to all peers of the local peer that this peer
+	 * "has" the specified piece.
+	 * @param pieceIndex
+	 */
+	public  void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
+		for(PeerInfo peer: this.localPeerProcessInstance.getNeighbors()) {
+			sendHaveMessage(pieceIndex, peer.getPeerID());
+		}
+	}
+	
+
+
+	/**
+	 * Send "NOT_INTERESTED" message to the peers who the local peer
+	 * is not interested in.
+	 * @param notInterestingPeers
+	 */
+	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * 
+	 * @param messageType, the type of message to sent
+	 * @param messagePayload, the required payload
+	 */
+	public  void sendHaveMessage(int pieceIndex, String remotePeerID) {
+		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
+			// wait for the connection socket to be created from the thread.
+			// System.err.println("OUT");
+//			System.err.println("\nWait for the local peer# " + localPeerID
+//					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
+
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		DataOutputStream out = connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
+		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
+		byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceIndex);
+		try {
+			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_HAVE);
+			streamToCombineByteArrays.write(pieceIndexMessagePayload);
+			byte[] message = streamToCombineByteArrays.toByteArray();
+			out.writeInt(message.length);
+			out.write(message);
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.sentHaveMap.put(remotePeerID, pieceIndex);
+	}
+	
+
+	/**
+	 * 
+	 * @return piece index of the piece which this local peer said it had (via a
+	 *         "have" message sent previously).
+	 */
+	public int getPieceIndexToSendToPeer(String remotePeerID) {
+		return this.sentHaveMap.get(remotePeerID);
+	}
+	
+	/**
+	 * Called after the peer responds with 'INTERESTING' 
+	 * and we sent it the piece.
+	 * @param remotePeerID
+	 */
+	public void removePieceIndexAlreadySentToPeer(String remotePeerID) {
+		this.sentHaveMap.remove(remotePeerID);
 	}
 
 }
