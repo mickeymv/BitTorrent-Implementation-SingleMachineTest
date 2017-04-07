@@ -4,7 +4,9 @@ import util.ConfigurationSetup;
 import util.Util;
 
 import java.awt.List;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,8 +31,10 @@ import messages.Message;
  */
 public class PeerProcess {
 
-	private Logger logger = Logger.getLogger(TCPConnectionManager.class);
-
+	private Logger logger = Logger.getLogger(PeerProcess.class);
+	private static Calendar calendar = Calendar.getInstance();
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+	
 	/** peer ID */
 	private String localPeerID;
 	private PeerInfo localPeerInfo = null;
@@ -52,13 +56,13 @@ public class PeerProcess {
 	
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
-
+	
 	/** time interval used to update preferred neighbors. */
 	private int time_interval_p_preferred_neighbor = 0;
-
+	
 	/** time intervals used to update unchoked neighbor. */
 	private int time_interval_m_unchoked_neighbor = 0;
-
+	
 	/** number of preferred neighbors. */
 	private int k_preferred_neighbors = 0;
 	
@@ -92,7 +96,7 @@ public class PeerProcess {
 	private HashMap<Integer, Integer> piecesRequested = new HashMap<>();
 
 	private boolean gotCompletedFile = false;
-
+	
 	public boolean getGotCompletedFile() {
 		return gotCompletedFile;
 	}
@@ -209,11 +213,12 @@ public class PeerProcess {
 	 * Initially, choose k preferred neighbors randomly.
 	 */
 	public void initializePreferredNeighbors() {
-
+		
 		int k = k_preferred_neighbors;
 		
 		ArrayList<String> peerIDs = new ArrayList<String>();
 		
+		StringBuilder peer_list = new StringBuilder();
 		synchronized(interested_peer_list) {
 			// get peerID list of all interested neighbors
 			for (PeerInfo peer : neighbors) {
@@ -227,8 +232,19 @@ public class PeerProcess {
 			for (int i = 0; i < k && i < peerIDs.size(); i++) {
 	
 				preferred_neighbors.put(peerIDs.get(i), true);
+				peer_list.append(peerIDs.get(i) + ", ");
 			}
 		}
+		
+		if (peer_list.length() > 0) peer_list.setLength(peer_list.length()-2);
+		//[Time]: Peer [peer_ID] has the preferred neighbors [preferred neighbor ID list].
+		//[preferred neighbor list] is the list of peer IDs separated by comma ‘,’.
+		
+		logger.info(dateFormat.format(calendar.getTime()) 
+				+ ": Peer " + localPeerID 
+				+ " has the preferred neighbors "
+				+ "[" + peer_list.toString() 
+				+ "]" + ".");
 	}
 
 	/**
@@ -245,6 +261,7 @@ public class PeerProcess {
 	public void updatePreferredNeighbors(ArrayList<String> myPeers, int k) throws Exception{
 		
 		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
+		StringBuilder peer_list = new StringBuilder();
 		
 		synchronized(download_speed) {
 			download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
@@ -294,11 +311,22 @@ public class PeerProcess {
 				
 				if (newPreferredKNeighbors.containsKey(peerid)) {
 					preferred_neighbors.put(peerid, true);
+					peer_list.append(peerid + ", ");
 				} else {
 					preferred_neighbors.put(peerid, false);
 				}
 			}
 		}
+		
+		if (peer_list.length() > 0) peer_list.setLength(peer_list.length()-2);
+		//[Time]: Peer [peer_ID] has the preferred neighbors [preferred neighbor ID list].
+		//[preferred neighbor list] is the list of peer IDs separated by comma ‘,’.
+		
+		logger.info(dateFormat.format(calendar.getTime()) 
+				+ ": Peer " + localPeerID 
+				+ " has the preferred neighbors "
+				+ "[" + peer_list.toString() 
+				+ "]" + ".");
 		
 		// notify neighbors
 		for (String peerid : needToNotify.keySet()) {
@@ -341,7 +369,8 @@ public class PeerProcess {
 			
 		for (String peer : peerSet) {
 			
-			if (interested_peer_list.get(peer) == true && ! preferred_neighbors.containsKey(peer)) {
+			if (interested_peer_list.get(peer) == true 
+					&& ! preferred_neighbors.containsKey(peer)) {
 				
 				interested_choked_peers.add(peer);
 			}
@@ -351,16 +380,26 @@ public class PeerProcess {
 			Collections.shuffle(interested_choked_peers);
 			
 			synchronized(optimistically_unchoked_neighbor) {
-				optimistically_unchoked_neighbor = interested_choked_peers.get(0);
+				optimistically_unchoked_neighbor = 
+						interested_choked_peers.get(0);
 			}
 		} else {
 			Random random = new Random();
 			int idx = random.nextInt(neighbors.size());
 			
 			synchronized(optimistically_unchoked_neighbor) {
-				optimistically_unchoked_neighbor = neighbors.get(idx).getPeerID();
+				optimistically_unchoked_neighbor = 
+						neighbors.get(idx).getPeerID();
 			}
 		}
+		
+		//[Time]: Peer [peer_ID] has the optimistically unchoked neighbor
+		// [optimistically unchoked neighbor ID].
+		logger.info(dateFormat.format(calendar.getTime())
+				+ ": Peer " + localPeerID 
+				+ " has the optimistically unchoked neighbor "
+				+ optimistically_unchoked_neighbor + ".");
+		
 		// unchoke the new optimistically unchoked neighbor
 		unchoke(optimistically_unchoked_neighbor);
 	}
@@ -522,6 +561,23 @@ public class PeerProcess {
 	public void updatePieceRecieved(int pieceIndex) {
 		this.piecesRequested.remove(pieceIndex);
 		Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
+		
+	}
+	
+	/**
+	 * Get the number of pieces received so far.
+	 * This method will access piecesRemainingToBeRequested and piecesRequested.
+	 * @return
+	 */
+	public int getNumberOfPiecesSoFar() {
+		
+		if (gotCompletedFile) {
+			return ConfigurationSetup.getNumberOfPieces();
+		} else {
+			return ConfigurationSetup.getNumberOfPieces() 
+					- piecesRemainingToBeRequested.size() 
+					- piecesRequested.size();
+		}
 	}
 
 }
