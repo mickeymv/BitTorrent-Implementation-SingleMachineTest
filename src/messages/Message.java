@@ -27,11 +27,15 @@ public class Message {
 	
 	private String localPeerID, remotePeerID;
 	private PeerProcess localPeerProcessInstance = null;
+	DataOutputStream out;
+
 
 	public Message(String localPeerID, String remotePeerID, PeerProcess localPeerProcessInstance) {
 		this.localPeerID = localPeerID;
 		this.remotePeerID = remotePeerID;
 		this.localPeerProcessInstance = localPeerProcessInstance;
+		//System.err.println("MessageConstructor for localPeer#" +localPeerID);
+		out = TCPConnectionManager.getDataOutputStream(localPeerID, remotePeerID);
 	}
 
 	public Message() {
@@ -86,7 +90,6 @@ public class Message {
 			streamToCombineByteArrays.write((byte)messageType);
 			streamToCombineByteArrays.write(messagePayload);
 			byte[] message = streamToCombineByteArrays.toByteArray();
-			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
 			out.writeInt(message.length);
 			out.write(message);
 			out.flush();
@@ -104,7 +107,6 @@ public class Message {
 	 */
 	public  void sendMessage(int messageType, String toPeerID) {
 		try {
-			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
 			out.writeInt(1);
 			out.write((byte)messageType);
 			out.flush();
@@ -117,7 +119,6 @@ public class Message {
 	// send a message to the output stream
 	public  void sendMessage(byte[] msg, String fromPeerID, String toPeerID) {
 		try {
-			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toPeerID);
 			out.writeInt(msg.length);
 			out.write(msg);
 			out.flush();
@@ -155,7 +156,6 @@ public class Message {
 			streamToCombineByteArrays.write(pieceIndexMessagePayload);
 			streamToCombineByteArrays.write(pieceDataMessagePayload);
 			byte[] message = streamToCombineByteArrays.toByteArray();
-			DataOutputStream out = TCPConnectionManager.getDataOutputStream(toRemotePeerID);
 			out.writeInt(message.length);
 			out.write(message);
 			out.flush();

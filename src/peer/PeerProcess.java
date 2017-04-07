@@ -47,6 +47,18 @@ public class PeerProcess {
 
 	private TCPConnectionManager connManager = null;
 
+	public TCPConnectionManager getConnManager() {
+		if (connManager == null) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return connManager;
+	}
+
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = new ArrayList<>();
 
@@ -172,7 +184,7 @@ public class PeerProcess {
 	public void initiatePeerProcess() {
 		// read configurations files and initialize local peer (setup
 		// connections to all other peers).
-		connManager = new TCPConnectionManager(localPeerInfo);
+		connManager = new TCPConnectionManager(localPeerInfo, this);
 		connManager.initializePeer();
 	}
 
@@ -453,9 +465,9 @@ public class PeerProcess {
 	 */
 	public int getPieceToBeRequested(String remotePeerID) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
-		//System.out.println("The bitfield for peer#" + remotePeerID);
+		//System.out.println("The bitfield for remotepeer#" + remotePeerID);
 		//Util.printBitfield(remotePeerBitField);
-		//System.out.println("The local bitfield for peer#" + this.localPeerID);
+		//System.out.println("The local bitfield for localpeer#" + this.localPeerID);
 		//Util.printBitfield(this.localPeerBitField);
 		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 			//System.out.println("Checking pieice#"+i+" for local bitfield for peer#" + this.localPeerID);

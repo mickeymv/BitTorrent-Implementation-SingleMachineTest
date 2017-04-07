@@ -32,13 +32,14 @@ public class EventProcessor {
 	private String localPeerID, remotePeerID;
 	private PeerProcess localPeerProcessInstance = null;
 	
-	private Message messageHandler = new Message(localPeerID, remotePeerID,localPeerProcessInstance);
+	private Message messageHandler;
 
 	public EventProcessor(String localPeerID, String remotePeerID) {
 		this.localPeerID = localPeerID;
 		this.remotePeerID = remotePeerID;
-		//TODO: make sure when we actually test on remote machine, that we have a way to access the local runnning peerProcess.
+		//TODO: make sure when we actually test on remote machine, that we have a way to access the local running peerProcess.
 		localPeerProcessInstance = PeerProcesses.peerProcesses.get(localPeerID);
+		messageHandler = new Message(localPeerID, remotePeerID,localPeerProcessInstance);
 	}
 
 	/**
