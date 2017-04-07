@@ -343,10 +343,10 @@ public class EventProcessor {
 					+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
 			
 			messageHandler.broadcastHavePieceIndexMessageToAllPeers(pieceIndex);
-
+			
 			ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
 			messageHandler.broadcastNotInterestedToUnInterestingPeers(notInterestingPeers);
-
+			
 			/*
 			 * { // TODO: Implement this properly! ArrayList<String>
 			 * notInterestingPeers =

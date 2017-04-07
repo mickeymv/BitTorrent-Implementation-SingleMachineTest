@@ -69,9 +69,9 @@ public class Util {
 
 	public static ArrayList<PeerInfo> getMyPeerList(String peerID) {
 		ArrayList<PeerInfo> myPeerList = new ArrayList<PeerInfo>();
-
+		
 		for (PeerInfo peerInfo : peerList) {
-			if (peerInfo.getPeerID() != peerID) {
+			if (peerInfo.getPeerID().equals(peerID)) {
 				myPeerList.add(peerInfo);
 			}
 		}

@@ -56,7 +56,7 @@ public class PeerProcess {
 	
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
-	
+
 	/** time interval used to update preferred neighbors. */
 	private int time_interval_p_preferred_neighbor = 0;
 	
@@ -104,7 +104,7 @@ public class PeerProcess {
 	public void setGotCompletedFile(boolean gotCompletedFile) {
 		this.gotCompletedFile = gotCompletedFile;
 	}
-
+	
 	public PeerProcess(String localPeerID) {
 		this.localPeerID = localPeerID;
 		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
@@ -590,5 +590,122 @@ public class PeerProcess {
 					- piecesRequested.size();
 		}
 	}
+	
+
+	// <<<<<<<**************** getter and setters *********************
+	public String getLocalPeerID() {
+		return localPeerID;
+	}
+
+	public void setLocalPeerID(String localPeerID) {
+		this.localPeerID = localPeerID;
+	}
+
+	public PeerInfo getLocalPeerInfo() {
+		return localPeerInfo;
+	}
+
+	public void setLocalPeerInfo(PeerInfo localPeerInfo) {
+		this.localPeerInfo = localPeerInfo;
+	}
+
+	public ArrayList<Byte> getLocalPeerBitField() {
+		return localPeerBitField;
+	}
+
+	public void setLocalPeerBitField(ArrayList<Byte> localPeerBitField) {
+		this.localPeerBitField = localPeerBitField;
+	}
+
+	public HashMap<String, ArrayList<Byte>> getPeersBitfields() {
+		return peersBitfields;
+	}
+
+	public void setPeersBitfields(HashMap<String, ArrayList<Byte>> peersBitfields) {
+		this.peersBitfields = peersBitfields;
+	}
+
+	public TCPConnectionManager getConnManager() {
+		return connManager;
+	}
+
+	public void setConnManager(TCPConnectionManager connManager) {
+		this.connManager = connManager;
+	}
+
+	public ArrayList<PeerInfo> getNeighbors() {
+		return neighbors;
+	}
+
+	public void setNeighbors(ArrayList<PeerInfo> neighbors) {
+		this.neighbors = neighbors;
+	}
+
+	public HashMap<String, Boolean> getPreferred_neighbors() {
+		return preferred_neighbors;
+	}
+
+	public void setPreferred_neighbors(HashMap<String, Boolean> preferred_neighbors) {
+		this.preferred_neighbors = preferred_neighbors;
+	}
+
+	public String getOptimistically_unchoked_neighbor() {
+		return optimistically_unchoked_neighbor;
+	}
+
+	public void setOptimistically_unchoked_neighbor(String optimistically_unchoked_neighbor) {
+		this.optimistically_unchoked_neighbor = optimistically_unchoked_neighbor;
+	}
+
+	public int getUnchoked_neighbor() {
+		return unchoked_neighbor;
+	}
+
+	public void setUnchoked_neighbor(int unchoked_neighbor) {
+		this.unchoked_neighbor = unchoked_neighbor;
+	}
+
+	public int getK_preferred_neighbors() {
+		return k_preferred_neighbors;
+	}
+
+	public void setK_preferred_neighbors(int k_preferred_neighbors) {
+		this.k_preferred_neighbors = k_preferred_neighbors;
+	}
+
+	public HashMap<String, Boolean> getInterested_peer_list() {
+		return interested_peer_list;
+	}
+
+	public void setInterested_peer_list(HashMap<String, Boolean> interested_peer_list) {
+		this.interested_peer_list = interested_peer_list;
+	}
+
+	public HashMap<String, Integer> getDownload_speed() {
+		return download_speed;
+	}
+
+	public void setDownload_speed(HashMap<String, Integer> download_speed) {
+		this.download_speed = download_speed;
+	}
+
+	public HashMap<Integer, Integer> getPiecesRemainingToBeRequested() {
+		return piecesRemainingToBeRequested;
+	}
+
+	public void setPiecesRemainingToBeRequested(HashMap<Integer, Integer> piecesRemainingToBeRequested) {
+		this.piecesRemainingToBeRequested = piecesRemainingToBeRequested;
+	}
+
+	public HashMap<Integer, Integer> getPiecesRequested() {
+		return piecesRequested;
+	}
+
+	public void setPiecesRequested(HashMap<Integer, Integer> piecesRequested) {
+		this.piecesRequested = piecesRequested;
+	}
+	// >>>>>>**************** getter and setters *********************
+	
+	
 
 }
