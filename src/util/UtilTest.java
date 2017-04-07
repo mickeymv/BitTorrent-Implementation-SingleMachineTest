@@ -27,11 +27,11 @@ public class UtilTest {
 		
 		//System.out.println(ConfigurationSetup.numberOfPieces);
 		//Util.printBitfield();
-		byte[] data = Util.getPieceAsByteArray(1);
-		for (byte b : data) {
-			
-			Util.printByteToBinaryString(b);
-		}		
+//		byte[] data = Util.getPieceAsByteArray(1);
+//		for (byte b : data) {
+//			
+//			Util.printByteToBinaryString(b);
+//		}		
 		
 	}
 
