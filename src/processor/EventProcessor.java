@@ -140,6 +140,14 @@ public class EventProcessor {
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getPieceIndexToSendToPeer(remotePeerID);
 			byte[] pieceMessagePayload = Util.getPieceAsByteArray(pieceIndexToBeSent);
 			Message.sendMessage(Message.MESSAGETYPE_PIECE, pieceMessagePayload, remotePeerID);
+			
+			try {
+				this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 
 			break;
 		case Message.MESSAGETYPE_NOTINTERESTED:
@@ -158,6 +166,14 @@ public class EventProcessor {
 					+ this.remotePeerID);
 			
 			localPeerProcessInstance.removeNeighborWhoIsNotInterested(remotePeerID);
+			
+			try {
+				this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_NOTINTERESTED);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			break;
 		case Message.MESSAGETYPE_HAVE:
 			/**

@@ -361,6 +361,17 @@ public class PeerProcess {
 		// unchoke the new optimistically unchoked neighbor
 		unchoke(optimistically_unchoked_neighbor);
 	}
+	
+	public void updateInterested_peer_list(String remotePeerID, int messageType) throws Exception{
+		HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
+
+		if(messageType == Message.MESSAGETYPE_INTERESTED){
+			interested_peer_list.put(remotePeerID, true);
+		}
+		else if(messageType == Message.MESSAGETYPE_NOTINTERESTED){
+			interested_peer_list.put(remotePeerID, false);
+		}
+	}
 
 	
 	/**
