@@ -10,7 +10,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
@@ -32,7 +34,9 @@ import util.Util;
 public class TCPConnectionManager {
 
 	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
-
+	private static Calendar calendar = Calendar.getInstance();
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+	
 	/** This is the map for P2pConnections. Input is the peerID of a peer. */
 	private static HashMap<String, P2PConnection> connMap = new HashMap<String, P2PConnection>();
 
@@ -45,7 +49,7 @@ public class TCPConnectionManager {
 	private ServerSocket listener = null;
 
 	private static Util utilInstance = Util.initializeUtil();
-
+	
 	/*
 	 * This is required for local testing. the map has as key the peer's
 	 * address, formatted as 'hostName:portNumber'; and value as the peerID.
@@ -116,8 +120,11 @@ public class TCPConnectionManager {
 		}
 	}
 
+	/**
+	 * Creates connections from local peer to previous peers. 
+	 */
 	private void createClientConnections() {
-		ArrayList<PeerInfo> previousPeers = utilInstance.getMyPreviousPeers(localPeerID);
+		ArrayList<PeerInfo> previousPeers = Util.getMyPreviousPeers(localPeerID);
 		for (PeerInfo remotePeerServer : previousPeers) {
 			// Each client connection connecting to a server is in a separate
 			// thread.
@@ -128,10 +135,15 @@ public class TCPConnectionManager {
 //							+ remotePeerServer.getPeerID());
 					Socket localPeerClientSocket;
 					try {
-
+						
 						localPeerClientSocket = new Socket(remotePeerServer.getHostName(),
 								remotePeerServer.getPortNumber());
-
+						
+						logger.info(dateFormat.format(calendar.getTime()) 
+								+ ": Peer " + remotePeerServer.getPeerID() 
+								+ " makes a connection to Peer "
+								+ localPeerID + ".");
+						
 						populateConnMap(localPeerClientSocket, remotePeerServer.getPeerID(),
 								remotePeerServer.getHostName(), remotePeerServer.getPortNumber());
 
@@ -140,6 +152,7 @@ public class TCPConnectionManager {
 
 						peerAddressToPeerIDMap.put(localHostname + ":" + localPeerClientSocket.getLocalPort(),
 								localPeerID);
+
 
 						new HandShake().establishClientHandShakeTwoWayStream(localPeerID, remotePeerServer.getPeerID());
 
@@ -209,6 +222,7 @@ public class TCPConnectionManager {
 							// handled in a separate thread
 
 							new PeerServerHandler(listener.accept(), localPeerID).start();
+							
 						} catch (IOException e) {
 							System.err.println("Error: Cannot create server socket " + "with hostname " + localHostname
 									+ " port number " + localPeerServerListeningPort);
@@ -284,9 +298,17 @@ public class TCPConnectionManager {
 		 * particular incoming client tcp connection.
 		 */
 		public PeerServerHandler(Socket connection, String localServerPeerID) {
+			
 			this.localPeerSocket = connection;
 			String clientHostname = connection.getInetAddress().getHostName();
 			remoteClientPeerID = peerAddressToPeerIDMap.get(clientHostname + ":" + connection.getPort());
+			
+			// log the connection: [Time]: Peer [peer_ID 1] is connected from Peer [peer_ID 2].
+			logger.info(dateFormat.format(calendar.getTime()) 
+					+ ": Peer " + localServerPeerID 
+					+ " is connected from Peer "
+					+ remoteClientPeerID + ".");
+			
 //			System.out.println("Server: " + localServerPeerID + ", connected to a client with address: "
 //					+ clientHostname + ":" + connection.getPort() + " and ID: " + remoteClientPeerID);
 			populateConnMap(localPeerSocket, remoteClientPeerID, clientHostname, connection.getPort());
