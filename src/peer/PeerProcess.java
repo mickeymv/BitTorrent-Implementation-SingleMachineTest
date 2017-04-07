@@ -258,11 +258,12 @@ public class PeerProcess {
 	 * 3). unchoke peers that were not in preferredKNeighbors and now in newPreferredKNeighbors
 	 * 
 	 */
-	public void updatePreferredNeighbors(ArrayList<String> myPeers, int k) throws Exception{
+	public void updatePreferredNeighbors() throws Exception{
 		
 		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
 		StringBuilder peer_list = new StringBuilder();
 		
+		int k = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
 		synchronized(download_speed) {
 			download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
 		}
