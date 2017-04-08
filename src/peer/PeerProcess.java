@@ -533,6 +533,12 @@ public class PeerProcess {
 	 */
 	public ArrayList<String> getListOfUnInterestingPeers() {
 		
+		/*TODO: the implementation below does not work!
+		 * Use the Util function isPieceIndexSetInBitField() for this.
+		 * See getPieceToBeRequested() function on how it could be used.
+		*/
+		
+		/*
 		ArrayList<String> uninterestedPeerList = new ArrayList<>();
 		for(int i = 0; i < neighbors.size(); i++){
 			uninterestedPeerList.add(neighbors.get(i).getPeerID());
@@ -552,6 +558,9 @@ public class PeerProcess {
 		}
 		
 		return uninterestedPeerList;
+		*/
+		
+		return null;
 	}
 
 	/**

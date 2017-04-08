@@ -167,7 +167,8 @@ public class EventProcessor {
 					"in peer: " + this.localPeerID + ", got 'INTERESTED' message from peer: " + this.remotePeerID);
 
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
-			int pieceIndexToBeSent = this.localPeerProcessInstance.getConnManager().getPieceIndexToSendToPeer(remotePeerID);
+			int pieceIndexToBeSent = this.localPeerProcessInstance.getConnManager()
+					.getPieceIndexToSendToPeer(remotePeerID);
 
 			try {
 				this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
@@ -322,15 +323,11 @@ public class EventProcessor {
 
 			localPeerProcessInstance.getConnManager().broadcastHavePieceIndexMessageToAllPeers(pieceIndex);
 
-			/*
-			 * { // TODO: Implement this properly! ArrayList<String>
-			 * notInterestingPeers =
-			 * this.localPeerProcessInstance.getListOfUnInterestingPeers();
-			 * Message.broadcastNotInterestedToUnInterestingPeers(
-			 * notInterestingPeers); }
-			 */
-			
-			
+		{ // TODO: Implement this properly! ArrayList<String>
+			ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
+			localPeerProcessInstance.getConnManager().broadcastNotInterestedToUnInterestingPeers(notInterestingPeers);
+		}
+
 			/*
 			 * //TODO 1. check for complete file i. Make complete file ii. Check
 			 * if all other peers are complete. iii. End all processes.
