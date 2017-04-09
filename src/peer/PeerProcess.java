@@ -7,11 +7,14 @@ import java.awt.List;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -131,6 +134,8 @@ public class PeerProcess {
 		} else {
 			Util.makePeerDirectory(localPeerID);
 		}
+		clearDownloadSpeed();
+		
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
@@ -207,6 +212,51 @@ public class PeerProcess {
 		//Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
+	public void start_p_timer() {
+		Timer timer = new Timer();
+		while(true) {
+			timer.schedule(new TimerTask() {
+			
+				@Override
+				public void run() {
+					//update preferred neighbors.
+					//update download speed.
+					try {
+						updatePreferredNeighbors();
+					} catch (Exception e) {
+						System.err.println("not enough interested peers. Need " 
+								+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+						e.printStackTrace();
+					}
+					clearDownloadSpeed();
+				}
+			}, ConfigurationSetup.getUnchokingInterval());
+			
+		}
+	}
+	
+	public void start_m_timer() {
+		Timer timer = new Timer();
+		while(true) {
+			timer.schedule(new TimerTask() {
+			
+				@Override
+				public void run() {
+					//update optimistically unchoked neighbor
+					try {
+						updateUnchokedNeighbor();
+					} catch (Exception e) {
+						System.err.println("not enough interested peers. Need " 
+								+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+						e.printStackTrace();
+					}
+				}
+			}, ConfigurationSetup.getOptimisticUnchokingInterval());
+			
+		}
+		
+	}
+	
 	/**
 	 * Initially, choose k preferred neighbors randomly.
 	 */
@@ -220,7 +270,8 @@ public class PeerProcess {
 		synchronized(interested_peer_list) {
 			// get peerID list of all interested neighbors
 			for (PeerInfo peer : neighbors) {
-				if (interested_peer_list.containsKey(peer.getPeerID())) {
+				if (interested_peer_list.containsKey(peer.getPeerID())
+						&& interested_peer_list.get(peer.getPeerID()) == true) {
 					
 					peerIDs.add(peer.getPeerID());
 				}	
@@ -258,13 +309,33 @@ public class PeerProcess {
 	 */
 	public void updatePreferredNeighbors() throws Exception{
 		
-		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
+		HashMap<String, Boolean> newPreferredKNeighbors = 
+				new HashMap<String, Boolean>();
 		StringBuilder peer_list = new StringBuilder();
 		
-		int k = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
-		synchronized(download_speed) {
-			download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
+		class peer_speed_pair implements Comparable<peer_speed_pair>{
+			String peerID;
+			int speed;
+			public peer_speed_pair(String peerid, int spe) {
+				peerID = peerid;
+				speed = spe;
+			}
+			
+			@Override
+			public int compareTo(peer_speed_pair o)
+			{
+			     return(speed - o.speed);
+			}
 		}
+		
+		int k = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
+		ArrayList<peer_speed_pair> speed_list = new ArrayList<peer_speed_pair>();
+		for (String key : download_speed.keySet()) {
+			
+			speed_list.add(new peer_speed_pair(key, download_speed.get(key)));
+		}
+		
+		Collections.sort(speed_list, Collections.reverseOrder());
 		
 		boolean noOneInterested = true;
 		
@@ -272,11 +343,14 @@ public class PeerProcess {
 			
 			// use the first k peers in the interested_peer_list
 			int index = 0;
-			for (Map.Entry<String, Integer> entry : download_speed.entrySet()) {
+			for (peer_speed_pair entry : speed_list) {
+				System.err.println("speed: " + entry.peerID);
+				System.err.println("interested?: " + interested_peer_list.get(entry.peerID));
 				if (index >= k) break;
 				
-				if (interested_peer_list.containsKey(entry.getKey())) {
-					newPreferredKNeighbors.put(entry.getKey(), true);
+				if (interested_peer_list.containsKey(entry.peerID) 
+						&& interested_peer_list.get(entry.peerID) == true) {
+					newPreferredKNeighbors.put(entry.peerID, true);
 					noOneInterested = false;
 					index ++;
 				}
@@ -414,6 +488,30 @@ public class PeerProcess {
 		}
 	}
 
+	/**
+	 * When the timer is triggered, download speed will be cleared.
+	 */
+	public void clearDownloadSpeed() {
+		
+		for (PeerInfo peer : neighbors) {
+			
+			download_speed.put(peer.getPeerID(), 0);
+		}
+	}
+	
+	/**
+	 * When a receive a piece, update the download speed of the source peer.
+	 */
+	public void updateDownloadSpeed(String peerID) {
+		
+		synchronized(download_speed) {
+			
+			download_speed.put(peerID, download_speed.get(peerID) + 1);
+		}
+	}
+	
+	
+	
 	
 	/**
 	 * Peer starts running from here
