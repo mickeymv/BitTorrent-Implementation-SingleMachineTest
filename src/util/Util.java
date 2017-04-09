@@ -172,10 +172,10 @@ public class Util {
 			return bitField;
 		} else {
 			bitField = new ArrayList<Byte>();
-
+			
 			int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
-
-			// System.out.println("length of bitfield:" + lengthOfBitfield);
+			
+			System.err.println("length of bitfield:" + lengthOfBitfield);
 			// set all full bytes
 			for (int i = 0; i < lengthOfBitfield; i++) {
 
@@ -197,6 +197,8 @@ public class Util {
 																							// zero
 				bitField.add(b);
 			}
+			
+			System.err.println("current bitfield: " + bitfieldToString(bitField));
 
 			if (hasFileInitially) {
 				// set remaining bits of the last byte.
@@ -204,8 +206,10 @@ public class Util {
 				// System.out.println("number of pieces:" +
 				// ConfigurationSetup.getNumberOfPieces() + " \n" + "remaining:"
 				// + remaining);
-				Byte b = setFirstNDigits(remaining);
-				bitField.add(b);
+				if (remaining != 0) {
+					Byte b = setFirstNDigits(remaining);
+					bitField.add(b);
+				}
 			}
 			return bitField;
 		}
@@ -445,6 +449,12 @@ public class Util {
 		}
 	}
 
+	public static String byte2BinaryString(Byte b) {
+		
+		return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+	}
+	
+	
 	public static void printByteToBinaryString(Byte b) {
 
 		String s1 = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
@@ -489,10 +499,21 @@ public class Util {
 	 * Print bitfield as a string.
 	 */
 	public static void printBitfield(ArrayList<Byte> bitField) {
-
+		
 		for (Byte b : bitField) {
 			printByteToBinaryString(b);
 		}
+	}
+	
+	public static String bitfieldToString(ArrayList<Byte> bitfield) {
+		
+		StringBuilder builder = new StringBuilder();
+		for (Byte b : bitfield) {
+			
+			builder.append(byte2BinaryString(b) + "\n");
+		}
+		
+		return builder.toString();
 	}
 
 	/**
@@ -512,7 +533,7 @@ public class Util {
 			return;
 		}
 		byte checkByte = bitField.get(byteContainingPiece);
-		bitField.add(byteContainingPiece, setBitInPosition(positionOfPieceWithinByte, checkByte));
+		bitField.set(byteContainingPiece, setBitInPosition(positionOfPieceWithinByte, checkByte));
 	}
 
 	public static byte setBitInPosition(int position, byte checkByte) {

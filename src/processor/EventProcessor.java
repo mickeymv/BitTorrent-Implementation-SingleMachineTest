@@ -189,8 +189,6 @@ public class EventProcessor {
 			// peer: " + this.remotePeerID);
 
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
-			int pieceIndexToBeSent = this.localPeerProcessInstance.getConnManager()
-					.getPieceIndexToSendToPeer(remotePeerID);
 
 			break;
 
@@ -273,6 +271,7 @@ public class EventProcessor {
 			if (localPeerProcessInstance.isEveryPeerCompleted()) {
 
 				localPeerProcessInstance.setKeepRunning(false);
+				System.err.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
 			}
 
 			break;
@@ -366,7 +365,6 @@ public class EventProcessor {
 			localPeerProcessInstance.getConnManager().broadcastHavePieceIndexMessageToAllPeers(pieceIndex);
 
 			localPeerProcessInstance.getConnManager().broadcastNotInterestedToUnInterestingPeers();
-
 			/*
 			 * //TODO 1. check for complete file i. Make complete file
 			 */
@@ -387,6 +385,20 @@ public class EventProcessor {
 
 					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 				}
+
+			} else {
+				// label file as completed.
+				localPeerProcessInstance.setGotCompletedFile(true);
+				// merge file
+				Util.mergeDataPieces(localPeerID, "project/peer_" + localPeerID + "/");
+				
+				logger.info(dateFormat.format(calendar.getTime()) 
+						+ ": Peer " + localPeerID 
+						+ "has downloaded the complete file.");
+				
+				System.out.println(dateFormat.format(calendar.getTime()) 
+						+ ": Peer " + localPeerID 
+						+ "has downloaded the complete file.");
 			}
 
 			break;

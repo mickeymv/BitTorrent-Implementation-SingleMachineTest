@@ -638,6 +638,9 @@ public class PeerProcess {
 	public void updateBitField(String remotePeerID, int pieceIndex) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
 		Util.setPieceIndexInBitField(pieceIndex, remotePeerBitField);
+		
+		System.out.println("Peer " + localPeerID + ": remote bitfield for " + remotePeerID
+				+ "bitfield: " + Util.bitfieldToString(remotePeerBitField));
 	}
 
 	/**
@@ -831,33 +834,45 @@ public class PeerProcess {
 		for (String peerid : peersBitfields.keySet()) {
 
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
-			if (isPeerCompleted(bfield)) {
-
-				System.out.println("	Peer " + peerid + " unfinished!");
+			
+			if (!isPeerCompleted(bfield, peerid)) {
+				
+				System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
 				return false;
+			} else {
+				
+				System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
 			}
 		}
 		return true;
 	}
 
-	public boolean isPeerCompleted(ArrayList<Byte> bfield) {
-		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
+
+	public boolean isPeerCompleted(ArrayList<Byte> bfield, String peerid) {
+		int lengthOfBitfield = (int) Math.floor(ConfigurationSetup.getNumberOfPieces() / 8.0);
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
-		Byte b = Util.setFirstNDigits(remaining);
-
-		byte last_byte = b.byteValue();
-		for (int i = 0; i < bfield.size() - 1; i++) {
-
+		System.err.println("remaining: " + remaining);
+		
+		for (int i = 0; i < bfield.size(); i ++) {
+			
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
-				System.out.println("	byte " + i + " unfilled yet.");
+				System.err.println("[debug] peer " + localPeerID 
+						+ ":	bitfield of peer: "  + peerid
+						+ " " + Util.bitfieldToString(bfield));
 				return false;
 			}
 		}
-		if (last_byte != bfield.get(bfield.size() - 1).byteValue()) {
-			System.out.println("	byte " + (bfield.size() - 1) + " unfilled yet.");
-			return false;
-		}
+
+		if (remaining != 0) {
+			Byte b = Util.setFirstNDigits(remaining);
+			byte last_byte = b.byteValue();
+			if (last_byte != bfield.get(bfield.size()-1).byteValue()) {
+				System.out.println("	byte " + (bfield.size() - 1) + " unfilled yet.");
+				return false;
+			}
+		} 
 		return true;
+		
 	}
 
 }
