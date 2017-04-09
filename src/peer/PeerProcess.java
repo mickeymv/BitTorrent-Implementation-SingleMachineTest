@@ -4,7 +4,6 @@ import util.ConfigurationSetup;
 import util.Util;
 
 import java.awt.List;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import java.util.Collections;
+import java.util.Date;
 
 import connection.TCPConnectionManager;
 import type.PeerInfo;
@@ -35,8 +35,6 @@ import messages.Message;
 public class PeerProcess {
 
 	private Logger logger = Logger.getLogger(PeerProcess.class);
-	private static Calendar calendar = Calendar.getInstance();
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 
 	/** peer ID */
 	private String localPeerID;
@@ -260,12 +258,12 @@ public class PeerProcess {
 			@Override
 			public void run() {
 				// update optimistically unchoked neighbor
-				System.out.println("time interval: " + ConfigurationSetup.getOptimisticUnchokingInterval());
+				//System.out.println("time interval: " + ConfigurationSetup.getOptimisticUnchokingInterval());
 				try {
 					updateUnchokedNeighbor();
 				} catch (Exception e) {
-					System.err.println("not enough interested peers. Need "
-							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+//					System.err.println("not enough interested peers. Need "
+//							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
 					e.printStackTrace();
 				}
 			}
@@ -309,7 +307,7 @@ public class PeerProcess {
 		// [preferred neighbor list] is the list of peer IDs separated by comma
 		// ‘,’.
 
-		logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " has the preferred neighbors "
+		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors "
 				+ "[" + peer_list.toString() + "]" + ".");
 	}
 
@@ -423,10 +421,10 @@ public class PeerProcess {
 		// [preferred neighbor list] is the list of peer IDs separated by comma
 		// ‘,’.
 
-		logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " has the preferred neighbors "
+		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors "
 				+ "[" + peer_list.toString() + "]" + ".");
 
-		System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+		System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 				+ " has the preferred neighbors " + "[" + peer_list.toString() + "]" + ".");
 
 		// notify neighbors
@@ -502,10 +500,10 @@ public class PeerProcess {
 
 		// [Time]: Peer [peer_ID] has the optimistically unchoked neighbor
 		// [optimistically unchoked neighbor ID].
-		logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 				+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
 
-		System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+		System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 				+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
 		// unchoke the new optimistically unchoked neighbor
 		this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_UNCHOKE);
@@ -594,8 +592,8 @@ public class PeerProcess {
 				// System.out.println("pieice#"+i+"is not in local bitfield for
 				// peer#" + this.localPeerID);
 				if (Util.isPieceIndexSetInBitField(i, remotePeerBitField)) {
-					System.out.println("local peer#" + this.localPeerID + " NEEDS piece#" + i + " that remote peer#"
-							+ remotePeerID + " has!");
+//					System.out.println("local peer#" + this.localPeerID + " NEEDS piece#" + i + " that remote peer#"
+//							+ remotePeerID + " has!");
 					return i;
 				}
 			}
@@ -649,8 +647,8 @@ public class PeerProcess {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
 		Util.setPieceIndexInBitField(pieceIndex, remotePeerBitField);
 
-		System.out.println("Peer " + localPeerID + ": remote bitfield for " + remotePeerID + "bitfield: "
-				+ Util.bitfieldToString(remotePeerBitField));
+//		System.out.println("Peer " + localPeerID + ": remote bitfield for " + remotePeerID + "bitfield: "
+//				+ Util.bitfieldToString(remotePeerBitField));
 	}
 
 	/**

@@ -12,9 +12,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
@@ -36,8 +36,6 @@ import util.Util;
 public class TCPConnectionManager {
 
 	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
-	private static Calendar calendar = Calendar.getInstance();
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
 
 	/** This is the map for P2pConnections. Input is the peerID of a peer. */
 
@@ -201,10 +199,10 @@ public class TCPConnectionManager {
 						localPeerClientSocket = new Socket(remotePeerServer.getHostName(),
 								remotePeerServer.getPortNumber());
 
-						logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+						logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
 						
-						System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+						System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 						+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
 
 						populateConnMap(localPeerID, localPeerClientSocket, remotePeerServer.getPeerID(),
@@ -402,10 +400,10 @@ public class TCPConnectionManager {
 
 			// log the connection: [Time]: Peer [peer_ID 1] is connected from
 			// Peer [peer_ID 2].
-			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localServerPeerID
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID
 					+ " is connected from Peer " + remoteClientPeerID + ".");
 
-			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localServerPeerID
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID
 					+ " is connected from Peer " + remoteClientPeerID + ".");
 			
 			// System.out.println("Server: " + localServerPeerID + ", connected

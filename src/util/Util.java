@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -28,6 +29,7 @@ import type.PeerInfo;
 public class Util {
 
 	private static Util instance = null;
+	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yy HH:mm:ss");
 
 	private static ArrayList<PeerInfo> peerList;
 	private static Map<String, Integer> peerIDToPositionMap;
