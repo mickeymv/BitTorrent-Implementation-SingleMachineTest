@@ -268,7 +268,7 @@ public class EventProcessor {
 			} else {
 				messageHandler.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
 			}
-
+			
 			this.localPeerProcessInstance.updateBitField(remotePeerID, pieceIndex);
 			
 			/*
@@ -370,7 +370,7 @@ public class EventProcessor {
 			ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
 			localPeerProcessInstance.getConnManager().broadcastNotInterestedToUnInterestingPeers(notInterestingPeers);
 		}
-
+		
 			/*
 			 * //TODO 1. check for complete file i. Make complete file 
 			 */
