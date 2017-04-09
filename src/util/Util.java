@@ -175,7 +175,7 @@ public class Util {
 			
 			int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 			
-			System.err.println("length of bitfield:" + lengthOfBitfield);
+			//System.err.println("length of bitfield:" + lengthOfBitfield);
 			// set all full bytes
 			for (int i = 0; i < lengthOfBitfield; i++) {
 
@@ -198,7 +198,7 @@ public class Util {
 				bitField.add(b);
 			}
 			
-			System.err.println("current bitfield: " + bitfieldToString(bitField));
+			//System.err.println("current bitfield: " + bitfieldToString(bitField));
 
 			if (hasFileInitially) {
 				// set remaining bits of the last byte.

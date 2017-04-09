@@ -201,8 +201,11 @@ public class TCPConnectionManager {
 						localPeerClientSocket = new Socket(remotePeerServer.getHostName(),
 								remotePeerServer.getPortNumber());
 
-						logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + remotePeerServer.getPeerID()
-								+ " makes a connection to Peer " + localPeerID + ".");
+						logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
+						
+						System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+						+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
 
 						populateConnMap(localPeerID, localPeerClientSocket, remotePeerServer.getPeerID(),
 								remotePeerServer.getHostName(), remotePeerServer.getPortNumber());
@@ -385,9 +388,9 @@ public class TCPConnectionManager {
 			this.localPeerSocket = connection;
 			String clientHostname = connection.getInetAddress().getHostName();
 			while (!peerAddressToPeerIDMap.containsKey(clientHostname + ":" + connection.getPort())) {
-				System.err.println("\nWait for the local server peer# " + localServerPeerID
-						+ ", peerAddressToPeerIDMap to have a mapping for the host# " + clientHostname + ":"
-						+ connection.getPort() + "\n");
+//				System.err.println("\nWait for the local server peer# " + localServerPeerID
+//						+ ", peerAddressToPeerIDMap to have a mapping for the host# " + clientHostname + ":"
+//						+ connection.getPort() + "\n");
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
@@ -402,6 +405,9 @@ public class TCPConnectionManager {
 			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localServerPeerID
 					+ " is connected from Peer " + remoteClientPeerID + ".");
 
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localServerPeerID
+					+ " is connected from Peer " + remoteClientPeerID + ".");
+			
 			// System.out.println("Server: " + localServerPeerID + ", connected
 			// to a client with address: "
 			// + clientHostname + ":" + connection.getPort() + " and ID: " +

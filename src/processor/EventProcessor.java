@@ -269,7 +269,6 @@ public class EventProcessor {
 			 * your local peer process.
 			 */
 			if (localPeerProcessInstance.isEveryPeerCompleted()) {
-
 				localPeerProcessInstance.setKeepRunning(false);
 				System.err.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
 			}

@@ -158,12 +158,10 @@ public class PeerProcess {
 		// 1). initialize interested neighbor
 		// 2). initialize preferred neighbor
 		// 3). initialize optimistically unchoked neighbor.
-		// 4).
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
 		this.interested_peer_list.put(remotePeerID, true);
-		// this.interestedNeighbors.add(remotePeerID);
 	}
 
 	private void initializePiecesRemainingMap() {
@@ -368,8 +366,8 @@ public class PeerProcess {
 			// use the first k peers in the interested_peer_list
 			int index = 0;
 			for (peer_speed_pair entry : speed_list) {
-				System.err.println("speed: " + entry.peerID);
-				System.err.println("interested?: " + interested_peer_list.get(entry.peerID));
+				//System.err.println("speed: " + entry.peerID);
+				//System.err.println("interested?: " + interested_peer_list.get(entry.peerID));
 				if (index >= k)
 					break;
 
@@ -527,9 +525,7 @@ public class PeerProcess {
 	 * When the timer is triggered, download speed will be cleared.
 	 */
 	public void clearDownloadSpeed() {
-
 		for (PeerInfo peer : neighbors) {
-
 			download_speed.put(peer.getPeerID(), 0);
 		}
 	}
@@ -845,22 +841,21 @@ public class PeerProcess {
 
 	public boolean isEveryPeerCompleted() {
 		
-		if (gotCompletedFile == false) {
-			
-			return false;
-		}
+		//TODO: Why doesn't the below work?
+//		if (gotCompletedFile == false) {
+//			
+//			return false;
+//		}
 		
 		for (String peerid : peersBitfields.keySet()) {
 
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
 
 			if (!isPeerCompleted(bfield, peerid)) {
-
-				System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
+				//System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
 				return false;
 			} else {
-
-				System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
+				//System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
 			}
 		}
 		return true;
@@ -869,13 +864,12 @@ public class PeerProcess {
 	public boolean isPeerCompleted(ArrayList<Byte> bfield, String peerid) {
 		int lengthOfBitfield = (int) Math.floor(ConfigurationSetup.getNumberOfPieces() / 8.0);
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
-		System.err.println("remaining: " + remaining);
+		//System.err.println("remaining: " + remaining);
 
 		for (int i = 0; i < bfield.size(); i++) {
-
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
-				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
-						+ Util.bitfieldToString(bfield));
+//				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
+//						+ Util.bitfieldToString(bfield));
 				return false;
 			}
 		}
