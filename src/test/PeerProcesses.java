@@ -34,7 +34,7 @@ public class PeerProcesses {
 		}
 		
 		try {
-			Thread.sleep(0); // give enough time before the main program
+			Thread.sleep(999999999); // give enough time before the main program
 									// exits for the different threads to finish
 									// execution (check to see if the various
 									// ports/streams have the data or not)
