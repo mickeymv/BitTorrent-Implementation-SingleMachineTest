@@ -194,7 +194,8 @@ public class PeerProcess {
 		connManager = new TCPConnectionManager(localPeerInfo, this);
 		connManager.initializePeer();
 		
-		
+		System.out.println("peers initialized ..");
+		/*
 		while(keepRunning) {
 			
 			try {
@@ -203,7 +204,7 @@ public class PeerProcess {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 
 	/**
@@ -406,7 +407,7 @@ public class PeerProcess {
 				}
 			}
 		}
-
+		
 		synchronized (preferred_neighbors) {
 			// update preferred_neighbors
 			for (String peerid : preferred_neighbors.keySet()) {
