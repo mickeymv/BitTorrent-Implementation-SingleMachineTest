@@ -661,7 +661,7 @@ public class PeerProcess {
 	 * @return list of peers which do not have interesting pieces for the local
 	 *         peer.
 	 */
-	public ArrayList<String> getListOfUnInterestingPeers() {
+	private ArrayList<String> getListOfUnInterestingPeers() {
 
 		/*
 		 * TODO: the implementation below does not work! Use the Util function
@@ -677,11 +677,12 @@ public class PeerProcess {
 		for (int i = 0; i < neighbors.size(); i++) {
 			remotePeerBitField = peersBitfields.get(neighbors.get(i).getPeerID());
 			for (int j = 0; j < remotePeerBitField.size(); j++) {
-				String byteArray = Integer.toBinaryString(remotePeerBitField.get(i) & 0xFF);
+				String selectedByte = Integer.toBinaryString(localPeerBitField.get(j) & 0xFF);
 				for (int k = 0; k < 8; k++) {
-					if (byteArray.charAt(k) == '0') {
+					if (selectedByte.charAt(k) == '0') {
 						if ((Integer.toBinaryString(remotePeerBitField.get(j) & 0xFF).charAt(k) != 0)) {
 							uninterestedPeerList.remove(i);
+							break;
 						}
 					}
 				}

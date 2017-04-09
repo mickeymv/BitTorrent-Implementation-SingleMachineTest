@@ -370,11 +370,12 @@ public class EventProcessor {
 
 			localPeerProcessInstance.getConnManager().broadcastHavePieceIndexMessageToAllPeers(pieceIndex);
 
+/*
 		{ // TODO: Implement this properly! ArrayList<String>
 			ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
 			localPeerProcessInstance.getConnManager().broadcastNotInterestedToUnInterestingPeers(notInterestingPeers);
 		}
-		
+*/
 			/*
 			 * //TODO 1. check for complete file i. Make complete file 
 			 */
