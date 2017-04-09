@@ -104,6 +104,13 @@ public class PeerProcess {
 	// requested
 	private HashMap<Integer, Integer> piecesRequested = new HashMap<>();
 
+	/**
+	 * This is a hashMap containing the unchokedNeighbors. This is used so as to
+	 * not send unnecessary choke/un-choke messages to peers who are already
+	 * choked/un-choked.
+	 */
+	private HashMap<String, String> unchokedNeighbors = new HashMap<>();
+
 	private boolean gotCompletedFile = false;
 
 	private boolean keepRunning = true;
@@ -419,9 +426,14 @@ public class PeerProcess {
 		// notify neighbors
 		for (String peerid : needToNotify.keySet()) {
 			if (needToNotify.get(peerid).equals("choke")) {
-				this.connManager.sendMessage(peerid, Message.MESSAGETYPE_CHOKE);
+				if (this.unchokedNeighbors.containsKey(peerid)) {
+					this.connManager.sendMessage(peerid, Message.MESSAGETYPE_CHOKE);
+					unchokedNeighbors.remove(peerid);
+				}
 			} else {
-				this.connManager.sendMessage(peerid, Message.MESSAGETYPE_UNCHOKE);
+				if (!this.unchokedNeighbors.containsKey(peerid)) {
+					this.connManager.sendMessage(peerid, Message.MESSAGETYPE_UNCHOKE);
+				}
 			}
 		}
 	}
@@ -514,8 +526,11 @@ public class PeerProcess {
 	public void updateDownloadSpeed(String peerID) {
 
 		synchronized (download_speed) {
-
-			download_speed.put(peerID, download_speed.get(peerID) + 1);
+			if (download_speed.containsKey(peerID)) {
+				download_speed.put(peerID, download_speed.get(peerID) + 1);
+			} else {
+				download_speed.put(peerID, 1);
+			}
 		}
 	}
 
@@ -622,9 +637,9 @@ public class PeerProcess {
 	public void updateBitField(String remotePeerID, int pieceIndex) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
 		Util.setPieceIndexInBitField(pieceIndex, remotePeerBitField);
-		
-		System.out.println("Peer " + localPeerID + ": remote bitfield for " + remotePeerID
-				+ "bitfield: " + Util.bitfieldToString(remotePeerBitField));
+
+		System.out.println("Peer " + localPeerID + ": remote bitfield for " + remotePeerID + "bitfield: "
+				+ Util.bitfieldToString(remotePeerBitField));
 	}
 
 	/**
@@ -818,31 +833,29 @@ public class PeerProcess {
 		for (String peerid : peersBitfields.keySet()) {
 
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
-			
+
 			if (!isPeerCompleted(bfield, peerid)) {
-				
+
 				System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
 				return false;
 			} else {
-				
+
 				System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
 			}
 		}
 		return true;
 	}
 
-
 	public boolean isPeerCompleted(ArrayList<Byte> bfield, String peerid) {
 		int lengthOfBitfield = (int) Math.floor(ConfigurationSetup.getNumberOfPieces() / 8.0);
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
 		System.err.println("remaining: " + remaining);
-		
-		for (int i = 0; i < bfield.size(); i ++) {
-			
+
+		for (int i = 0; i < bfield.size(); i++) {
+
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
-				System.err.println("[debug] peer " + localPeerID 
-						+ ":	bitfield of peer: "  + peerid
-						+ " " + Util.bitfieldToString(bfield));
+				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
+						+ Util.bitfieldToString(bfield));
 				return false;
 			}
 		}
@@ -850,13 +863,13 @@ public class PeerProcess {
 		if (remaining != 0) {
 			Byte b = Util.setFirstNDigits(remaining);
 			byte last_byte = b.byteValue();
-			if (last_byte != bfield.get(bfield.size()-1).byteValue()) {
+			if (last_byte != bfield.get(bfield.size() - 1).byteValue()) {
 				System.out.println("	byte " + (bfield.size() - 1) + " unfilled yet.");
 				return false;
 			}
-		} 
+		}
 		return true;
-		
+
 	}
 
 }
