@@ -106,6 +106,18 @@ public class PeerProcess {
 
 	private boolean gotCompletedFile = false;
 
+	
+	private boolean keepRunning = true;
+	
+	
+	public boolean isKeepRunning() {
+		return keepRunning;
+	}
+
+	public void setKeepRunning(boolean keepRunning) {
+		this.keepRunning = keepRunning;
+	}
+	
 	public boolean getGotCompletedFile() {
 		return gotCompletedFile;
 	}
@@ -181,6 +193,17 @@ public class PeerProcess {
 		// connections to all other peers).
 		connManager = new TCPConnectionManager(localPeerInfo, this);
 		connManager.initializePeer();
+		
+		
+		while(keepRunning) {
+			
+			try {
+				Thread.sleep(20000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -814,5 +837,40 @@ public class PeerProcess {
 		this.piecesRequested = piecesRequested;
 	}
 	// >>>>>>**************** getter and setters *********************
+	
+	
+	public boolean isEveryPeerCompleted() {
+		
+		for (String peerid : peersBitfields.keySet()) {
+			
+			ArrayList<Byte> bfield = peersBitfields.get(peerid);
+			if (isPeerCompleted(bfield)) {
+				
+				System.out.println("	Peer " + peerid + " unfinished!");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean isPeerCompleted(ArrayList<Byte> bfield) {
+		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
+		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
+		Byte b = Util.setFirstNDigits(remaining);
+		
+		byte last_byte = b.byteValue();
+		for (int i = 0; i < bfield.size() - 1; i ++) {
+			
+			if (bfield.get(i).byteValue() != (byte) 0xFF) {
+				System.out.println("	byte " + i + " unfilled yet.");
+				return false;
+			}
+		}
+		if (last_byte != bfield.get(bfield.size()-1).byteValue()) {
+			System.out.println("	byte " + (bfield.size() - 1) + " unfilled yet.");
+			return false;
+		}
+		return true;
+	}
 
 }

@@ -275,8 +275,12 @@ public class EventProcessor {
 			 * i. Check
 			 * if all other peers are complete. 
 			 * 	if so, then ii. End your local peer process.
-			 */
-
+			 */	
+			if (localPeerProcessInstance.isEveryPeerCompleted()) {
+				
+				localPeerProcessInstance.setKeepRunning(false);
+			}
+			
 			break;
 			
 		case Message.MESSAGETYPE_REQUEST:
@@ -390,6 +394,11 @@ public class EventProcessor {
 
 					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 				}
+			} else {
+				// label file as completed.
+				localPeerProcessInstance.setGotCompletedFile(true);
+				// merge file
+				Util.mergeDataPieces(localPeerID, "project/peer_" + localPeerID + "/");
 			}
 			
 			break;
