@@ -368,7 +368,7 @@ public class EventProcessor {
 			/*
 			 * //TODO 1. check for complete file i. Make complete file
 			 */
-
+			
 			if (!this.localPeerProcessInstance.getGotCompletedFile()) {
 				int pieceToBeRequestedFromPeer = localPeerProcessInstance.getPieceToBeRequested(remotePeerID);
 				if (pieceToBeRequestedFromPeer == -1) {
@@ -390,7 +390,7 @@ public class EventProcessor {
 				// label file as completed.
 				localPeerProcessInstance.setGotCompletedFile(true);
 				// merge file
-				Util.mergeDataPieces(localPeerID, "project/peer_" + localPeerID + "/");
+				Util.mergeDataPieces(localPeerID, "project");
 				
 				logger.info(dateFormat.format(calendar.getTime()) 
 						+ ": Peer " + localPeerID 

@@ -296,7 +296,7 @@ public class Util {
 			e1.printStackTrace();
 		}
 
-		for (int i = 1; i <= ConfigurationSetup.getNumberOfPieces(); i++) {
+		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 
 			String pieceFileName = directory + "/" + "peer_" + localPeerID + "/_piece_" + i; // File.separator
 			// giving

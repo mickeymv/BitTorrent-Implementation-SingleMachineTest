@@ -124,7 +124,9 @@ public class PeerProcess {
 	}
 
 	public boolean getGotCompletedFile() {
-		return gotCompletedFile;
+		
+		return isPeerCompleted(localPeerBitField, localPeerID);
+		//return gotCompletedFile;
 	}
 
 	public void setGotCompletedFile(boolean gotCompletedFile) {
@@ -326,6 +328,12 @@ public class PeerProcess {
 	 */
 	public void updatePreferredNeighbors() throws Exception {
 
+		if (keepRunning == false) {
+			
+			return;
+		}
+			
+			
 		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
 		StringBuilder peer_list = new StringBuilder();
 
@@ -456,6 +464,12 @@ public class PeerProcess {
 	 */
 	public void updateUnchokedNeighbor() throws Exception {
 
+		if (keepRunning == false) {
+			
+			return;
+		}
+
+
 		ArrayList<String> interested_choked_peers = new ArrayList<String>();
 		Set<String> peerSet = null;
 		synchronized (interested_peer_list) {
@@ -526,9 +540,10 @@ public class PeerProcess {
 	public void updateDownloadSpeed(String peerID) {
 
 		synchronized (download_speed) {
-			if (download_speed.containsKey(peerID)) {
+
+			if (download_speed.containsKey(peerID))
 				download_speed.put(peerID, download_speed.get(peerID) + 1);
-			} else {
+			else {
 				download_speed.put(peerID, 1);
 			}
 		}
@@ -829,7 +844,12 @@ public class PeerProcess {
 	// >>>>>>**************** getter and setters *********************
 
 	public boolean isEveryPeerCompleted() {
-
+		
+		if (gotCompletedFile == false) {
+			
+			return false;
+		}
+		
 		for (String peerid : peersBitfields.keySet()) {
 
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
