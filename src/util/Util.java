@@ -35,8 +35,8 @@ public class Util {
 	private static Map<String, Integer> peerIDToPositionMap;
 	private static ConfigurationSetup configInstance = null;
 
-	private static final String PROJECT_TOP_LEVEL_DIRECTORY = "project";
-	private static final String PEER_DIRECTORY_PREFIX = "peer_";
+	public static final String PROJECT_TOP_LEVEL_DIRECTORY = "project";
+	public static final String PEER_DIRECTORY_PREFIX = "peer_";
 	private static final String PIECE_PREFIX = "_piece_";
 
 	private Util() {
@@ -229,7 +229,7 @@ public class Util {
 	 */
 	public static void splitDataFile(String localPeerID) {
 
-		Path path = Paths.get(ConfigurationSetup.getInstance().getFileName());
+		Path path = Paths.get(PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/" + ConfigurationSetup.getInstance().getFileName());
 		// String pieceDir = "project/peer_" +
 		// PeerProcess.getLocalPeerInstance().getPeerID();
 		File temp_path = new File(PROJECT_TOP_LEVEL_DIRECTORY);
@@ -245,6 +245,7 @@ public class Util {
 		temp_path.mkdirs();
 
 		try {
+			//System.err.println("The path is: " + path.toString());
 			byte[] data = Files.readAllBytes(path);
 			long fileLength = data.length;
 			long remaining = fileLength;

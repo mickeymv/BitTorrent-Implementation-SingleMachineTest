@@ -78,8 +78,8 @@ public class ConfigurationSetup {
 	// list of all the peers in the network (including local peer)
 	private final static ArrayList<PeerInfo> peerList = new ArrayList<PeerInfo>();
 
-	private static final String peerInfoFile = "PeerInfo.cfg";
-	private static final String commonInfoFile = "Common.cfg";
+	private static final String peerInfoFile = Util.PROJECT_TOP_LEVEL_DIRECTORY + "/" + "PeerInfo.cfg";
+	private static final String commonInfoFile = Util.PROJECT_TOP_LEVEL_DIRECTORY + "/" + "Common.cfg";
 
 	// map of peerID to the peer's position in the peers arraylist
 	private static Map<String, Integer> peerIDToPositionMap = new HashMap<>();

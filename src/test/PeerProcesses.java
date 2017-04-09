@@ -22,7 +22,7 @@ public class PeerProcesses {
 	
 	
 	public static void initiatePeerProcessForLocalHostTesting(ArrayList<String> peerIDList) {
-		Util.createRandomDataFile(2048); //change according to what is in Common.cfg
+		//Util.createRandomDataFile(2048); //change according to what is in Common.cfg
 		for (String peerID : peerIDList) {
 			PeerProcess localPeer = new PeerProcess(peerID);
 			peerProcesses.put(peerID, localPeer);
@@ -34,7 +34,7 @@ public class PeerProcesses {
 		}
 		
 		try {
-			Thread.sleep(200000); // give enough time before the main program
+			Thread.sleep(0); // give enough time before the main program
 									// exits for the different threads to finish
 									// execution (check to see if the various
 									// ports/streams have the data or not)
