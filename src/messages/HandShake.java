@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import connection.TCPConnectionManager;
 import listener.MessageListener;
+import peer.PeerProcess;
 import util.Util;
 
 /**
@@ -15,10 +16,16 @@ import util.Util;
  */
 public class HandShake {
 
+	public HandShake(TCPConnectionManager connManager) {
+		 this.connManager = connManager;
+	}
+	
 	private static final String HANDSHAKE_HEADER = "P2PFILESHARINGPROJ";
 
 	private static Util utilInstance = Util.initializeUtil();
 
+	TCPConnectionManager connManager;
+	
 	/**
 	 * This is called by the client socket. Sends handshake to server and waits
 	 * for one back.
@@ -26,6 +33,7 @@ public class HandShake {
 	 * @param localClientPeerID
 	 * @param remoteServerPeerID
 	 */
+	
 	public  void establishClientHandShakeTwoWayStream(String localClientPeerID, String remoteServerPeerID) {
 		try {
 			byte handshakeMessageBytes[] = getHandShakeBytes(localClientPeerID);
@@ -40,21 +48,21 @@ public class HandShake {
 			// String(peerIDBytes));
 
 			// send HandShake to the listening server
-			new Message().sendMessage(handshakeMessageBytes, localClientPeerID, remoteServerPeerID);
+			new Message(localClientPeerID, remoteServerPeerID, connManager.localPeerProcessInstance).sendMessage(handshakeMessageBytes);
 
 			int messageLength;
 			byte[] messageBytes = null; // message received back from the server
 
 			/* Blocking call! */
 			// receive the HandShake message sent back from the server
-			messageLength = TCPConnectionManager.getDataInputStream(remoteServerPeerID).readInt();
+			messageLength = TCPConnectionManager.getDataInputStream(localClientPeerID, remoteServerPeerID).readInt();
 
 			// System.out.println("The message length received from server is: "
 			// + messageLength);
 
 			if (messageLength == 32) {
 				messageBytes = new byte[messageLength];
-				TCPConnectionManager.getDataInputStream(remoteServerPeerID).readFully(messageBytes, 0,
+				TCPConnectionManager.getDataInputStream(localClientPeerID, remoteServerPeerID).readFully(messageBytes, 0,
 						messageBytes.length);
 
 				int receivedHandShakeFromPeer = utilInstance
@@ -119,7 +127,7 @@ public class HandShake {
 
 			/* Blocking call! */
 			// receive the HandShake message sent from the client
-			messageLength = TCPConnectionManager.getDataInputStream(remoteClientPeerID).readInt();
+			messageLength = TCPConnectionManager.getDataInputStream(localServerPeerID, remoteClientPeerID).readInt();
 
 			// System.out.println("The message length received from client is: "
 			// + messageLength);
@@ -127,7 +135,7 @@ public class HandShake {
 			if (messageLength == 32) {
 
 				messageBytes = new byte[messageLength];
-				TCPConnectionManager.getDataInputStream(remoteClientPeerID).readFully(messageBytes, 0,
+				TCPConnectionManager.getDataInputStream(localServerPeerID, remoteClientPeerID).readFully(messageBytes, 0,
 						messageBytes.length); // read
 
 				// System.out.println("Inside server: "+localServerPeerID+",
@@ -158,7 +166,7 @@ public class HandShake {
 			byte handshakeMessageBytes[] = getHandShakeBytes(localServerPeerID);
 
 			// send HandShake back to the listening client
-			new Message().sendMessage(handshakeMessageBytes, localServerPeerID, remoteClientPeerID);
+			new Message(localServerPeerID, remoteClientPeerID, connManager.localPeerProcessInstance).sendMessage(handshakeMessageBytes);
 
 		} catch (IOException ioException) {
 			System.out.println("Disconnect with client after handshake " + remoteClientPeerID);

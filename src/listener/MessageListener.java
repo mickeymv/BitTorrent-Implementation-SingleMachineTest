@@ -55,7 +55,7 @@ public class MessageListener {
 					messageBytes = new byte[messageLength];
 					in.readFully(messageBytes, 0, messageBytes.length); // read
 					
-					System.out.println("In peer#" + localPeerID+" and received a message from peer#" + remotePeerID);
+					//System.out.println("In peer#" + localPeerID+" and received a message from peer#" + remotePeerID);
 					
 					messageProcessor.processMessage(messageBytes);
 				} else {

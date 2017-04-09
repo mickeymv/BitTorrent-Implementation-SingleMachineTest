@@ -7,11 +7,14 @@ import java.awt.List;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -47,12 +50,24 @@ public class PeerProcess {
 
 	private TCPConnectionManager connManager = null;
 
+	public TCPConnectionManager getConnManager() {
+		if (connManager == null) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return connManager;
+	}
+
 	/** this list contains all other peers' information in the network. */
 	private ArrayList<PeerInfo> neighbors = new ArrayList<>();
 
 	/** the index of the preferred neighbor set. */
 	private HashMap<String, Boolean> preferred_neighbors = new HashMap<>();
-	private String optimistically_unchoked_neighbor = null;
+	private String optimistically_unchoked_neighbor = new String();
 	
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
@@ -71,12 +86,7 @@ public class PeerProcess {
 	HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
 	/** track the download speed from each peers, in number of pieces. */
 	HashMap<String, Integer> download_speed = new HashMap<String, Integer>();
-	
-	/*
-	 * Map of which piece index was sent as a "have" message to which remote
-	 * peer. remotePeerID -> PieceIndex
-	 */
-	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
+
 	
 	/*
 	 * map of neighbors who are interested in local pieces. Only choose
@@ -107,8 +117,8 @@ public class PeerProcess {
 	
 	public PeerProcess(String localPeerID) {
 		this.localPeerID = localPeerID;
-		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
-		localPeerBitField = utilInstance.getPeerBitfield(localPeerInfo.isHasFileInitially());
+		localPeerInfo = Util.getPeerInfo(localPeerID);
+		localPeerBitField = Util.getPeerBitfield(localPeerInfo.isHasFileInitially());
 		// System.out.println("the bitfield for peer: "+localPeerID+" is:");
 		// utilInstance.printBitfield(localPeerBitField);
 		time_interval_p_preferred_neighbor = ConfigurationSetup.getUnchokingInterval();
@@ -124,15 +134,12 @@ public class PeerProcess {
 		} else {
 			Util.makePeerDirectory(localPeerID);
 		}
-	}
-
-	/**
-	 * 
-	 * @return piece index of the piece which this local peer said it had (via a
-	 *         "have" message sent previously).
-	 */
-	public int getPieceIndexToSendToPeer(String remotePeerID) {
-		return this.sentHaveMap.get(remotePeerID);
+		clearDownloadSpeed();
+		
+		// 1). initialize interested neighbor
+		// 2). initialize preferred neighbor
+		// 3). initialize optimistically unchoked neighbor.
+		// 4). 
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
@@ -147,10 +154,10 @@ public class PeerProcess {
 			}
 		}
 	}
-
+	
 	private void setPeersBitfields() {
 		for (PeerInfo peer : neighbors) {
-			setPeerBitField(peer.getPeerID(), utilInstance.getPeerBitfield(peer.isHasFileInitially()));
+			setPeerBitField(peer.getPeerID(), Util.getPeerBitfield(peer.isHasFileInitially()));
 		}
 	}
 
@@ -172,7 +179,7 @@ public class PeerProcess {
 	public void initiatePeerProcess() {
 		// read configurations files and initialize local peer (setup
 		// connections to all other peers).
-		connManager = new TCPConnectionManager(localPeerInfo);
+		connManager = new TCPConnectionManager(localPeerInfo, this);
 		connManager.initializePeer();
 	}
 
@@ -197,6 +204,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void choke(String peerID) {
+		new Message(localPeerID, peerID, this).sendMessage(Message.MESSAGETYPE_CHOKE);
 		//Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
 	}
 
@@ -206,9 +214,55 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void unchoke(String peerID) {
+		new Message(localPeerID, peerID, this).sendMessage(Message.MESSAGETYPE_UNCHOKE);
 		//Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
+	public void start_p_timer() {
+		Timer timer = new Timer();
+		
+		timer.scheduleAtFixedRate(new TimerTask() {
+		
+			@Override
+			public void run() {
+				//update preferred neighbors.
+				//update download speed.
+				try {
+					updatePreferredNeighbors();
+				} catch (Exception e) {
+					System.err.println("not enough interested peers. Need " 
+							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+					e.printStackTrace();
+				}
+				clearDownloadSpeed();
+			}
+		}, ConfigurationSetup.getUnchokingInterval() * 1000
+		,  ConfigurationSetup.getUnchokingInterval() * 1000);
+		
+	}
+	
+	public void start_m_timer() {
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+		
+			@Override
+			public void run() {
+				//update optimistically unchoked neighbor
+				System.out.println("time interval: " + ConfigurationSetup.getOptimisticUnchokingInterval());
+				try {
+					updateUnchokedNeighbor();
+				} catch (Exception e) {
+					System.err.println("not enough interested peers. Need " 
+							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+					e.printStackTrace();
+				}
+			}
+		}, ConfigurationSetup.getOptimisticUnchokingInterval() * 1000
+		, ConfigurationSetup.getOptimisticUnchokingInterval() * 1000);
+		
+		
+	}
+	
 	/**
 	 * Initially, choose k preferred neighbors randomly.
 	 */
@@ -222,7 +276,8 @@ public class PeerProcess {
 		synchronized(interested_peer_list) {
 			// get peerID list of all interested neighbors
 			for (PeerInfo peer : neighbors) {
-				if (interested_peer_list.containsKey(peer.getPeerID())) {
+				if (interested_peer_list.containsKey(peer.getPeerID())
+						&& interested_peer_list.get(peer.getPeerID()) == true) {
 					
 					peerIDs.add(peer.getPeerID());
 				}	
@@ -260,13 +315,33 @@ public class PeerProcess {
 	 */
 	public void updatePreferredNeighbors() throws Exception{
 		
-		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
+		HashMap<String, Boolean> newPreferredKNeighbors = 
+				new HashMap<String, Boolean>();
 		StringBuilder peer_list = new StringBuilder();
 		
-		int k = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
-		synchronized(download_speed) {
-			download_speed = new HashMap<String, Integer> (sortByValue(download_speed));
+		class peer_speed_pair implements Comparable<peer_speed_pair>{
+			String peerID;
+			int speed;
+			public peer_speed_pair(String peerid, int spe) {
+				peerID = peerid;
+				speed = spe;
+			}
+			
+			@Override
+			public int compareTo(peer_speed_pair o)
+			{
+			     return(speed - o.speed);
+			}
 		}
+		
+		int k = ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors();
+		ArrayList<peer_speed_pair> speed_list = new ArrayList<peer_speed_pair>();
+		for (String key : download_speed.keySet()) {
+			
+			speed_list.add(new peer_speed_pair(key, download_speed.get(key)));
+		}
+		
+		Collections.sort(speed_list, Collections.reverseOrder());
 		
 		boolean noOneInterested = true;
 		
@@ -274,18 +349,22 @@ public class PeerProcess {
 			
 			// use the first k peers in the interested_peer_list
 			int index = 0;
-			for (Map.Entry<String, Integer> entry : download_speed.entrySet()) {
+			for (peer_speed_pair entry : speed_list) {
+				System.err.println("speed: " + entry.peerID);
+				System.err.println("interested?: " + interested_peer_list.get(entry.peerID));
 				if (index >= k) break;
 				
-				if (interested_peer_list.containsKey(entry.getKey())) {
-					newPreferredKNeighbors.put(entry.getKey(), true);
+				if (interested_peer_list.containsKey(entry.peerID) 
+						&& interested_peer_list.get(entry.peerID) == true) {
+					newPreferredKNeighbors.put(entry.peerID, true);
 					noOneInterested = false;
 					index ++;
 				}
 			}
 		}
-		if (noOneInterested) {
-			
+		
+		//if (noOneInterested) {
+		if (false) {
 			throw new Exception("no one is interested!");
 		}
 		
@@ -300,7 +379,7 @@ public class PeerProcess {
 				if (! newPreferredKNeighbors.containsKey(id)) { // if id is selected this time
 					needToNotify.put(id, "choke");
 					//choke(id); // choke peer
-				} else if(! preferred_neighbors.containsKey(id)) { // 
+				} else { //
 					needToNotify.put(id, "unchoke");
 				}
 			}
@@ -329,6 +408,12 @@ public class PeerProcess {
 				+ "[" + peer_list.toString() 
 				+ "]" + ".");
 		
+		System.out.println(dateFormat.format(calendar.getTime()) 
+				+ ": Peer " + localPeerID 
+				+ " has the preferred neighbors "
+				+ "[" + peer_list.toString()
+				+ "]" + ".");
+		
 		// notify neighbors
 		for (String peerid : needToNotify.keySet()) {
 			
@@ -350,7 +435,6 @@ public class PeerProcess {
 		return map.entrySet().stream().sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 	}
-	
 
 	/**
 	 * Determines unchoked neighbor every m seconds. optimistically unchoked
@@ -401,9 +485,15 @@ public class PeerProcess {
 				+ " has the optimistically unchoked neighbor "
 				+ optimistically_unchoked_neighbor + ".");
 		
+		System.out.println(dateFormat.format(calendar.getTime())
+				+ ": Peer " + localPeerID 
+				+ " has the optimistically unchoked neighbor "
+				+ optimistically_unchoked_neighbor + ".");
 		// unchoke the new optimistically unchoked neighbor
 		unchoke(optimistically_unchoked_neighbor);
 	}
+	
+	
 	
 	public void updateInterested_peer_list(String remotePeerID, int messageType) throws Exception{
 		HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
@@ -416,6 +506,30 @@ public class PeerProcess {
 		}
 	}
 
+	/**
+	 * When the timer is triggered, download speed will be cleared.
+	 */
+	public void clearDownloadSpeed() {
+		
+		for (PeerInfo peer : neighbors) {
+			
+			download_speed.put(peer.getPeerID(), 0);
+		}
+	}
+	
+	/**
+	 * When a receive a piece, update the download speed of the source peer.
+	 */
+	public void updateDownloadSpeed(String peerID) {
+		
+		synchronized(download_speed) {
+			
+			download_speed.put(peerID, download_speed.get(peerID) + 1);
+		}
+	}
+	
+	
+	
 	
 	/**
 	 * Peer starts running from here
@@ -453,9 +567,9 @@ public class PeerProcess {
 	 */
 	public int getPieceToBeRequested(String remotePeerID) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
-		//System.out.println("The bitfield for peer#" + remotePeerID);
+		//System.out.println("The bitfield for remotepeer#" + remotePeerID);
 		//Util.printBitfield(remotePeerBitField);
-		//System.out.println("The local bitfield for peer#" + this.localPeerID);
+		//System.out.println("The local bitfield for localpeer#" + this.localPeerID);
 		//Util.printBitfield(this.localPeerBitField);
 		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 			//System.out.println("Checking pieice#"+i+" for local bitfield for peer#" + this.localPeerID);
@@ -479,7 +593,7 @@ public class PeerProcess {
 	 *         any of the remote peer's pieces.
 	 */
 	public boolean checkIfInterested(String remotePeerID) {
-		if (this.gotCompletedFile || getPieceToBeRequested(remotePeerID) != -1) {
+		if (this.gotCompletedFile || getPieceToBeRequested(remotePeerID) == -1) {
 			return false;
 		} else {
 			return true;
@@ -535,6 +649,12 @@ public class PeerProcess {
 	 */
 	public ArrayList<String> getListOfUnInterestingPeers() {
 		
+		/*TODO: the implementation below does not work!
+		 * Use the Util function isPieceIndexSetInBitField() for this.
+		 * See getPieceToBeRequested() function on how it could be used.
+		*/
+		
+		/*
 		ArrayList<String> uninterestedPeerList = new ArrayList<>();
 		ArrayList<Byte> remotePeerBitField = new ArrayList<>();
 		for(int i = 0; i < neighbors.size(); i++){
@@ -555,6 +675,9 @@ public class PeerProcess {
 		}
 		
 		return uninterestedPeerList;
+		*/
+		
+		return null;
 	}
 
 	/**
@@ -574,7 +697,6 @@ public class PeerProcess {
 	public void updatePieceRecieved(int pieceIndex) {
 		this.piecesRequested.remove(pieceIndex);
 		Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
-		
 	}
 	
 	/**
@@ -625,10 +747,6 @@ public class PeerProcess {
 
 	public void setPeersBitfields(HashMap<String, ArrayList<Byte>> peersBitfields) {
 		this.peersBitfields = peersBitfields;
-	}
-
-	public TCPConnectionManager getConnManager() {
-		return connManager;
 	}
 
 	public void setConnManager(TCPConnectionManager connManager) {

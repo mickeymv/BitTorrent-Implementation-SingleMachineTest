@@ -2,6 +2,8 @@ package connection;
 
 import java.io.ByteArrayOutputStream;
 import messages.Message;
+import peer.PeerProcess;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -36,8 +38,19 @@ public class TCPConnectionManager {
 	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
 	private static Calendar calendar = Calendar.getInstance();
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
-	
+
 	/** This is the map for P2pConnections. Input is the peerID of a peer. */
+
+	/**
+	 * This is the map for P2pConnections.
+	 * 
+	 * TODO: for local testing we cannot make this static.
+	 * 
+	 * But for actual machine testing, this can be made static with the key as
+	 * the remote peer alone. For now, key has to be "localPeerID:remotePeerID"
+	 * 
+	 * Key is the peerID of a peer (when actual remote machine testing).
+	 */
 	private static HashMap<String, P2PConnection> connMap = new HashMap<String, P2PConnection>();
 
 	/** This is a list that contains all of the peers in the network */
@@ -49,26 +62,49 @@ public class TCPConnectionManager {
 	private ServerSocket listener = null;
 
 	private static Util utilInstance = Util.initializeUtil();
+
+	private HandShake handShakeHandler;
+
+	public PeerProcess localPeerProcessInstance;
+
+	/**
+	 * Map of which piece index was sent as a "have" message to which remote
+	 * peer. remotePeerID -> PieceIndex
+	 */
+	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
 	
-	/*
+	/**
+	 * TODO: Remove this after local testing.
 	 * This is required for local testing. the map has as key the peer's
 	 * address, formatted as 'hostName:portNumber'; and value as the peerID.
+	 * 
+	 * The only thing required for remote machine testing is getPeerIDFromHostName();
 	 **/
 	private static HashMap<String, String> peerAddressToPeerIDMap = new HashMap<>();
 
 	/**
 	 * Constructor, initiate the object.
 	 * 
+	 * @param peerProcess
+	 * 
 	 * @param hostname:
 	 *            host name of self
 	 * @param port:
 	 *            port number of self
 	 */
-	public TCPConnectionManager(PeerInfo localPeer) {
+	public TCPConnectionManager(PeerInfo localPeer, PeerProcess peerProcess) {
 		this.localPeerID = localPeer.getPeerID();
 		this.localHostname = localPeer.getHostName();
 		this.localPeerServerListeningPort = localPeer.getPortNumber();
+		this.localPeerProcessInstance = peerProcess;
 		populatePeerAddressToPeerIDHashMap();
+	}
+
+	private HandShake getHandShakeHandler() {
+		if (handShakeHandler == null) {
+			handShakeHandler = new HandShake(this);
+		}
+		return handShakeHandler;
 	}
 
 	/*
@@ -89,7 +125,8 @@ public class TCPConnectionManager {
 		// if the peer is not the first, create client connections to previous
 		// peers.
 		if (!utilInstance.isFirstPeer(localPeerID)) {
-			//System.out.println("Create client connections for peer#" + localPeerID);
+			// System.out.println("Create client connections for peer#" +
+			// localPeerID);
 			createClientConnections();
 		}
 		// if the peer is not the last, create a server socket and listen to
@@ -108,20 +145,46 @@ public class TCPConnectionManager {
 			(new Thread() {
 				@Override
 				public void run() {
+					// System.err.println("In INITIAL choking for local
+					// peer#"+localPeerID);
+					// initialize preferred neighbors.
 					for (PeerInfo peer : peerList) {
-						if (localPeerID != peer.getPeerID()) {
-							new Message().sendMessage(Message.MESSAGETYPE_UNCHOKE, peer.getPeerID());
-							System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
-									+ peer.getPeerID());
+						if (!localPeerID.equals(peer.getPeerID())) {
+							
+							if (localPeerProcessInstance.checkIfInterested(peer.getPeerID()) == true) {
+								
+								new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
+										.sendMessage(Message.MESSAGETYPE_INTERESTED);
+							} else {
+								
+								new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
+										.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
+							}
+							
+							// System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
+							//		+ peer.getPeerID());
+							//new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
+							//	.sendMessage_bitfield(localPeerProcessInstance.getLocalPeerBitField());
 						}
 					}
+					
+					localPeerProcessInstance.start_p_timer();
+					localPeerProcessInstance.start_m_timer();
+					
+					//localPeerProcessInstance.initializePreferredNeighbors();
+					//try {
+					//	localPeerProcessInstance.updateUnchokedNeighbor();
+					//} catch (Exception e) {
+						// TODO Auto-generated catch block
+					//	e.printStackTrace();
+					//}
 				}
 			}).start();
 		}
 	}
 
 	/**
-	 * Creates connections from local peer to previous peers. 
+	 * Creates connections from local peer to previous peers.
 	 */
 	private void createClientConnections() {
 		ArrayList<PeerInfo> previousPeers = Util.getMyPreviousPeers(localPeerID);
@@ -131,34 +194,43 @@ public class TCPConnectionManager {
 			(new Thread() {
 				@Override
 				public void run() {
-//					System.out.println("inside Client: " + localPeerID + " 's thread to connect to Server: "
-//							+ remotePeerServer.getPeerID());
+					// System.out.println("inside Client: " + localPeerID + " 's
+					// thread to connect to Server: "
+					// + remotePeerServer.getPeerID());
 					Socket localPeerClientSocket;
 					try {
-						
+
 						localPeerClientSocket = new Socket(remotePeerServer.getHostName(),
 								remotePeerServer.getPortNumber());
-						
-						logger.info(dateFormat.format(calendar.getTime()) 
-								+ ": Peer " + remotePeerServer.getPeerID() 
-								+ " makes a connection to Peer "
-								+ localPeerID + ".");
-						
-						populateConnMap(localPeerClientSocket, remotePeerServer.getPeerID(),
-								remotePeerServer.getHostName(), remotePeerServer.getPortNumber());
 
-//						System.out.println("123inside after client connected to server: " + localPeerID + " "
-//								+ remotePeerServer.getPeerID());
+						logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + remotePeerServer.getPeerID()
+								+ " makes a connection to Peer " + localPeerID + ".");
+
+						populateConnMap(localPeerID, localPeerClientSocket, remotePeerServer.getPeerID(),
+								remotePeerServer.getHostName(), remotePeerServer.getPortNumber());
 
 						peerAddressToPeerIDMap.put(localHostname + ":" + localPeerClientSocket.getLocalPort(),
 								localPeerID);
 
+						// System.out.println("Mapping for "+localHostname + ":"
+						// + localPeerClientSocket.getLocalPort()+" to
+						// "+localPeerID+ " has been entered");
 
-						new HandShake().establishClientHandShakeTwoWayStream(localPeerID, remotePeerServer.getPeerID());
+						// System.out.println("123inside after client connected
+						// to server: " + localPeerID + " "
+						// + remotePeerServer.getPeerID());
+
+						// TODO: uncomment this for handshakes!
+						// getHandShakeHandler().establishClientHandShakeTwoWayStream(localPeerID,
+						// remotePeerServer.getPeerID());
+
+						// System.out.println("ClientHandler: Trying to get
+						// DatainputStream for "+localPeerID+":"+
+						// remotePeerServer.getPeerID());
 
 						MessageListener localPeerMessageListener = new MessageListener(localPeerID,
 								remotePeerServer.getPeerID(),
-								TCPConnectionManager.getDataInputStream(remotePeerServer.getPeerID()));
+								TCPConnectionManager.getDataInputStream(localPeerID, remotePeerServer.getPeerID()));
 						localPeerMessageListener.startListening();
 
 						// System.out.println("Client: " + localPeerID + ",
@@ -201,14 +273,15 @@ public class TCPConnectionManager {
 
 		try {
 			listener = new ServerSocket(serverPort);
-//			System.out.println("The server " + localPeerID + " is running.");
+			// System.out.println("The server " + localPeerID + " is running.");
 
 			// the listening server should be in a separate thread or else it
 			// will block the main thread.
 			(new Thread() {
 				@Override
 				public void run() {
-//					System.out.println("Inside the server " + localPeerID + " thread, listening to client requests...");
+					// System.out.println("Inside the server " + localPeerID + "
+					// thread, listening to client requests...");
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -222,7 +295,7 @@ public class TCPConnectionManager {
 							// handled in a separate thread
 
 							new PeerServerHandler(listener.accept(), localPeerID).start();
-							
+
 						} catch (IOException e) {
 							System.err.println("Error: Cannot create server socket " + "with hostname " + localHostname
 									+ " port number " + localPeerServerListeningPort);
@@ -256,15 +329,22 @@ public class TCPConnectionManager {
 	/**
 	 * Return peerID given a hostname.
 	 * 
+	 * TODO: This is the only function needed when we test on actual remote
+	 * machines. There is no need for a peerAddress to peerID map then.
+	 * 
 	 * @param hostname
 	 * @return
 	 */
-	/*
-	 * private static String hostname2peerID(String hostname) { String peerID =
-	 * null; for (PeerInfo peer : peerList) { if
-	 * (hostname.equals(peer.getHostName())) { peerID = peer.getPeerID(); break;
-	 * } } return peerID; }
-	 */
+
+	private static String getPeerIDFromHostName(String hostname) {
+		String peerID = null;
+		for (PeerInfo peer : peerList) {
+			if (hostname.equals(peer.getHostName())) {
+				return peer.getPeerID();
+			}
+		}
+		return peerID;
+	}
 
 	/**
 	 * Populate the map for TCP connections.
@@ -275,18 +355,23 @@ public class TCPConnectionManager {
 	 * @param peerID:
 	 *            peerID of the (remote) client/server.
 	 */
-	private static void populateConnMap(Socket localSocket, String remotePeerID, String hostname, int port) {
+	private synchronized static void populateConnMap(String localPeerID, Socket localSocket, String remotePeerID,
+			String hostname, int port) {
 		P2PConnection p2pConn = new P2PConnection(localSocket, remotePeerID, hostname, port);
-		connMap.put(remotePeerID, p2pConn);
+		connMap.put(localPeerID + ":" + remotePeerID, p2pConn);
 
-//		System.out.println("connMap has a socket for the remotePeer#" + remotePeerID);
+		// System.out.println("Connection added for
+		// "+localPeerID+":"+remotePeerID);
+
+		// System.out.println("connMap has a socket for the remotePeer#" +
+		// remotePeerID);
 	}
 
 	/**
 	 * A handler thread class. Handlers are spawned from the listening loop and
 	 * are responsible for dealing with a single client's requests.
 	 */
-	private static class PeerServerHandler extends Thread {
+	private class PeerServerHandler extends Thread {
 		private Socket localPeerSocket;
 		// private DataInputStream in; // stream read from the client socket
 		// private DataOutputStream out; // stream write to the client socket
@@ -298,20 +383,33 @@ public class TCPConnectionManager {
 		 * particular incoming client tcp connection.
 		 */
 		public PeerServerHandler(Socket connection, String localServerPeerID) {
-			
+
 			this.localPeerSocket = connection;
 			String clientHostname = connection.getInetAddress().getHostName();
+			while (!peerAddressToPeerIDMap.containsKey(clientHostname + ":" + connection.getPort())) {
+				System.err.println("\nWait for the local server peer# " + localServerPeerID
+						+ ", peerAddressToPeerIDMap to have a mapping for the host# " + clientHostname + ":"
+						+ connection.getPort() + "\n");
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			remoteClientPeerID = peerAddressToPeerIDMap.get(clientHostname + ":" + connection.getPort());
-			
-			// log the connection: [Time]: Peer [peer_ID 1] is connected from Peer [peer_ID 2].
-			logger.info(dateFormat.format(calendar.getTime()) 
-					+ ": Peer " + localServerPeerID 
-					+ " is connected from Peer "
-					+ remoteClientPeerID + ".");
-			
-//			System.out.println("Server: " + localServerPeerID + ", connected to a client with address: "
-//					+ clientHostname + ":" + connection.getPort() + " and ID: " + remoteClientPeerID);
-			populateConnMap(localPeerSocket, remoteClientPeerID, clientHostname, connection.getPort());
+
+			// log the connection: [Time]: Peer [peer_ID 1] is connected from
+			// Peer [peer_ID 2].
+			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localServerPeerID
+					+ " is connected from Peer " + remoteClientPeerID + ".");
+
+			// System.out.println("Server: " + localServerPeerID + ", connected
+			// to a client with address: "
+			// + clientHostname + ":" + connection.getPort() + " and ID: " +
+			// remoteClientPeerID);
+			populateConnMap(localServerPeerID, localPeerSocket, remoteClientPeerID, clientHostname,
+					connection.getPort());
 			this.localServerPeerID = localServerPeerID;
 			// System.out.println("123inside after server connected to client: "
 			// + localServerPeerID + " "+clientPeerID);
@@ -320,21 +418,28 @@ public class TCPConnectionManager {
 		public void run() {
 			// System.out.println("Inside the server " + localServerPeerID + "
 			// thread,after accepted a client request...");
-			new HandShake().establishServerHandShakeTwoWayStream(localServerPeerID, remoteClientPeerID);
+
+			// TODO: uncomment this for handshakes!
+			// getHandShakeHandler().establishServerHandShakeTwoWayStream(localServerPeerID,
+			// remoteClientPeerID);
+
+			// System.out.println("ServerHandler: Trying to get DatainputStream
+			// for "+localPeerID+":"+ remoteClientPeerID);
 
 			MessageListener localPeerMessageListener = new MessageListener(localServerPeerID, remoteClientPeerID,
-					TCPConnectionManager.getDataInputStream(remoteClientPeerID));
+					TCPConnectionManager.getDataInputStream(localPeerID, remoteClientPeerID));
 			localPeerMessageListener.startListening();
 		}
 
 	}
 
-	public static DataOutputStream getDataOutputStream(String remotePeerID) {
+	public static DataOutputStream getDataOutputStream(String localPeerID, String remotePeerID) {
 
-		while (!connMap.containsKey(remotePeerID)) {
+		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
-
-			System.err.println("Wait for the connMap to have a socket for the remotePeer#" + remotePeerID);
+			// System.err.println("OUT");
+//			System.err.println("\nWait for the local peer# " + localPeerID
+//					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
 
 			try {
 				Thread.sleep(10000);
@@ -344,17 +449,19 @@ public class TCPConnectionManager {
 			}
 		}
 
-		//System.out.println("out of Waiting for the connMap to have a socket for the remotePeer#" + remotePeerID);
+		// System.out.println("out of Waiting for the connMap to have a socket
+		// for the remotePeer#" + remotePeerID);
 
-		return connMap.get(remotePeerID).getDataOutputStream();
+		return connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
 	}
 
-	public static DataInputStream getDataInputStream(String remotePeerID) {
-		
-		while (!connMap.containsKey(remotePeerID)) {
-			// wait for the connection socket to be created from the thread.
+	public static DataInputStream getDataInputStream(String localPeerID, String remotePeerID) {
 
-			System.err.println("Wait for the connMap to have a socket for the remotePeer#" + remotePeerID);
+		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
+			// wait for the connection socket to be created from the thread.
+			// System.err.println("IN");
+//			System.err.println("\nWait for the local peer# " + localPeerID
+//					+ ", connMap to have a socket for the remotePeer# " + remotePeerID + "\n");
 
 			try {
 				Thread.sleep(10000);
@@ -363,20 +470,89 @@ public class TCPConnectionManager {
 				e.printStackTrace();
 			}
 		}
-		
-		return connMap.get(remotePeerID).getDataInputStream();
-	}
 
-	/*
-	 * public static void spawnNewMessageListener(String localPeerID, String
-	 * remotePeerID) {
-	 * 
-	 * (new Thread() {
-	 * 
-	 * @Override public void run() { MessageListener localPeerMessageListener =
-	 * new MessageListener(localPeerID, remotePeerID,
-	 * TCPConnectionManager.getDataInputStream(remotePeerID));
-	 * localPeerMessageListener.startListening(); } }).start(); }
+		return connMap.get(localPeerID + ":" + remotePeerID).getDataInputStream();
+	}
+	
+	/**
+	 * Broadcast to all peers of the local peer that this peer
+	 * "has" the specified piece.
+	 * @param pieceIndex
 	 */
+	public  void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
+		for(PeerInfo peer: this.localPeerProcessInstance.getNeighbors()) {
+			sendHaveMessage(pieceIndex, peer.getPeerID());
+		}
+	}
+	
+
+
+	/**
+	 * Send "NOT_INTERESTED" message to the peers who the local peer
+	 * is not interested in.
+	 * @param notInterestingPeers
+	 */
+	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * 
+	 * @param messageType, the type of message to sent
+	 * @param messagePayload, the required payload
+	 */
+	public  void sendHaveMessage(int pieceIndex, String remotePeerID) {
+		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
+			// wait for the connection socket to be created from the thread.
+			// System.err.println("OUT");
+//			System.err.println("\nWait for the local peer# " + localPeerID
+//					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
+
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		DataOutputStream out = connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
+		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
+		byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceIndex);
+		try {
+			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_HAVE);
+			streamToCombineByteArrays.write(pieceIndexMessagePayload);
+			byte[] message = streamToCombineByteArrays.toByteArray();
+			out.writeInt(message.length);
+			out.write(message);
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.sentHaveMap.put(remotePeerID, pieceIndex);
+	}
+	
+	
+	/**
+	 * 
+	 * @return piece index of the piece which this local peer said it had (via a
+	 *         "have" message sent previously).
+	 */
+	public int getPieceIndexToSendToPeer(String remotePeerID) {
+		if (this.sentHaveMap.containsKey(remotePeerID) )
+			return this.sentHaveMap.get(remotePeerID);
+		else
+			return -1;
+	}
+	
+	/**
+	 * Called after the peer responds with 'INTERESTING' 
+	 * and we sent it the piece.
+	 * @param remotePeerID
+	 */
+	public void removePieceIndexAlreadySentToPeer(String remotePeerID) {
+		this.sentHaveMap.remove(remotePeerID);
+	}
 
 }

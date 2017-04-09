@@ -87,6 +87,12 @@ public class Util {
 		// System.out.println("the piece# to check for is:" + pieceIndex);
 		int byteContainingPiece = pieceIndex / 8;
 		// System.out.println("byteContainingPiece# is:" + byteContainingPiece);
+		
+		if(bitField == null || bitField.size() == 0) {
+			//TODO: Remove this and figure out why this happens!
+			return false;
+		}
+		
 		byte checkByte = bitField.get(byteContainingPiece);
 		// System.out.println("the byte containing piece is:" +
 		// String.valueOf(checkByte));
@@ -160,7 +166,7 @@ public class Util {
 	 */
 	public static ArrayList<Byte> getPeerBitfield(boolean hasFileInitially) {
 		ArrayList<Byte> bitField = new ArrayList<Byte>();
-
+		
 		// if there is no local file, set the bitmap to be null
 		if (ConfigurationSetup.getInstance().getFileName() == null) {
 			return bitField;
@@ -501,8 +507,8 @@ public class Util {
 		int byteContainingPiece = pieceIndex / 8;
 		//System.out.println("byteContainingPiece is:" + byteContainingPiece);
 		//System.out.println("size of bitfield is:" + bitField.size());
-		if (bitField.size() == 0) {
-			//TODO: Remove this. figure out why this is happening!
+		if(bitField == null || bitField.size() == 0) {
+			//TODO: Remove this and figure out why this happens!
 			return;
 		}
 		byte checkByte = bitField.get(byteContainingPiece);
