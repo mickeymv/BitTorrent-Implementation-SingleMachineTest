@@ -114,6 +114,23 @@ public class Message {
 		}
 	}
 	
+	/**
+	 * send out bitfield
+	 * @param bitfield
+	 */
+	public void sendMessage_bitfield(ArrayList<Byte> bitfield) {
+		
+		int len = bitfield.size();
+		byte [] bitFieldArr = new byte[len];
+		for (int i = 0; i < len; i ++) {
+			
+			bitFieldArr[i] = bitfield.get(i);
+		}
+		byte [] message = getMessage(MESSAGETYPE_BITFIELD, bitFieldArr);
+		sendMessage(message);
+	}
+	
+	
 	// send a message to the output stream
 	public  void sendMessage(byte[] msg) {
 		try {

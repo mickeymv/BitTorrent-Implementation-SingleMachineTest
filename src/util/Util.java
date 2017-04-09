@@ -166,7 +166,7 @@ public class Util {
 	 */
 	public static ArrayList<Byte> getPeerBitfield(boolean hasFileInitially) {
 		ArrayList<Byte> bitField = new ArrayList<Byte>();
-
+		
 		// if there is no local file, set the bitmap to be null
 		if (ConfigurationSetup.getInstance().getFileName() == null) {
 			return bitField;

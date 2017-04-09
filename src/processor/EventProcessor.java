@@ -67,6 +67,16 @@ public class EventProcessor {
 		int pieceIndex = -1;
 		switch (type) {
 
+		case Message.MESSAGETYPE_BITFIELD:
+			/**
+			 * print the length of the bitfield
+			 */
+			//System.out.println(localPeerID + ">> bitfield received from " + remotePeerID + ". length: " + payload.length);
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " received bitfield from "
+					+ this.remotePeerID + ".");
+			
+			
+			
 		case Message.MESSAGETYPE_CHOKE:
 			/**
 			 * This happens when; Received when this peer becomes a preferred or
@@ -75,20 +85,22 @@ public class EventProcessor {
 			 * complete file, or that remote peer has no interesting pieces,
 			 * then this was receieved in error;
 			 */
-
+			
 			// [Time]: Peer [peer_ID 1] is choked by [peer_ID 2].
 			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " is choked by "
 					+ this.remotePeerID + ".");
-
-			System.out
-					.println("in peer: " + this.localPeerID + ", got 'CHOKE' message from peer: " + this.remotePeerID);
+			
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " is choked by "
+					+ this.remotePeerID + ".");
+			//System.out
+			//		.println("in peer: " + this.localPeerID + ", got 'CHOKE' message from peer: " + this.remotePeerID);
 
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID)) {
 				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
 						+ this.remotePeerID
 						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 				messageHandler.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
-
+				
 				return;
 			} else {
 				// do nothing
@@ -108,7 +120,8 @@ public class EventProcessor {
 			// [Time]: Peer [peer_ID 1] is unchoked by [peer_ID 2].
 			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " is unchoked by "
 					+ this.remotePeerID + ".");
-
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID + " is unchoked by "
+					+ this.remotePeerID + ".");
 			/*
 			 * Action to take;
 			 * 
@@ -116,8 +129,8 @@ public class EventProcessor {
 			 * B. else, send "request" to B, if B has pieces that local peer
 			 * doesn't have and hasen't requested.
 			 */
-			System.out.println(
-					"in peer: " + this.localPeerID + ", got 'UNCHOKE' message from peer: " + this.remotePeerID);
+			//System.out.println(
+			//		"in peer: " + this.localPeerID + ", got 'UNCHOKE' message from peer: " + this.remotePeerID);
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID)) {
 				System.out.println(" in peer: " + this.localPeerID + ", got UNCHOKE message from peer: "
 						+ this.remotePeerID
@@ -154,6 +167,9 @@ public class EventProcessor {
 			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
 					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
 
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
+
 			/*
 			 * Action to take;
 			 * 
@@ -163,8 +179,8 @@ public class EventProcessor {
 			 * 2). if B is not there, add B into interesetd_peer_list
 			 */
 
-			System.out.println(
-					"in peer: " + this.localPeerID + ", got 'INTERESTED' message from peer: " + this.remotePeerID);
+			//System.out.println(
+			//		"in peer: " + this.localPeerID + ", got 'INTERESTED' message from peer: " + this.remotePeerID);
 
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
 			int pieceIndexToBeSent = this.localPeerProcessInstance.getConnManager()
@@ -176,10 +192,15 @@ public class EventProcessor {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			byte[] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndexToBeSent);
-			messageHandler.sendPieceMessage(pieceIndex, pieceMessagePayload);
-			System.out.println("peer#: " + this.localPeerID + " sent piece message Piece# " + pieceIndexToBeSent
-					+ " to peer#" + this.remotePeerID);
+			
+			// if find a piece that need to be sent.
+			if (pieceIndexToBeSent != -1) {
+				
+				byte[] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndexToBeSent);
+				messageHandler.sendPieceMessage(pieceIndex, pieceMessagePayload);
+				System.out.println("peer#: " + this.localPeerID + " sent piece message Piece# " + pieceIndexToBeSent
+						+ " to peer#" + this.remotePeerID);
+			}
 
 			break;
 		case Message.MESSAGETYPE_NOTINTERESTED:
@@ -194,13 +215,15 @@ public class EventProcessor {
 			// message from [peer_ID 2].
 			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
 					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
 
 			/*
 			 * update interested peers list.
 			 */
 
-			System.out.println(
-					"in peer: " + this.localPeerID + ", got 'NOT_INTERESTED' message from peer: " + this.remotePeerID);
+			//System.out.println(
+			//		"in peer: " + this.localPeerID + ", got 'NOT_INTERESTED' message from peer: " + this.remotePeerID);
 
 			localPeerProcessInstance.removeNeighborWhoIsNotInterested(remotePeerID);
 
@@ -234,9 +257,11 @@ public class EventProcessor {
 			// from [peer_ID 2] for the piece [piece index].
 			logger.info(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
 					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 
-			System.out.println("in peer: " + this.localPeerID + ", got 'HAVE' piece#" + pieceIndex
-					+ " message from peer: " + this.remotePeerID);
+			//System.out.println("in peer: " + this.localPeerID + ", got 'HAVE' piece#" + pieceIndex
+			//		+ " message from peer: " + this.remotePeerID);
 
 			if (this.localPeerProcessInstance.isPieceNotAvailableOrNotRequested(pieceIndex)) {
 				messageHandler.sendMessage(Message.MESSAGETYPE_INTERESTED);
@@ -265,22 +290,25 @@ public class EventProcessor {
 			 * pieces.
 			 */
 			pieceIndex = Util.intFromByteArray(payload);
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+					+ " send request to " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 
-			System.out.println("in peer: " + this.localPeerID + ", got 'REQUEST' piece#" + pieceIndex
-					+ " message from peer: " + this.remotePeerID);
+			
+			//System.out.println("in peer: " + this.localPeerID + ", got 'REQUEST' piece#" + pieceIndex
+			//		+ " message from peer: " + this.remotePeerID);
 
 			// Safety check: check if piece is available in local peer
 
 			if (this.localPeerProcessInstance.isPieceAvailableLocally(pieceIndex)) {
-				pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndex);
+				byte [] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndex);
 				messageHandler.sendPieceMessage(pieceIndex, pieceMessagePayload);
-				System.out.println("peer#: " + this.localPeerID + " sent a Piece message piece# " + pieceIndex
-						+ " to peer#" + this.remotePeerID);
+				//System.out.println("peer#: " + this.localPeerID + " sent a Piece message piece# " + pieceIndex
+				//		+ " to peer#" + this.remotePeerID);
 
 			} else {
-				System.out.println("in peer: " + this.localPeerID + ", got REQUEST of piece '" + pieceIndex
-						+ "' message from peer: " + this.remotePeerID
-						+ ", when this local peer does not have that piece. This piece should not have been selected by that peer!");
+				//System.out.println("in peer: " + this.localPeerID + ", got REQUEST of piece '" + pieceIndex
+				//		+ "' message from peer: " + this.remotePeerID
+				//		+ ", when this local peer does not have that piece. This piece should not have been selected by that peer!");
 				return;
 			}
 
@@ -307,9 +335,13 @@ public class EventProcessor {
 
 			pieceIndex = Util.intFromByteArray(pieceIndexBytesArray);
 
-			System.out.println("in peer: " + this.localPeerID + ", got 'PIECE' piece#" + pieceIndex
-					+ " message from peer: " + this.remotePeerID);
+			System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
+					+ " received piece from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 
+			
+			//System.out.println("in peer: " + this.localPeerID + ", got 'PIECE' piece#" + pieceIndex
+			//		+ " message from peer: " + this.remotePeerID);
+			
 			Util.savePieceFile(pieceDataBytesArray, this.localPeerID, String.valueOf(pieceIndex));
 
 			this.localPeerProcessInstance.updatePieceRecieved(pieceIndex);

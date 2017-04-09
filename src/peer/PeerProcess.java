@@ -67,7 +67,7 @@ public class PeerProcess {
 
 	/** the index of the preferred neighbor set. */
 	private HashMap<String, Boolean> preferred_neighbors = new HashMap<>();
-	private String optimistically_unchoked_neighbor = null;
+	private String optimistically_unchoked_neighbor = new String();
 	
 	/** the unchoked neighbor. */
 	private int unchoked_neighbor = -1;
@@ -117,8 +117,8 @@ public class PeerProcess {
 	
 	public PeerProcess(String localPeerID) {
 		this.localPeerID = localPeerID;
-		localPeerInfo = utilInstance.getPeerInfo(localPeerID);
-		localPeerBitField = utilInstance.getPeerBitfield(localPeerInfo.isHasFileInitially());
+		localPeerInfo = Util.getPeerInfo(localPeerID);
+		localPeerBitField = Util.getPeerBitfield(localPeerInfo.isHasFileInitially());
 		// System.out.println("the bitfield for peer: "+localPeerID+" is:");
 		// utilInstance.printBitfield(localPeerBitField);
 		time_interval_p_preferred_neighbor = ConfigurationSetup.getUnchokingInterval();
@@ -136,6 +136,10 @@ public class PeerProcess {
 		}
 		clearDownloadSpeed();
 		
+		// 1). initialize interested neighbor
+		// 2). initialize preferred neighbor
+		// 3). initialize optimistically unchoked neighbor.
+		// 4). 
 	}
 
 	public void addInterestedNeighbor(String remotePeerID) {
@@ -150,10 +154,10 @@ public class PeerProcess {
 			}
 		}
 	}
-
+	
 	private void setPeersBitfields() {
 		for (PeerInfo peer : neighbors) {
-			setPeerBitField(peer.getPeerID(), utilInstance.getPeerBitfield(peer.isHasFileInitially()));
+			setPeerBitField(peer.getPeerID(), Util.getPeerBitfield(peer.isHasFileInitially()));
 		}
 	}
 
@@ -200,6 +204,7 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void choke(String peerID) {
+		new Message(localPeerID, peerID, this).sendMessage(Message.MESSAGETYPE_CHOKE);
 		//Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
 	}
 
@@ -209,51 +214,52 @@ public class PeerProcess {
 	 * @param peerID
 	 */
 	public void unchoke(String peerID) {
+		new Message(localPeerID, peerID, this).sendMessage(Message.MESSAGETYPE_UNCHOKE);
 		//Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
 	}
 
 	public void start_p_timer() {
 		Timer timer = new Timer();
-		while(true) {
-			timer.schedule(new TimerTask() {
-			
-				@Override
-				public void run() {
-					//update preferred neighbors.
-					//update download speed.
-					try {
-						updatePreferredNeighbors();
-					} catch (Exception e) {
-						System.err.println("not enough interested peers. Need " 
-								+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
-						e.printStackTrace();
-					}
-					clearDownloadSpeed();
+		
+		timer.scheduleAtFixedRate(new TimerTask() {
+		
+			@Override
+			public void run() {
+				//update preferred neighbors.
+				//update download speed.
+				try {
+					updatePreferredNeighbors();
+				} catch (Exception e) {
+					System.err.println("not enough interested peers. Need " 
+							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+					e.printStackTrace();
 				}
-			}, ConfigurationSetup.getUnchokingInterval());
-			
-		}
+				clearDownloadSpeed();
+			}
+		}, ConfigurationSetup.getUnchokingInterval() * 1000
+		,  ConfigurationSetup.getUnchokingInterval() * 1000);
+		
 	}
 	
 	public void start_m_timer() {
 		Timer timer = new Timer();
-		while(true) {
-			timer.schedule(new TimerTask() {
-			
-				@Override
-				public void run() {
-					//update optimistically unchoked neighbor
-					try {
-						updateUnchokedNeighbor();
-					} catch (Exception e) {
-						System.err.println("not enough interested peers. Need " 
-								+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
-						e.printStackTrace();
-					}
+		timer.scheduleAtFixedRate(new TimerTask() {
+		
+			@Override
+			public void run() {
+				//update optimistically unchoked neighbor
+				System.out.println("time interval: " + ConfigurationSetup.getOptimisticUnchokingInterval());
+				try {
+					updateUnchokedNeighbor();
+				} catch (Exception e) {
+					System.err.println("not enough interested peers. Need " 
+							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+					e.printStackTrace();
 				}
-			}, ConfigurationSetup.getOptimisticUnchokingInterval());
-			
-		}
+			}
+		}, ConfigurationSetup.getOptimisticUnchokingInterval() * 1000
+		, ConfigurationSetup.getOptimisticUnchokingInterval() * 1000);
+		
 		
 	}
 	
@@ -356,8 +362,9 @@ public class PeerProcess {
 				}
 			}
 		}
-		if (noOneInterested) {
-			
+		
+		//if (noOneInterested) {
+		if (false) {
 			throw new Exception("no one is interested!");
 		}
 		
@@ -372,7 +379,7 @@ public class PeerProcess {
 				if (! newPreferredKNeighbors.containsKey(id)) { // if id is selected this time
 					needToNotify.put(id, "choke");
 					//choke(id); // choke peer
-				} else if(! preferred_neighbors.containsKey(id)) { // 
+				} else { //
 					needToNotify.put(id, "unchoke");
 				}
 			}
@@ -401,6 +408,12 @@ public class PeerProcess {
 				+ "[" + peer_list.toString() 
 				+ "]" + ".");
 		
+		System.out.println(dateFormat.format(calendar.getTime()) 
+				+ ": Peer " + localPeerID 
+				+ " has the preferred neighbors "
+				+ "[" + peer_list.toString()
+				+ "]" + ".");
+		
 		// notify neighbors
 		for (String peerid : needToNotify.keySet()) {
 			
@@ -422,7 +435,6 @@ public class PeerProcess {
 		return map.entrySet().stream().sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 	}
-	
 
 	/**
 	 * Determines unchoked neighbor every m seconds. optimistically unchoked
@@ -473,9 +485,15 @@ public class PeerProcess {
 				+ " has the optimistically unchoked neighbor "
 				+ optimistically_unchoked_neighbor + ".");
 		
+		System.out.println(dateFormat.format(calendar.getTime())
+				+ ": Peer " + localPeerID 
+				+ " has the optimistically unchoked neighbor "
+				+ optimistically_unchoked_neighbor + ".");
 		// unchoke the new optimistically unchoked neighbor
 		unchoke(optimistically_unchoked_neighbor);
 	}
+	
+	
 	
 	public void updateInterested_peer_list(String remotePeerID, int messageType) throws Exception{
 		HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
@@ -575,7 +593,7 @@ public class PeerProcess {
 	 *         any of the remote peer's pieces.
 	 */
 	public boolean checkIfInterested(String remotePeerID) {
-		if (this.gotCompletedFile || getPieceToBeRequested(remotePeerID) != -1) {
+		if (this.gotCompletedFile || getPieceToBeRequested(remotePeerID) == -1) {
 			return false;
 		} else {
 			return true;

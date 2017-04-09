@@ -147,14 +147,37 @@ public class TCPConnectionManager {
 				public void run() {
 					// System.err.println("In INITIAL choking for local
 					// peer#"+localPeerID);
+					// initialize preferred neighbors.
 					for (PeerInfo peer : peerList) {
 						if (!localPeerID.equals(peer.getPeerID())) {
-							new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
-									.sendMessage(Message.MESSAGETYPE_UNCHOKE);
-							System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
-									+ peer.getPeerID());
+							
+							if (localPeerProcessInstance.checkIfInterested(peer.getPeerID()) == true) {
+								
+								new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
+										.sendMessage(Message.MESSAGETYPE_INTERESTED);
+							} else {
+								
+								new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
+										.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
+							}
+							
+							// System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
+							//		+ peer.getPeerID());
+							//new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
+							//	.sendMessage_bitfield(localPeerProcessInstance.getLocalPeerBitField());
 						}
 					}
+					
+					localPeerProcessInstance.start_p_timer();
+					localPeerProcessInstance.start_m_timer();
+					
+					//localPeerProcessInstance.initializePreferredNeighbors();
+					//try {
+					//	localPeerProcessInstance.updateUnchokedNeighbor();
+					//} catch (Exception e) {
+						// TODO Auto-generated catch block
+					//	e.printStackTrace();
+					//}
 				}
 			}).start();
 		}
@@ -510,14 +533,17 @@ public class TCPConnectionManager {
 		this.sentHaveMap.put(remotePeerID, pieceIndex);
 	}
 	
-
+	
 	/**
 	 * 
 	 * @return piece index of the piece which this local peer said it had (via a
 	 *         "have" message sent previously).
 	 */
 	public int getPieceIndexToSendToPeer(String remotePeerID) {
-		return this.sentHaveMap.get(remotePeerID);
+		if (this.sentHaveMap.containsKey(remotePeerID) )
+			return this.sentHaveMap.get(remotePeerID);
+		else
+			return -1;
 	}
 	
 	/**
