@@ -219,25 +219,8 @@ public class PeerProcess {
 	}
 
 	/**
-	 * Choke a peer
-	 * 
-	 * @param peerID
+	 * Timer for preferred neighbors at ever 'p' seconds.
 	 */
-	public void choke(String peerID) {
-		new Message(localPeerID, peerID, this).sendMessage(Message.MESSAGETYPE_CHOKE);
-		// Message.sendMessage(Message.MESSAGETYPE_CHOKE, peerID);
-	}
-
-	/**
-	 * unchoke a peer
-	 * 
-	 * @param peerID
-	 */
-	public void unchoke(String peerID) {
-		new Message(localPeerID, peerID, this).sendMessage(Message.MESSAGETYPE_UNCHOKE);
-		// Message.sendMessage(Message.MESSAGETYPE_UNCHOKE, peerID);
-	}
-
 	public void start_p_timer() {
 		Timer timer = new Timer();
 
@@ -260,6 +243,9 @@ public class PeerProcess {
 
 	}
 
+	/**
+	 * Timer for optimistically unchoked neighbor at ever 'm' seconds.
+	 */
 	public void start_m_timer() {
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
@@ -403,7 +389,7 @@ public class PeerProcess {
 				}
 			}
 		}
-		
+
 		synchronized (preferred_neighbors) {
 			// update preferred_neighbors
 			for (String peerid : preferred_neighbors.keySet()) {
@@ -432,12 +418,10 @@ public class PeerProcess {
 
 		// notify neighbors
 		for (String peerid : needToNotify.keySet()) {
-
 			if (needToNotify.get(peerid).equals("choke")) {
-
-				choke(peerid);
+				this.connManager.sendMessage(peerid, Message.MESSAGETYPE_CHOKE);
 			} else {
-				unchoke(peerid);
+				this.connManager.sendMessage(peerid, Message.MESSAGETYPE_UNCHOKE);
 			}
 		}
 	}
@@ -500,7 +484,7 @@ public class PeerProcess {
 		System.out.println(dateFormat.format(calendar.getTime()) + ": Peer " + localPeerID
 				+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
 		// unchoke the new optimistically unchoked neighbor
-		unchoke(optimistically_unchoked_neighbor);
+		this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_UNCHOKE);
 	}
 
 	public void updateInterested_peer_list(String remotePeerID, int messageType) throws Exception {

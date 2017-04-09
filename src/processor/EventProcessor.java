@@ -113,7 +113,7 @@ public class EventProcessor {
 			/**
 			 * This happens when;
 			 * 
-			 * Received when this peer stops being a preferred or optimistically
+			 * Received when this peer becomes a preferred or optimistically
 			 * unchoked neighbor of a remote peer, and if this peer is
 			 * interested in a piece from that peer. If this peer has a complete
 			 * file, or that remote peer has no interesting pieces, then this

@@ -134,9 +134,10 @@ public class TCPConnectionManager {
 		// Sent and recieve Bitfield messages. For now doing locally as
 		// all are on one machine.
 
-		{// TODO: Remove this. Only for initial testing of piece
-			// transfer and protocol stability without preferred
-			// neighbor mechanism.
+		{
+			// Assuming we received BitField messages from all our peers, we
+			// sent
+			// interested or not_interested messages to neighbor peers.
 			(new Thread() {
 				@Override
 				public void run() {
@@ -493,7 +494,7 @@ public class TCPConnectionManager {
 	 */
 	public void broadcastNotInterestedToUnInterestingPeers() {
 		for (String remotePeerID : this.localPeerProcessInstance.getListOfUnInterestingPeers()) {
-			sendNotInterestedMessage(remotePeerID);
+			sendMessage(remotePeerID, Message.MESSAGETYPE_NOTINTERESTED);
 		}
 	}
 
@@ -501,7 +502,7 @@ public class TCPConnectionManager {
 	 * 
 	 * @param remotePeerID
 	 */
-	private void sendNotInterestedMessage(String remotePeerID) {
+	public void sendMessage(String remotePeerID, int messageType) {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
 			// System.err.println("OUT");
@@ -519,7 +520,7 @@ public class TCPConnectionManager {
 		DataOutputStream out = connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
 		try {
 			out.writeInt(1);
-			out.write((byte) Message.MESSAGETYPE_NOTINTERESTED);
+			out.write((byte) messageType);
 			out.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
