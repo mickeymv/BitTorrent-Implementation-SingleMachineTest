@@ -654,7 +654,7 @@ public class PeerProcess {
 		 * See getPieceToBeRequested() function on how it could be used.
 		*/
 		
-		/*
+		
 		ArrayList<String> uninterestedPeerList = new ArrayList<>();
 		ArrayList<Byte> remotePeerBitField = new ArrayList<>();
 		for(int i = 0; i < neighbors.size(); i++){
@@ -675,9 +675,6 @@ public class PeerProcess {
 		}
 		
 		return uninterestedPeerList;
-		*/
-		
-		return null;
 	}
 
 	/**
