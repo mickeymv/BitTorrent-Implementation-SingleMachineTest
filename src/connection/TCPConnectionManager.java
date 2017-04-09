@@ -66,13 +66,14 @@ public class TCPConnectionManager {
 	private HandShake handShakeHandler;
 
 	public PeerProcess localPeerProcessInstance;
-	
+
 	/**
-	 * TODO: Remove this after local testing.
-	 * This is required for local testing. the map has as key the peer's
-	 * address, formatted as 'hostName:portNumber'; and value as the peerID.
+	 * TODO: Remove this after local testing. This is required for local
+	 * testing. the map has as key the peer's address, formatted as
+	 * 'hostName:portNumber'; and value as the peerID.
 	 * 
-	 * The only thing required for remote machine testing is getPeerIDFromHostName();
+	 * The only thing required for remote machine testing is
+	 * getPeerIDFromHostName();
 	 **/
 	private static HashMap<String, String> peerAddressToPeerIDMap = new HashMap<>();
 
@@ -144,34 +145,36 @@ public class TCPConnectionManager {
 					// initialize preferred neighbors.
 					for (PeerInfo peer : peerList) {
 						if (!localPeerID.equals(peer.getPeerID())) {
-							
+
 							if (localPeerProcessInstance.checkIfInterested(peer.getPeerID()) == true) {
-								
+
 								new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
 										.sendMessage(Message.MESSAGETYPE_INTERESTED);
 							} else {
-								
+
 								new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
 										.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
 							}
-							
-							// System.out.println("In peer#" + localPeerID + ", and sent a unchoke message to peer#"
-							//		+ peer.getPeerID());
-							//new Message(localPeerID, peer.getPeerID(), localPeerProcessInstance)
-							//	.sendMessage_bitfield(localPeerProcessInstance.getLocalPeerBitField());
+
+							// System.out.println("In peer#" + localPeerID + ",
+							// and sent a unchoke message to peer#"
+							// + peer.getPeerID());
+							// new Message(localPeerID, peer.getPeerID(),
+							// localPeerProcessInstance)
+							// .sendMessage_bitfield(localPeerProcessInstance.getLocalPeerBitField());
 						}
 					}
-					
+
 					localPeerProcessInstance.start_p_timer();
 					localPeerProcessInstance.start_m_timer();
-					
-					//localPeerProcessInstance.initializePreferredNeighbors();
-					//try {
-					//	localPeerProcessInstance.updateUnchokedNeighbor();
-					//} catch (Exception e) {
-						// TODO Auto-generated catch block
-					//	e.printStackTrace();
-					//}
+
+					// localPeerProcessInstance.initializePreferredNeighbors();
+					// try {
+					// localPeerProcessInstance.updateUnchokedNeighbor();
+					// } catch (Exception e) {
+					// TODO Auto-generated catch block
+					// e.printStackTrace();
+					// }
 				}
 			}).start();
 		}
@@ -432,8 +435,9 @@ public class TCPConnectionManager {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
 			// System.err.println("OUT");
-//			System.err.println("\nWait for the local peer# " + localPeerID
-//					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
+			// System.err.println("\nWait for the local peer# " + localPeerID
+			// + ", connMap to have a socket for the remotePeer#" + remotePeerID
+			// + "\n");
 
 			try {
 				Thread.sleep(10000);
@@ -454,8 +458,9 @@ public class TCPConnectionManager {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
 			// System.err.println("IN");
-//			System.err.println("\nWait for the local peer# " + localPeerID
-//					+ ", connMap to have a socket for the remotePeer# " + remotePeerID + "\n");
+			// System.err.println("\nWait for the local peer# " + localPeerID
+			// + ", connMap to have a socket for the remotePeer# " +
+			// remotePeerID + "\n");
 
 			try {
 				Thread.sleep(10000);
@@ -467,76 +472,78 @@ public class TCPConnectionManager {
 
 		return connMap.get(localPeerID + ":" + remotePeerID).getDataInputStream();
 	}
-	
+
 	/**
-	 * Broadcast to all peers of the local peer that this peer
-	 * "has" the specified piece.
+	 * Broadcast to all peers of the local peer that this peer "has" the
+	 * specified piece.
+	 * 
 	 * @param pieceIndex
 	 */
-	public  void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
-		for(PeerInfo peer: this.localPeerProcessInstance.getNeighbors()) {
+	public void broadcastHavePieceIndexMessageToAllPeers(int pieceIndex) {
+		for (PeerInfo peer : this.localPeerProcessInstance.getNeighbors()) {
 			sendHaveMessage(pieceIndex, peer.getPeerID());
 		}
 	}
-	
-
 
 	/**
-	 * Send "NOT_INTERESTED" message to the peers who the local peer
-	 * is not interested in.
+	 * Send "NOT_INTERESTED" message to the peers who the local peer is not
+	 * interested in.
+	 * 
 	 * @param notInterestingPeers
 	 */
-	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
-
-		for(int i = 0; i<notInterestingPeers.size();i++) {
-			sendNotInterestedMessage(notInterestingPeers.get(i));
+	public void broadcastNotInterestedToUnInterestingPeers() {
+		for (String remotePeerID : this.localPeerProcessInstance.getListOfUnInterestingPeers()) {
+			sendNotInterestedMessage(remotePeerID);
 		}
 	}
-	
-	public  void sendNotInterestedMessage(String remotePeerID) {
+
+	/**
+	 * 
+	 * @param remotePeerID
+	 */
+	private void sendNotInterestedMessage(String remotePeerID) {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
-			/* System.err.println("OUT");
-			System.err.println("\nWait for the local peer# " + localPeerID
-					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
-*/
+			// System.err.println("OUT");
+			// System.err.println("\nWait for the local peer# " + localPeerID
+			// + ", connMap to have a socket for the remotePeer#" + remotePeerID
+			// + "\n");
+
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		DataOutputStream out = connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
-		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		try {
-			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_NOTINTERESTED);
-			byte[] message = streamToCombineByteArrays.toByteArray();
-			out.writeInt(message.length);
-			out.write(message);
+			out.writeInt(1);
+			out.write((byte) Message.MESSAGETYPE_NOTINTERESTED);
 			out.flush();
-			System.out.println("sending not interested message to remote peer "+remotePeerID+ " from "+localPeerID);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
 	 * 
-	 * @param messageType, the type of message to sent
-	 * @param messagePayload, the required payload
+	 * @param messageType,
+	 *            the type of message to sent
+	 * @param messagePayload,
+	 *            the required payload
 	 */
-	public  void sendHaveMessage(int pieceIndex, String remotePeerID) {
+	private void sendHaveMessage(int pieceIndex, String remotePeerID) {
 		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
 			// wait for the connection socket to be created from the thread.
 			// System.err.println("OUT");
-//			System.err.println("\nWait for the local peer# " + localPeerID
-//					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
+			// System.err.println("\nWait for the local peer# " + localPeerID
+			// + ", connMap to have a socket for the remotePeer#" + remotePeerID
+			// + "\n");
 
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -546,7 +553,7 @@ public class TCPConnectionManager {
 		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
 		byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceIndex);
 		try {
-			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_HAVE);
+			streamToCombineByteArrays.write((byte) Message.MESSAGETYPE_HAVE);
 			streamToCombineByteArrays.write(pieceIndexMessagePayload);
 			byte[] message = streamToCombineByteArrays.toByteArray();
 			out.writeInt(message.length);

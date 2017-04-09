@@ -106,10 +106,8 @@ public class PeerProcess {
 
 	private boolean gotCompletedFile = false;
 
-	
 	private boolean keepRunning = true;
-	
-	
+
 	public boolean isKeepRunning() {
 		return keepRunning;
 	}
@@ -117,7 +115,7 @@ public class PeerProcess {
 	public void setKeepRunning(boolean keepRunning) {
 		this.keepRunning = keepRunning;
 	}
-	
+
 	public boolean getGotCompletedFile() {
 		return gotCompletedFile;
 	}
@@ -193,18 +191,16 @@ public class PeerProcess {
 		// connections to all other peers).
 		connManager = new TCPConnectionManager(localPeerInfo, this);
 		connManager.initializePeer();
-		
-		System.out.println("peers initialized ..");
-		/*
-		while(keepRunning) {
-			
-			try {
-				Thread.sleep(20000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}*/
+
+		// while(keepRunning) {
+		//
+		// try {
+		// Thread.sleep(20000);
+		// } catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// }
 	}
 
 	/**
@@ -662,38 +658,21 @@ public class PeerProcess {
 	 * @return list of peers which do not have interesting pieces for the local
 	 *         peer.
 	 */
-		
-	private ArrayList<String> getListOfUnInterestingPeers() {
-
-		/*
-		 * TODO: the implementation below does not work! Use the Util function
-		 * isPieceIndexSetInBitField() for this. See getPieceToBeRequested()
-		 * function on how it could be used.
-		 */
+	public ArrayList<String> getListOfUnInterestingPeers() {
 
 		ArrayList<String> uninterestedPeerList = new ArrayList<>();
-		ArrayList<Byte> remotePeerBitField = new ArrayList<>();
-		for (int i = 0; i < neighbors.size(); i++) {
-			uninterestedPeerList.add(neighbors.get(i).getPeerID());
-		}
-		for(int j=0; j<remotePeerBitField.size();j++){
-			String byteArray = Integer.toBinaryString(localPeerBitField.get(j) & 0xFF);
-			System.out.println(" local peer bit field "+byteArray);
-		}
-		
-		for (int i = 0; i < neighbors.size(); i++) {
-			remotePeerBitField = peersBitfields.get(neighbors.get(i).getPeerID());
-			for (int j = 0; j < remotePeerBitField.size(); j++) {
-				String selectedByte = Integer.toBinaryString(localPeerBitField.get(j) & 0xFF);
-				for (int k = 0; k < 8; k++) {
-					if (selectedByte.charAt(k) == '0') {
-						if ((Integer.toBinaryString(remotePeerBitField.get(j) & 0xFF).charAt(k) != 0)) {
 
-							uninterestedPeerList.remove(i);
-							break;
-						}
-					}
+		for (int remotePeerIndex = 0; remotePeerIndex < neighbors.size(); remotePeerIndex++) {
+			ArrayList<Byte> remotePeerBitField = peersBitfields.get(neighbors.get(remotePeerIndex).getPeerID());
+			boolean isRemotePeerInteresting = false;
+			for (Integer pieceIndexNeededInLocalPeer : this.piecesRemainingToBeRequested.keySet()) {
+				if (Util.isPieceIndexSetInBitField(pieceIndexNeededInLocalPeer, remotePeerBitField)) {
+					isRemotePeerInteresting = true;
+					break;
 				}
+			}
+			if (!isRemotePeerInteresting) {
+				uninterestedPeerList.add(neighbors.get(remotePeerIndex).getPeerID());
 			}
 		}
 
@@ -846,36 +825,35 @@ public class PeerProcess {
 		this.piecesRequested = piecesRequested;
 	}
 	// >>>>>>**************** getter and setters *********************
-	
-	
+
 	public boolean isEveryPeerCompleted() {
-		
+
 		for (String peerid : peersBitfields.keySet()) {
-			
+
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
 			if (isPeerCompleted(bfield)) {
-				
+
 				System.out.println("	Peer " + peerid + " unfinished!");
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	public boolean isPeerCompleted(ArrayList<Byte> bfield) {
 		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
 		Byte b = Util.setFirstNDigits(remaining);
-		
+
 		byte last_byte = b.byteValue();
-		for (int i = 0; i < bfield.size() - 1; i ++) {
-			
+		for (int i = 0; i < bfield.size() - 1; i++) {
+
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
 				System.out.println("	byte " + i + " unfilled yet.");
 				return false;
 			}
 		}
-		if (last_byte != bfield.get(bfield.size()-1).byteValue()) {
+		if (last_byte != bfield.get(bfield.size() - 1).byteValue()) {
 			System.out.println("	byte " + (bfield.size() - 1) + " unfilled yet.");
 			return false;
 		}

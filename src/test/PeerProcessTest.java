@@ -59,6 +59,7 @@ public class PeerProcessTest {
 		assertTrue(5 == peerProcess.getNeighbors().size());	
 	}
 
+	/*
 	@Test
 	public void testUninterestedPeerList(){
 		ArrayList<String> notInterestingPeers = peerProcess.getListOfUnInterestingPeers();
@@ -66,6 +67,7 @@ public class PeerProcessTest {
 			System.out.println("Not interested peer list "+notInterestingPeers.get(i).toString());
 		}		
 		}
+	/*
 	@Test
 	public void testUpdateInterestedPeerList(){
 		for(int i = 0; i < peerProcess.getNeighbors().size(); i++){
@@ -79,6 +81,7 @@ public class PeerProcessTest {
 		}
 		}
 	}
+	*/
 
 
 }
