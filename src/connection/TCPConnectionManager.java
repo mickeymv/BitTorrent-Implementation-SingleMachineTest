@@ -493,9 +493,40 @@ public class TCPConnectionManager {
 	 * @param notInterestingPeers
 	 */
 	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
-		// TODO Auto-generated method stub
-		
+		for(int i = 0; i<notInterestingPeers.size();i++) {
+			sendNotInterestedMessage(notInterestingPeers.get(i));
+		}
 	}
+	
+	public  void sendNotInterestedMessage(String remotePeerID) {
+		while (!connMap.containsKey(localPeerID + ":" + remotePeerID)) {
+			// wait for the connection socket to be created from the thread.
+			/* System.err.println("OUT");
+			System.err.println("\nWait for the local peer# " + localPeerID
+					+ ", connMap to have a socket for the remotePeer#" + remotePeerID + "\n");
+*/
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		DataOutputStream out = connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
+		ByteArrayOutputStream streamToCombineByteArrays = new ByteArrayOutputStream();
+		try {
+			streamToCombineByteArrays.write((byte)Message.MESSAGETYPE_NOTINTERESTED);
+			byte[] message = streamToCombineByteArrays.toByteArray();
+			out.writeInt(message.length);
+			out.write(message);
+			out.flush();
+			System.out.println("sending not interested message to remote peer "+remotePeerID+ " from "+localPeerID);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	/**
 	 * 
