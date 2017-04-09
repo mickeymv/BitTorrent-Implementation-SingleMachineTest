@@ -66,12 +66,6 @@ public class TCPConnectionManager {
 	private HandShake handShakeHandler;
 
 	public PeerProcess localPeerProcessInstance;
-
-	/**
-	 * Map of which piece index was sent as a "have" message to which remote
-	 * peer. remotePeerID -> PieceIndex
-	 */
-	private HashMap<String, Integer> sentHaveMap = new HashMap<>();
 	
 	/**
 	 * TODO: Remove this after local testing.
@@ -494,7 +488,6 @@ public class TCPConnectionManager {
 	 */
 	public  void broadcastNotInterestedToUnInterestingPeers(ArrayList<String> notInterestingPeers) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -530,29 +523,6 @@ public class TCPConnectionManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.sentHaveMap.put(remotePeerID, pieceIndex);
-	}
-	
-	
-	/**
-	 * 
-	 * @return piece index of the piece which this local peer said it had (via a
-	 *         "have" message sent previously).
-	 */
-	public int getPieceIndexToSendToPeer(String remotePeerID) {
-		if (this.sentHaveMap.containsKey(remotePeerID) )
-			return this.sentHaveMap.get(remotePeerID);
-		else
-			return -1;
-	}
-	
-	/**
-	 * Called after the peer responds with 'INTERESTING' 
-	 * and we sent it the piece.
-	 * @param remotePeerID
-	 */
-	public void removePieceIndexAlreadySentToPeer(String remotePeerID) {
-		this.sentHaveMap.remove(remotePeerID);
 	}
 
 }

@@ -160,7 +160,8 @@ public class EventProcessor {
 			/**
 			 * This happens when;
 			 * 
-			 * Received if this peer sent a "have" message to a remote peer, and
+			 * 1. Initially received when comparing bitFields (this peer DID NOT send a 'have' message)
+			 * 2. Received if this peer sent a "have" message to a remote peer, and
 			 * that peer wants that piece.
 			 */
 			// [Time]: Peer [peer_ID 1] received the ‘interested’
@@ -173,34 +174,19 @@ public class EventProcessor {
 
 			/*
 			 * Action to take;
-			 * 
-			 * if B is choked, add B into interested_peer_list if B is not
-			 * there. else B is unchoked, check "sent_have_map" 1). if B is
-			 * there, send piece x from the map to B, and update bitfield for B
-			 * 2). if B is not there, add B into interesetd_peer_list
+			 *  add B into interesetd_peer_list
 			 */
 
 			//System.out.println(
 			//		"in peer: " + this.localPeerID + ", got 'INTERESTED' message from peer: " + this.remotePeerID);
 
 			this.localPeerProcessInstance.addInterestedNeighbor(remotePeerID);
-			int pieceIndexToBeSent = this.localPeerProcessInstance.getConnManager()
-					.getPieceIndexToSendToPeer(remotePeerID);
 
 			try {
 				this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-			
-			// if find a piece that need to be sent.
-			if (pieceIndexToBeSent != -1) {
-				
-				byte[] pieceMessagePayload = Util.getPieceAsByteArray(localPeerID, pieceIndexToBeSent);
-				messageHandler.sendPieceMessage(pieceIndex, pieceMessagePayload);
-//				System.out.println("peer#: " + this.localPeerID + " sent piece message Piece# " + pieceIndexToBeSent
-//						+ " to peer#" + this.remotePeerID);
 			}
 
 			break;
@@ -249,10 +235,17 @@ public class EventProcessor {
 			 */
 
 			/*
-			 * Check if x is what we don't have and not requested yet. 1). if
-			 * so, send "interested" to B 2). else, send "not interested" to B.
+			 * Check if x is what we don't have and not requested yet. 
+			 * 1). if so, send "interested" to B 
+			 * 2). else, send "not interested" to B.
 			 * Update bitfield of B.
+			 * 
+			 /*
+			 * i. Check
+			 * if all other peers are complete. 
+			 * 	if so, then ii. End your local peer process.
 			 */
+			
 
 			pieceIndex = Util.intFromByteArray(payload);
 
@@ -277,6 +270,12 @@ public class EventProcessor {
 			}
 
 			this.localPeerProcessInstance.updateBitField(remotePeerID, pieceIndex);
+			
+			/*
+			 * i. Check
+			 * if all other peers are complete. 
+			 * 	if so, then ii. End your local peer process.
+			 */
 
 			break;
 			
@@ -325,13 +324,16 @@ public class EventProcessor {
 			 * 
 			 */
 			/*
-			 * 1). if x not exist locally, save x as a piece file. and a). send
-			 * "have" x messages to all peers. b). send "not_interested"
-			 * messages to peers who don't have interesting pieces. c). check if
-			 * we have all pieces. i). If we do, update "have_complete_file"
-			 * variable, and create the complete data file. check bitfield of
-			 * other peers. If all of them have all pieces, then end the peer
-			 * program. ii). if we do not, send "request" about another piece,
+			 * 1). if x not exist locally, save x as a piece file. and 
+			 * 	a). send
+			 * "have" x messages to all peers. 
+			 * b). send "not_interested"
+			 * messages to peers who don't have interesting pieces.  
+			 * c). check if
+			 * we have all pieces. 
+			 * 	i). If we do, update "have_complete_file"
+			 * variable, and create the complete data file. 
+			 * ii). if we do not, send "request" about another piece,
 			 * we don't have and not requested.
 			 */
 
@@ -370,8 +372,7 @@ public class EventProcessor {
 		}
 
 			/*
-			 * //TODO 1. check for complete file i. Make complete file ii. Check
-			 * if all other peers are complete. iii. End all processes.
+			 * //TODO 1. check for complete file i. Make complete file 
 			 */
 
 			if (!this.localPeerProcessInstance.getGotCompletedFile()) {
