@@ -654,20 +654,24 @@ public class PeerProcess {
 		 * See getPieceToBeRequested() function on how it could be used.
 		*/
 		
-		
 		ArrayList<String> uninterestedPeerList = new ArrayList<>();
 		ArrayList<Byte> remotePeerBitField = new ArrayList<>();
 		for(int i = 0; i < neighbors.size(); i++){
 			uninterestedPeerList.add(neighbors.get(i).getPeerID());
 		}
+		for(int j=0; j<remotePeerBitField.size();j++){
+			String byteArray = Integer.toBinaryString(localPeerBitField.get(j) & 0xFF);
+			System.out.println(" local peer bit field "+byteArray);
+		}
 		for(int i = 0; i < neighbors.size(); i++){
 			remotePeerBitField = peersBitfields.get(neighbors.get(i).getPeerID());
 			for(int j=0; j<remotePeerBitField.size();j++){
-				String byteArray = Integer.toBinaryString(remotePeerBitField.get(i) & 0xFF);
+				String byteArray = Integer.toBinaryString(localPeerBitField.get(j) & 0xFF);
 				for(int k = 0; k < 8; k++){
 					if(byteArray.charAt(k)== '0'){
 						if((Integer.toBinaryString(remotePeerBitField.get(j) & 0xFF).charAt(k)!= 0)){
 							uninterestedPeerList.remove(i);
+							break;
 						}
 					}
 				}
