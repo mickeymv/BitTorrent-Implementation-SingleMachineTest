@@ -29,7 +29,7 @@ import type.PeerInfo;
 public class Util {
 
 	private static Util instance = null;
-	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yy HH:mm:ss");
+	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 
 	private static ArrayList<PeerInfo> peerList;
 	private static Map<String, Integer> peerIDToPositionMap;

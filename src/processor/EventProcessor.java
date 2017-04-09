@@ -1,6 +1,5 @@
 package processor;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -27,7 +26,6 @@ import util.Util;
 public class EventProcessor {
 
 	private Logger logger = Logger.getLogger(PeerProcess.class);
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yy HH:mm:ss");
 
 	private String localPeerID, remotePeerID;
 	private PeerProcess localPeerProcessInstance = null;
@@ -73,7 +71,7 @@ public class EventProcessor {
 			 */
 			// System.out.println(localPeerID + ">> bitfield received from " +
 			// remotePeerID + ". length: " + payload.length);
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received bitfield from " + this.remotePeerID + ".");
 
 			break;
@@ -88,10 +86,10 @@ public class EventProcessor {
 			 */
 
 			// [Time]: Peer [peer_ID 1] is choked by [peer_ID 2].
-			logger.info(dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
 					+ this.remotePeerID + ".");
 
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
 					+ this.remotePeerID + ".");
 			// System.out
 			// .println("in peer: " + this.localPeerID + ", got 'CHOKE' message
@@ -120,9 +118,9 @@ public class EventProcessor {
 			 * was receieved in error;
 			 */
 			// [Time]: Peer [peer_ID 1] is unchoked by [peer_ID 2].
-			logger.info(dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
 					+ this.remotePeerID + ".");
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
 					+ this.remotePeerID + ".");
 			/*
 			 * Action to take;
@@ -174,10 +172,10 @@ public class EventProcessor {
 			 */
 			// [Time]: Peer [peer_ID 1] received the ‘interested’
 			// message from [peer_ID 2].
-			logger.info(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
 
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
 
 			/*
@@ -202,9 +200,9 @@ public class EventProcessor {
 			 */
 			// [Time]: Peer [peer_ID 1] received the ‘not interested’
 			// message from [peer_ID 2].
-			logger.info(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
 
 			/*
@@ -242,9 +240,9 @@ public class EventProcessor {
 
 			// [Time]: Peer [peer_ID 1] received the ‘have’ message
 			// from [peer_ID 2] for the piece [piece index].
-			logger.info(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 
 			// System.out.println("in peer: " + this.localPeerID + ", got 'HAVE'
@@ -289,7 +287,7 @@ public class EventProcessor {
 			 * pieces.
 			 */
 			pieceIndex = Util.intFromByteArray(payload);
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received request from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 
 			// System.out.println("in peer: " + this.localPeerID + ", got
@@ -337,7 +335,7 @@ public class EventProcessor {
 
 			pieceIndex = Util.intFromByteArray(pieceIndexBytesArray);
 
-			System.out.println(dateFormat.format(new Date()) + ": Peer " + localPeerID + " received piece from "
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " received piece from "
 					+ this.remotePeerID + " for the piece " + pieceIndex + ".");
 
 			// System.out.println("in peer: " + this.localPeerID + ", got
@@ -352,12 +350,12 @@ public class EventProcessor {
 			// [Time]: Peer [peer_ID 1] has downloaded the piece [piece index]
 			// from [peer_ID 2]. Now the number of pieces it has is
 			// [number of pieces].
-			logger.info(dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
 					+ pieceIndex + " from " + this.remotePeerID + ". Now the number of pieces it has is "
 					+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
 
 			System.out.println(
-					dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
+					Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
 							+ pieceIndex + " from " + this.remotePeerID + ". Now the number of pieces it has is "
 							+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
 
@@ -391,11 +389,11 @@ public class EventProcessor {
 				// merge file
 				Util.mergeDataPieces(localPeerID, "project");
 				
-				logger.info(dateFormat.format(new Date()) 
+				logger.info(Util.dateFormat.format(new Date()) 
 						+ ": Peer " + localPeerID 
 						+ " has downloaded the complete file.");
 				
-				System.out.println(dateFormat.format(new Date()) 
+				System.out.println(Util.dateFormat.format(new Date()) 
 						+ ": Peer " + localPeerID 
 						+ " has downloaded the complete file.");
 			}
