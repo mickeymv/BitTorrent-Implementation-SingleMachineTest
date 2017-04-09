@@ -536,17 +536,18 @@ public class PeerProcess {
 	public ArrayList<String> getListOfUnInterestingPeers() {
 		
 		ArrayList<String> uninterestedPeerList = new ArrayList<>();
+		ArrayList<Byte> remotePeerBitField = new ArrayList<>();
 		for(int i = 0; i < neighbors.size(); i++){
 			uninterestedPeerList.add(neighbors.get(i).getPeerID());
 		}
 		for(int i = 0; i < neighbors.size(); i++){
-			ArrayList<Byte> remotePeerBitField = peersBitfields.get(neighbors.get(i));
+			remotePeerBitField = peersBitfields.get(neighbors.get(i).getPeerID());
 			for(int j=0; j<remotePeerBitField.size();j++){
+				String byteArray = Integer.toBinaryString(remotePeerBitField.get(i) & 0xFF);
 				for(int k = 0; k < 8; k++){
-					if(Integer.toBinaryString(localPeerBitField.get(j)).charAt(k)== 0){
-						if(Integer.toBinaryString(remotePeerBitField.get(j)).charAt(k)!= 0){
+					if(byteArray.charAt(k)== '0'){
+						if((Integer.toBinaryString(remotePeerBitField.get(j) & 0xFF).charAt(k)!= 0)){
 							uninterestedPeerList.remove(i);
-							break;
 						}
 					}
 				}

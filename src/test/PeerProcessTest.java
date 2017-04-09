@@ -26,17 +26,23 @@ import util.Util;
 
 public class PeerProcessTest {
 	PeerProcess peerProcess = null;
-	PeerProcess localPeerProcessInstance = null;
-	String localPeerID, remotePeerID;
-
+	HashMap<String, Boolean> preferred_neighbors = null;
 	@Before
-	public void preTest(String localPeerID, String remotePeerID) {
+	public void pretest() {
+		
+		Util inst = Util.initializeUtil();
 		ConfigurationSetup instance = ConfigurationSetup.getInstance();
-		Util testInstance = Util.initializeUtil();		
-		this.localPeerID = localPeerID;
-		this.remotePeerID = remotePeerID;
-		localPeerProcessInstance = PeerProcesses.peerProcesses.get(localPeerID);
+		System.out.println("peer list size: " + instance.getPeerList().size());
+		peerProcess = new PeerProcess("2");
+		preferred_neighbors = peerProcess.getPreferred_neighbors();
+		HashMap<String, Boolean> interested_peer_list = peerProcess.getInterested_peer_list();
+		interested_peer_list.put("3", true);
+		interested_peer_list.put("4", true);
+		interested_peer_list.put("5", true);
+		interested_peer_list.put("6", true);
+		
 	}
+	
 	
 	@Test
 	public void test() {
@@ -50,32 +56,28 @@ public class PeerProcessTest {
 			
 			System.out.println(peer.getPeerID());
 		}
-		assertTrue(1 == peerProcess.getNeighbors().size());
-		
-		
-		
-		
+		assertTrue(5 == peerProcess.getNeighbors().size());	
 	}
 
 	@Test
 	public void testUninterestedPeerList(){
-		test();
-		ArrayList<String> notInterestingPeers = this.localPeerProcessInstance.getListOfUnInterestingPeers();
+		ArrayList<String> notInterestingPeers = peerProcess.getListOfUnInterestingPeers();
 		for(int i = 0; i < notInterestingPeers.size();i++){
-			System.out.println(notInterestingPeers.get(i).toString());
-		}
+			System.out.println("Not interested peer list "+notInterestingPeers.get(i).toString());
+		}		
 		}
 	@Test
 	public void testUpdateInterestedPeerList(){
-		test();
+		for(int i = 0; i < peerProcess.getNeighbors().size(); i++){
 		try {
-			this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_INTERESTED);
-			this.localPeerProcessInstance.updateInterested_peer_list(remotePeerID, Message.MESSAGETYPE_NOTINTERESTED);
+			peerProcess.updateInterested_peer_list(peerProcess.getNeighbors().get(i).getPeerID(), Message.MESSAGETYPE_INTERESTED);
+			peerProcess.updateInterested_peer_list(peerProcess.getNeighbors().get(i).getPeerID(), Message.MESSAGETYPE_NOTINTERESTED);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}			
+		}
+		}
 	}
 
 
