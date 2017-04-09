@@ -22,7 +22,7 @@ public class PeerProcesses {
 	
 	
 	public static void initiatePeerProcessForLocalHostTesting(ArrayList<String> peerIDList) {
-		Util.createRandomDataFile(1024); //change according to what is in Common.cfg
+		Util.createRandomDataFile(2048); //change according to what is in Common.cfg
 		for (String peerID : peerIDList) {
 			PeerProcess localPeer = new PeerProcess(peerID);
 			peerProcesses.put(peerID, localPeer);
