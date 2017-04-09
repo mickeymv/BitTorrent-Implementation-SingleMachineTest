@@ -350,7 +350,7 @@ public class EventProcessor {
 			Util.savePieceFile(pieceDataBytesArray, this.localPeerID, String.valueOf(pieceIndex));
 
 			this.localPeerProcessInstance.updatePieceRecieved(pieceIndex);
-			
+			this.localPeerProcessInstance.updateDownloadSpeed(localPeerProcessInstance.getLocalPeerID());
 
 			// [Time]: Peer [peer_ID 1] has downloaded the piece [piece index]
 			// from [peer_ID 2]. Now the number of pieces it has is
