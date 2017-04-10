@@ -164,9 +164,6 @@ public class TCPConnectionManager {
 						}
 					}
 
-					localPeerProcessInstance.start_p_timer();
-					localPeerProcessInstance.start_m_timer();
-
 					// localPeerProcessInstance.initializePreferredNeighbors();
 					// try {
 					// localPeerProcessInstance.updateUnchokedNeighbor();

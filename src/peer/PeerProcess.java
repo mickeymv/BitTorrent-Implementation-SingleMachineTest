@@ -80,7 +80,8 @@ public class PeerProcess {
 	private int k_preferred_neighbors = 0;
 
 	/** data structures for maintaining the control logic */
-	/** a map to find which peer is in interested. */
+	/** a map to find which peer is in interested. 
+	 *      * These are peers which are interested in this local peers data.*/
 	HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
 	/** track the download speed from each peers, in number of pieces. */
 	HashMap<String, Integer> download_speed = new HashMap<String, Integer>();
@@ -237,6 +238,9 @@ public class PeerProcess {
 		// e.printStackTrace();
 		// }
 		// }
+		
+		start_p_timer();
+		start_m_timer();
 	}
 
 	/**
@@ -870,7 +874,6 @@ public class PeerProcess {
 
 	public boolean isEveryPeerCompleted() {
 		
-		//TODO: Why doesn't the below work?
 		if (gotCompletedFile == false) {
 			
 			return false;
