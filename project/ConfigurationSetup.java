@@ -1,4 +1,3 @@
-package util;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import type.PeerInfo;
+import PeerInfo;
 
 /**
  * 1. read config files - common.cfg, peerinfo.cfg 2. store relevant common

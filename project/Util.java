@@ -1,4 +1,3 @@
-package util;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -19,9 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.io.File;
-import TCPConnectionManager;
-import PeerProcess;
-import PeerInfo;
+import connection.TCPConnectionManager;
+import peer.PeerProcess;
+import type.PeerInfo;
 
 /**
  * @author Mickey Vellukunnel, Xiaolong Li, Arpitha
