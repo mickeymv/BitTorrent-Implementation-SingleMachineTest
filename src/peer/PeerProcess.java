@@ -871,10 +871,10 @@ public class PeerProcess {
 	public boolean isEveryPeerCompleted() {
 		
 		//TODO: Why doesn't the below work?
-//		if (gotCompletedFile == false) {
-//			
-//			return false;
-//		}
+		if (gotCompletedFile == false) {
+			
+			return false;
+		}
 		
 		for (String peerid : peersBitfields.keySet()) {
 
@@ -894,7 +894,7 @@ public class PeerProcess {
 		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
 		//System.err.println("remaining: " + remaining);
-
+		
 		for (int i = 0; i < lengthOfBitfield; i++) {
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
 //				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
