@@ -23,9 +23,9 @@ import peer.PeerProcess;
 import type.PeerInfo;
 
 /**
-* @author Mickey Vellukunnel, Xiaolong Li, Arpitha
-*
-*/
+ * @author Mickey Vellukunnel, Xiaolong Li, Arpitha
+ *
+ */
 
 public class Util {
 
@@ -74,7 +74,7 @@ public class Util {
 		ArrayList<PeerInfo> myPeerList = new ArrayList<PeerInfo>();
 
 		for (PeerInfo peerInfo : peerList) {
-			if (! peerInfo.getPeerID().equals(peerID)) {
+			if (!peerInfo.getPeerID().equals(peerID)) {
 				myPeerList.add(peerInfo);
 			}
 		}
@@ -90,12 +90,12 @@ public class Util {
 		// System.out.println("the piece# to check for is:" + pieceIndex);
 		int byteContainingPiece = pieceIndex / 8;
 		// System.out.println("byteContainingPiece# is:" + byteContainingPiece);
-		
-		if(bitField == null || bitField.size() == 0) {
-			//TODO: Remove this and figure out why this happens!
+
+		if (bitField == null || bitField.size() == 0) {
+			// TODO: Remove this and figure out why this happens!
 			return false;
 		}
-		
+
 		byte checkByte = bitField.get(byteContainingPiece);
 		// System.out.println("the byte containing piece is:" +
 		// String.valueOf(checkByte));
@@ -169,16 +169,16 @@ public class Util {
 	 */
 	public static ArrayList<Byte> getPeerBitfield(boolean hasFileInitially) {
 		ArrayList<Byte> bitField = new ArrayList<Byte>();
-		
+
 		// if there is no local file, set the bitmap to be null
 		if (ConfigurationSetup.getInstance().getFileName() == null) {
 			return bitField;
 		} else {
 			bitField = new ArrayList<Byte>();
-			
+
 			int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
-			
-			//System.err.println("length of bitfield:" + lengthOfBitfield);
+
+			// System.err.println("length of bitfield:" + lengthOfBitfield);
 			// set all full bytes
 			for (int i = 0; i < lengthOfBitfield; i++) {
 
@@ -200,8 +200,9 @@ public class Util {
 																							// zero
 				bitField.add(b);
 			}
-			
-			//System.err.println("current bitfield: " + bitfieldToString(bitField));
+
+			// System.err.println("current bitfield: " +
+			// bitfieldToString(bitField));
 
 			if (hasFileInitially) {
 				// set remaining bits of the last byte.
@@ -214,8 +215,8 @@ public class Util {
 					bitField.add(b);
 				}
 			} else {
-				
-				Byte b = new Byte((byte)0x00);
+
+				Byte b = new Byte((byte) 0x00);
 				bitField.add(b);
 			}
 			return bitField;
@@ -234,7 +235,8 @@ public class Util {
 	 */
 	public static void splitDataFile(String localPeerID) {
 
-		Path path = Paths.get(PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/" + ConfigurationSetup.getInstance().getFileName());
+		Path path = Paths.get(PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/"
+				+ ConfigurationSetup.getInstance().getFileName());
 		// String pieceDir = "project/peer_" +
 		// PeerProcess.getLocalPeerInstance().getPeerID();
 		File temp_path = new File(PROJECT_TOP_LEVEL_DIRECTORY);
@@ -250,7 +252,7 @@ public class Util {
 		temp_path.mkdirs();
 
 		try {
-			//System.err.println("The path is: " + path.toString());
+			// System.err.println("The path is: " + path.toString());
 			byte[] data = Files.readAllBytes(path);
 			long fileLength = data.length;
 			long remaining = fileLength;
@@ -292,13 +294,14 @@ public class Util {
 	 * Merge all pieces of data file into a single file.
 	 * 
 	 */
-	public static void mergeDataPieces(String localPeerID, String directory) {
+	public static void mergeDataPieces(String localPeerID) {
 
-		File path = new File(directory);
+		File path = new File(PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/");
 		FileOutputStream outputStream = null;
 
 		try {
-			outputStream = new FileOutputStream(ConfigurationSetup.getInstance().getFileName(), true);
+			outputStream = new FileOutputStream(PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID
+					+ "/" + ConfigurationSetup.getInstance().getFileName(), true);
 		} catch (FileNotFoundException e1) {
 			System.err.print("Cannot create data file.");
 			e1.printStackTrace();
@@ -306,7 +309,8 @@ public class Util {
 
 		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
 
-			String pieceFileName = directory + "/" + "peer_" + localPeerID + "/_piece_" + i; // File.separator
+			String pieceFileName = PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/_piece_"
+					+ i; // File.separator
 			// giving
 			// ':'
 			// ?
@@ -458,11 +462,10 @@ public class Util {
 	}
 
 	public static String byte2BinaryString(Byte b) {
-		
+
 		return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 	}
-	
-	
+
 	public static void printByteToBinaryString(Byte b) {
 
 		String s1 = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
@@ -507,20 +510,20 @@ public class Util {
 	 * Print bitfield as a string.
 	 */
 	public static void printBitfield(ArrayList<Byte> bitField) {
-		
+
 		for (Byte b : bitField) {
 			printByteToBinaryString(b);
 		}
 	}
-	
+
 	public static String bitfieldToString(ArrayList<Byte> bitfield) {
-		
+
 		StringBuilder builder = new StringBuilder();
 		for (Byte b : bitfield) {
-			
+
 			builder.append(byte2BinaryString(b) + "\n");
 		}
-		
+
 		return builder.toString();
 	}
 
@@ -532,12 +535,12 @@ public class Util {
 	 */
 	public static synchronized void setPieceIndexInBitField(int pieceIndex, ArrayList<Byte> bitField) {
 		int positionOfPieceWithinByte = pieceIndex % 8;
-		//System.out.println("the piece# to check for is:" + pieceIndex);
+		// System.out.println("the piece# to check for is:" + pieceIndex);
 		int byteContainingPiece = pieceIndex / 8;
-		//System.out.println("byteContainingPiece is:" + byteContainingPiece);
-		//System.out.println("size of bitfield is:" + bitField.size());
-		if(bitField == null || bitField.size() == 0) {
-			//TODO: Remove this and figure out why this happens!
+		// System.out.println("byteContainingPiece is:" + byteContainingPiece);
+		// System.out.println("size of bitfield is:" + bitField.size());
+		if (bitField == null || bitField.size() == 0) {
+			// TODO: Remove this and figure out why this happens!
 			return;
 		}
 		byte checkByte = bitField.get(byteContainingPiece);

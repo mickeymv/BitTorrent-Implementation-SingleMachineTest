@@ -273,7 +273,7 @@ public class EventProcessor {
 			 */
 			if (localPeerProcessInstance.isEveryPeerCompleted()) {
 				localPeerProcessInstance.setKeepRunning(false);
-				System.err.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
+				//System.err.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
 			}
 
 			break;
@@ -393,7 +393,7 @@ public class EventProcessor {
 				// label file as completed.
 				localPeerProcessInstance.setGotCompletedFile(true);
 				// merge file
-				Util.mergeDataPieces(localPeerID, "project");
+				Util.mergeDataPieces(localPeerID);
 				
 				logger.info(Util.dateFormat.format(new Date()) 
 						+ ": Peer " + localPeerID 
