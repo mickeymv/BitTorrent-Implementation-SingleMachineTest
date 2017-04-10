@@ -435,8 +435,21 @@ public class PeerProcess {
 		}
 
 		// if (noOneInterested) {
-		if (false) {
-			throw new Exception("no one is interested!");
+		if (noOneInterested) {
+			//throw new Exception("no one is interested!");
+			if (preferred_neighbors.isEmpty()) {
+				
+				return;
+			} else {
+				synchronized (preferred_neighbors) {
+					// update preferred_neighbors
+					for (String peerid : preferred_neighbors.keySet()) {
+						
+						this.connManager.sendMessage(peerid, Message.MESSAGETYPE_CHOKE);
+					}
+				}
+				
+			}
 		}
 
 		HashMap<String, String> needToNotify = new HashMap<String, String>();
