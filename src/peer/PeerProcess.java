@@ -507,8 +507,17 @@ public class PeerProcess {
 			peerSet = interested_peer_list.keySet();
 		}
 
-		if (peerSet.isEmpty())
-			throw new Exception("interested_peer_list is empty!");
+		if (peerSet.isEmpty()) {
+			//throw new Exception("interested_peer_list is empty!");
+			if (optimistically_unchoked_neighbor == null) {
+				
+				return;
+			} else {
+				
+				this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_CHOKE);
+				optimistically_unchoked_neighbor = null;
+			}
+		}
 
 		for (String peer : peerSet) {
 
@@ -731,7 +740,11 @@ public class PeerProcess {
 	 * @param pieceToBeRequestedFromPeer
 	 */
 	public void updatePieceRequested(int pieceToBeRequestedFromPeer) {
-		this.piecesRemainingToBeRequested.remove(pieceToBeRequestedFromPeer);
+		
+		synchronized(piecesRemainingToBeRequested) {
+		
+			this.piecesRemainingToBeRequested.remove(pieceToBeRequestedFromPeer);
+		}
 		this.piecesRequested.put(pieceToBeRequestedFromPeer, pieceToBeRequestedFromPeer);
 	}
 
@@ -860,7 +873,9 @@ public class PeerProcess {
 	}
 
 	public void setPiecesRemainingToBeRequested(HashMap<Integer, Integer> piecesRemainingToBeRequested) {
-		this.piecesRemainingToBeRequested = piecesRemainingToBeRequested;
+		synchronized(piecesRemainingToBeRequested) {
+			this.piecesRemainingToBeRequested = piecesRemainingToBeRequested;
+		}
 	}
 
 	public HashMap<Integer, Integer> getPiecesRequested() {
