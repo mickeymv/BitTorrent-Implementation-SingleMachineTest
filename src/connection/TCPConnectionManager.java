@@ -226,7 +226,8 @@ public class TCPConnectionManager {
 
 						MessageListener localPeerMessageListener = new MessageListener(localPeerID,
 								remotePeerServer.getPeerID(),
-								TCPConnectionManager.getDataInputStream(localPeerID, remotePeerServer.getPeerID()));
+								TCPConnectionManager.getDataInputStream(localPeerID, remotePeerServer.getPeerID()),
+								localPeerProcessInstance);
 						localPeerMessageListener.startListening();
 
 						// System.out.println("Client: " + localPeerID + ",
@@ -428,7 +429,7 @@ public class TCPConnectionManager {
 			// for "+localPeerID+":"+ remoteClientPeerID);
 
 			MessageListener localPeerMessageListener = new MessageListener(localServerPeerID, remoteClientPeerID,
-					TCPConnectionManager.getDataInputStream(localPeerID, remoteClientPeerID));
+					TCPConnectionManager.getDataInputStream(localPeerID, remoteClientPeerID), localPeerProcessInstance);
 			localPeerMessageListener.startListening();
 		}
 

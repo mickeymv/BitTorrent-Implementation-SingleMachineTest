@@ -125,6 +125,8 @@ public class PeerProcess {
 
 	private boolean keepRunning = true;
 
+	public Object PEER_PROCESS_LOCK = new Object();
+	
 	public boolean isKeepRunning() {
 		return keepRunning;
 	}
@@ -665,23 +667,11 @@ public class PeerProcess {
 	 */
 	public int getPieceToBeRequested(String remotePeerID) {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
-		// System.out.println("The bitfield for remotepeer#" + remotePeerID);
-		// Util.printBitfield(remotePeerBitField);
-		// System.out.println("The local bitfield for localpeer#" +
-		// this.localPeerID);
-		// Util.printBitfield(this.localPeerBitField);
 		ArrayList<Integer> piecesToBeRequestedArray = new ArrayList<Integer>(piecesRemainingToBeRequested.keySet());
 		Collections.shuffle(piecesToBeRequestedArray);
 		for (Integer i : piecesToBeRequestedArray) {
-			// System.out.println("Checking pieice#"+i+" for local bitfield for
-			// peer#" + this.localPeerID);
 			if (!this.piecesRequested.containsKey(i)) {
-				// System.out.println("pieice#"+i+"is not in local bitfield for
-				// peer#" + this.localPeerID);
 				if (Util.isPieceIndexSetInBitField(i, remotePeerBitField)) {
-					// System.out.println("local peer#" + this.localPeerID + "
-					// NEEDS piece#" + i + " that remote peer#"
-					// + remotePeerID + " has!");
 					return i;
 				}
 			}
@@ -812,8 +802,11 @@ public class PeerProcess {
 			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceToBeRequestedFromPeer,
 					"piecesRequested in updatePieceRequested()");
 		}
+		
+		System.err
+				.println("[debug] " +localPeerID+ " ********** piece " + pieceToBeRequestedFromPeer 
+						+ " piecesRemainingToBeRequested ----> piecesRequested");
 	}
-
 
 	/**
 	 * This is called when a piece is received from a remote peer. Also update
@@ -829,6 +822,7 @@ public class PeerProcess {
 					"piecesRequestedMap in updatePieceRecieved()");
 		}
 	}
+
 	/**
 	 * Get the number of pieces received so far. This method will access
 	 * piecesRemainingToBeRequested and piecesRequested.
@@ -860,14 +854,6 @@ public class PeerProcess {
 
 	public void setLocalPeerInfo(PeerInfo localPeerInfo) {
 		this.localPeerInfo = localPeerInfo;
-	}
-
-	public ArrayList<Byte> getLocalPeerBitField() {
-		return localPeerBitField;
-	}
-
-	public void setLocalPeerBitField(ArrayList<Byte> localPeerBitField) {
-		this.localPeerBitField = localPeerBitField;
 	}
 
 	public HashMap<String, ArrayList<Byte>> getPeersBitfields() {

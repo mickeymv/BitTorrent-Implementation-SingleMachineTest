@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import connection.TCPConnectionManager;
+import peer.PeerProcess;
 import processor.EventProcessor;
 
 /**
@@ -22,12 +23,15 @@ public class MessageListener {
 	private boolean listeningSocketOpen = true;
 
 	private Object messageProcessorLock = new Object();
+	private int message_index = 0;
+	private PeerProcess localPeerProcessInstance = null;
 	
-	public MessageListener(String localPeerID, String remotePeerID, DataInputStream in) {
+	public MessageListener(String localPeerID, String remotePeerID, DataInputStream in, PeerProcess localPeerProcessInstance) {
 		this.localPeerID = localPeerID;
 		this.remotePeerID = remotePeerID;
 		this.in = in;
 		messageProcessor = new EventProcessor(localPeerID, remotePeerID);
+		this.localPeerProcessInstance = localPeerProcessInstance;
 	}
 
 	/**
@@ -58,13 +62,23 @@ public class MessageListener {
 				if (messageLength >= 1) {
 					messageBytes = new byte[messageLength];
 					in.readFully(messageBytes, 0, messageBytes.length); // read
+
+					// System.out.println("In peer#" + localPeerID+" and
+					// received a message from peer#" + remotePeerID);
+
+					// synchronized(messageProcessorLock) {
+
+//					System.err.println(">>>listener " + localPeerID + ":" + remotePeerID 
+//							+ " " + message_index
+//							+ " processing a message ");
 					
-					//System.out.println("In peer#" + localPeerID+" and received a message from peer#" + remotePeerID);
-					
-					//synchronized(messageProcessorLock) {
-						
+					synchronized(localPeerProcessInstance.PEER_PROCESS_LOCK) {
 						messageProcessor.processMessage(messageBytes);
-					//}
+					}
+					
+//					System.err.println(">>>listener " + localPeerID + ":" + remotePeerID + " " 
+//									+ (message_index++) + " done");
+					// }
 				} else {
 					System.err.println("\n\n\n###################\n\nERROR! " + localPeerID
 							+ " local peer Received message of incorrect length from Peer " + remotePeerID

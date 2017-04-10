@@ -149,7 +149,7 @@ public class ConfigurationSetup {
 			while (peerScanner.hasNextLine()) {
 				PeerInfo peerInfo = new PeerInfo();
 				String string = peerScanner.nextLine();
-				String[] splitBySpace = string.split(" ");
+				String[] splitBySpace = string.split("[ ]+");
 				peerInfo.setPeerID(splitBySpace[0].trim());
 				peerInfo.setHostName(splitBySpace[1].trim());
 				peerInfo.setPortNumber(Integer.parseInt(splitBySpace[2].trim()));
