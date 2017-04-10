@@ -72,7 +72,8 @@ public class EventProcessor {
 			 */
 			// System.out.println(localPeerID + ">> bitfield received from " +
 			// remotePeerID + ". length: " + payload.length);
-			System.err.println("[DEBUG]: Peer " + localPeerID + " received COMPLETED from " + this.remotePeerID + ".");
+			// System.err.println("[DEBUG]: Peer " + localPeerID + " received
+			// COMPLETED from " + this.remotePeerID + ".");
 
 			this.localPeerProcessInstance.updateRemoteNeighborWhoIsComplete(remotePeerID);
 
@@ -173,10 +174,13 @@ public class EventProcessor {
 					synchronized (this) {
 						byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 						messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
-//						System.out.println("peer#: " + this.localPeerID + " sent a request when unchoked, for piece# "
-//								+ pieceToBeRequestedFromPeer + " to peer#" + this.remotePeerID
-//								+ "\n the remote peer's bitfield is: "
-//								+ Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
+						// System.out.println("peer#: " + this.localPeerID + "
+						// sent a request when unchoked, for piece# "
+						// + pieceToBeRequestedFromPeer + " to peer#" +
+						// this.remotePeerID
+						// + "\n the remote peer's bitfield is: "
+						// +
+						// Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
 
 						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 					}
@@ -401,10 +405,13 @@ public class EventProcessor {
 					synchronized (this) {
 						byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 						messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
-//						System.out.println("peer#: " + this.localPeerID
-//								+ " sent a REQUEST message when received a piece for piece# " + pieceIndex + " to peer#"
-//								+ this.remotePeerID + "\n the remote peer's bitfield is: "
-//								+ Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
+						// System.out.println("peer#: " + this.localPeerID
+						// + " sent a REQUEST message when received a piece for
+						// piece# " + pieceIndex + " to peer#"
+						// + this.remotePeerID + "\n the remote peer's bitfield
+						// is: "
+						// +
+						// Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
 						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 					}
 				}

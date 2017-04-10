@@ -158,12 +158,10 @@ public class ConfigurationSetup {
 				}
 			}
 
-			if (fileSize % pieceSize == 0) {
-				numberOfPieces = fileSize / pieceSize;
-			} else {
-				numberOfPieces = fileSize / pieceSize + 1;
-			}
+			numberOfPieces = (int) Math.ceil((float) fileSize / pieceSize);
+
 			commonInfoScanner.close();
+
 		} catch (Exception e) { // FileNotFoundException
 			// TODO Auto-generated catch block
 			e.printStackTrace();

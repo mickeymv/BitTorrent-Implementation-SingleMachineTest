@@ -292,6 +292,20 @@ public class Util {
 	}
 
 	/**
+	 * Delete all pieces of data file.
+	 * 
+	 */
+	public static void deleteDataPieces(String localPeerID) {
+
+		for (int i = 0; i < ConfigurationSetup.getNumberOfPieces(); i++) {
+			File pieceFile = new File(
+					PROJECT_TOP_LEVEL_DIRECTORY + "/" + PEER_DIRECTORY_PREFIX + localPeerID + "/_piece_" + i); // File.separator
+			pieceFile.delete();
+		}
+
+	}
+
+	/**
 	 * Merge all pieces of data file into a single file.
 	 * 
 	 */
@@ -579,7 +593,8 @@ public class Util {
 			sb.append(piece + ", ");
 		}
 
-//		System.err.println("for peer#" + localPeerID + "the piece index updated is#" + pieceIndex + " and the map is:"
-//				+ string + "\n" + sb.toString());
+		// System.err.println("for peer#" + localPeerID + "the piece index
+		// updated is#" + pieceIndex + " and the map is:"
+		// + string + "\n" + sb.toString());
 	}
 }
