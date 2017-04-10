@@ -162,8 +162,11 @@ public class PeerProcess {
 	}
 
 	public boolean getGotCompletedFile() {
-
-		return isPeerCompleted(localPeerBitField, localPeerID);
+		boolean isCompleted = false;
+		synchronized (localPeerBitField) {
+			isCompleted = isPeerCompleted(localPeerBitField, localPeerID);
+		}
+		return isCompleted;
 		// return gotCompletedFile;
 	}
 
@@ -436,19 +439,19 @@ public class PeerProcess {
 
 		// if (noOneInterested) {
 		if (noOneInterested) {
-			//throw new Exception("no one is interested!");
+			// throw new Exception("no one is interested!");
 			if (preferred_neighbors.isEmpty()) {
-				
+
 				return;
 			} else {
 				synchronized (preferred_neighbors) {
 					// update preferred_neighbors
 					for (String peerid : preferred_neighbors.keySet()) {
-						
+
 						this.connManager.sendMessage(peerid, Message.MESSAGETYPE_CHOKE);
 					}
 				}
-				
+
 			}
 		}
 
@@ -811,6 +814,7 @@ public class PeerProcess {
 		}
 	}
 
+
 	/**
 	 * This is called when a piece is received from a remote peer. Also update
 	 * the local bitfield.
@@ -825,7 +829,6 @@ public class PeerProcess {
 					"piecesRequestedMap in updatePieceRecieved()");
 		}
 	}
-
 	/**
 	 * Get the number of pieces received so far. This method will access
 	 * piecesRemainingToBeRequested and piecesRequested.

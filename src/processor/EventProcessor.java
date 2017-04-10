@@ -177,6 +177,7 @@ public class EventProcessor {
 								+ pieceToBeRequestedFromPeer + " to peer#" + this.remotePeerID
 								+ "\n the remote peer's bitfield is: "
 								+ Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
+
 						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 					}
 				}
