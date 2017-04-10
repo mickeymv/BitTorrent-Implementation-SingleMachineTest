@@ -567,4 +567,13 @@ public class TCPConnectionManager {
 		}
 	}
 
+	/**
+	 * Send "COMPLETED" message to the peers when the local peer is complete.
+	 */
+	public void broadcastCompletedToPeers() {
+		for (PeerInfo remotePeer : this.localPeerProcessInstance.getNeighbors()) {
+			sendMessage(remotePeer.getPeerID(), Message.MESSAGETYPE_COMPLETED);
+		}
+	}
+
 }

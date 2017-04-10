@@ -24,6 +24,7 @@ public class Message {
 	public static final int MESSAGETYPE_BITFIELD = 5;
 	public static final int MESSAGETYPE_REQUEST = 6;
 	public static final int MESSAGETYPE_PIECE = 7;
+	public static final int MESSAGETYPE_COMPLETED = 9;
 	
 	private String localPeerID, remotePeerID;
 	private PeerProcess localPeerProcessInstance = null;

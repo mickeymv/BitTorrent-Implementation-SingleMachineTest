@@ -80,11 +80,16 @@ public class PeerProcess {
 	private int k_preferred_neighbors = 0;
 
 	/** data structures for maintaining the control logic */
-	/** a map to find which peer is in interested. 
-	 *      * These are peers which are interested in this local peers data.*/
+	/**
+	 * a map to find which peer is in interested. * These are peers which are
+	 * interested in this local peers data.
+	 */
 	HashMap<String, Boolean> interested_peer_list = new HashMap<String, Boolean>();
 	/** track the download speed from each peers, in number of pieces. */
 	HashMap<String, Integer> download_speed = new HashMap<String, Integer>();
+
+	/** Map to store which remote peer is left to complete their file */
+	private HashMap<String, String> incompleteNeighbors = new HashMap<>();
 
 	/*
 	 * map of neighbors who are interested in local pieces. Only choose
@@ -102,9 +107,11 @@ public class PeerProcess {
 	// piecesRequested -> pieces not present locally, and which have been
 	// requested
 	private HashMap<Integer, Integer> piecesRequested = new HashMap<>();
-	
-	/** This is the list of all peers who have currently unchoked the local peer.
-	 * This is used to decide whether or not to send a 'request' message.*/
+
+	/**
+	 * This is the list of all peers who have currently unchoked the local peer.
+	 * This is used to decide whether or not to send a 'request' message.
+	 */
 	private HashMap<String, String> peersWhoHaveUnChokedThisLocalPeer = new HashMap<>();
 
 	/**
@@ -125,27 +132,28 @@ public class PeerProcess {
 	public void setKeepRunning(boolean keepRunning) {
 		this.keepRunning = keepRunning;
 	}
-	
+
 	/**
-	 * This is called when this local peer got a unchoke
-	 * from a remote peer.
+	 * This is called when this local peer got a unchoke from a remote peer.
+	 * 
 	 * @param remotePeerID
 	 */
 	public synchronized void addPeerWhoHasUnchokedLocal(String remotePeerID) {
 		peersWhoHaveUnChokedThisLocalPeer.put(remotePeerID, remotePeerID);
 	}
-	
+
 	/**
-	 * This is called when this local peer got a choke
-	 * from a remote peer.
+	 * This is called when this local peer got a choke from a remote peer.
+	 * 
 	 * @param remotePeerID
 	 */
 	public synchronized void removePeerWhoChokedLocal(String remotePeerID) {
 		peersWhoHaveUnChokedThisLocalPeer.remove(remotePeerID);
 	}
-	
+
 	/**
 	 * Check if the remotePeer has unchoked this local peer.
+	 * 
 	 * @param remotePeerID
 	 * @return
 	 */
@@ -154,9 +162,9 @@ public class PeerProcess {
 	}
 
 	public boolean getGotCompletedFile() {
-		
+
 		return isPeerCompleted(localPeerBitField, localPeerID);
-		//return gotCompletedFile;
+		// return gotCompletedFile;
 	}
 
 	public void setGotCompletedFile(boolean gotCompletedFile) {
@@ -238,13 +246,13 @@ public class PeerProcess {
 		// e.printStackTrace();
 		// }
 		// }
-		
+
 		start_p_timer();
 		start_m_timer();
 	}
 
 	/**
-	 * Initialize the neighbors list.
+	 * Initialize the neighbors list and the incomplete neighbors list.
 	 */
 	private void findNeighbors() {
 
@@ -254,8 +262,20 @@ public class PeerProcess {
 			if (!peer.getPeerID().equals(getPeerID())) {
 				// none of the neighbors is preferred neighbor at the begining.
 				preferred_neighbors.put(peer.getPeerID(), false);
+				if (!peer.isHasFileInitially()) {
+					this.incompleteNeighbors.put(peer.getPeerID(), null);
+				}
 			}
 		}
+	}
+
+	/**
+	 * Called when we receive a broadcast of complete from the remote peer.
+	 * 
+	 * @param remotePeerID
+	 */
+	public void updateRemoteNeighborWhoIsComplete(String remotePeerID) {
+		this.incompleteNeighbors.remove(remotePeerID);
 	}
 
 	/**
@@ -293,12 +313,14 @@ public class PeerProcess {
 			@Override
 			public void run() {
 				// update optimistically unchoked neighbor
-				//System.out.println("time interval: " + ConfigurationSetup.getOptimisticUnchokingInterval());
+				// System.out.println("time interval: " +
+				// ConfigurationSetup.getOptimisticUnchokingInterval());
 				try {
 					updateUnchokedNeighbor();
 				} catch (Exception e) {
-//					System.err.println("not enough interested peers. Need "
-//							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+					// System.err.println("not enough interested peers. Need "
+					// +
+					// ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
 					e.printStackTrace();
 				}
 			}
@@ -342,8 +364,8 @@ public class PeerProcess {
 		// [preferred neighbor list] is the list of peer IDs separated by comma
 		// ‘,’.
 
-		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors "
-				+ "[" + peer_list.toString() + "]" + ".");
+		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
+				+ peer_list.toString() + "]" + ".");
 	}
 
 	/**
@@ -360,11 +382,10 @@ public class PeerProcess {
 	public void updatePreferredNeighbors() throws Exception {
 
 		if (keepRunning == false) {
-			
+
 			return;
 		}
-			
-			
+
 		HashMap<String, Boolean> newPreferredKNeighbors = new HashMap<String, Boolean>();
 		StringBuilder peer_list = new StringBuilder();
 
@@ -399,8 +420,9 @@ public class PeerProcess {
 			// use the first k peers in the interested_peer_list
 			int index = 0;
 			for (peer_speed_pair entry : speed_list) {
-				//System.err.println("speed: " + entry.peerID);
-				//System.err.println("interested?: " + interested_peer_list.get(entry.peerID));
+				// System.err.println("speed: " + entry.peerID);
+				// System.err.println("interested?: " +
+				// interested_peer_list.get(entry.peerID));
 				if (index >= k)
 					break;
 
@@ -456,8 +478,8 @@ public class PeerProcess {
 		// [preferred neighbor list] is the list of peer IDs separated by comma
 		// ‘,’.
 
-		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors "
-				+ "[" + peer_list.toString() + "]" + ".");
+		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
+				+ peer_list.toString() + "]" + ".");
 
 		System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 				+ " has the preferred neighbors " + "[" + peer_list.toString() + "]" + ".");
@@ -496,10 +518,9 @@ public class PeerProcess {
 	public void updateUnchokedNeighbor() throws Exception {
 
 		if (keepRunning == false) {
-			
+
 			return;
 		}
-
 
 		ArrayList<String> interested_choked_peers = new ArrayList<String>();
 		Set<String> peerSet = null;
@@ -636,8 +657,9 @@ public class PeerProcess {
 				// System.out.println("pieice#"+i+"is not in local bitfield for
 				// peer#" + this.localPeerID);
 				if (Util.isPieceIndexSetInBitField(i, remotePeerBitField)) {
-//					System.out.println("local peer#" + this.localPeerID + " NEEDS piece#" + i + " that remote peer#"
-//							+ remotePeerID + " has!");
+					// System.out.println("local peer#" + this.localPeerID + "
+					// NEEDS piece#" + i + " that remote peer#"
+					// + remotePeerID + " has!");
 					return i;
 				}
 			}
@@ -691,8 +713,9 @@ public class PeerProcess {
 		ArrayList<Byte> remotePeerBitField = peersBitfields.get(remotePeerID);
 		Util.setPieceIndexInBitField(pieceIndex, remotePeerBitField);
 
-//		System.out.println("Peer " + localPeerID + ": remote bitfield for " + remotePeerID + "bitfield: "
-//				+ Util.bitfieldToString(remotePeerBitField));
+		// System.out.println("Peer " + localPeerID + ": remote bitfield for " +
+		// remotePeerID + "bitfield: "
+		// + Util.bitfieldToString(remotePeerBitField));
 	}
 
 	/**
@@ -888,21 +911,23 @@ public class PeerProcess {
 	// >>>>>>**************** getter and setters *********************
 
 	public boolean isEveryPeerCompleted() {
-		
+
 		if (gotCompletedFile == false) {
-			
+
 			return false;
 		}
-		
+
 		for (String peerid : peersBitfields.keySet()) {
 
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
 
 			if (!isPeerCompleted(bfield, peerid)) {
-				//System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
+				// System.out.println("[debug] in peer:" + localPeerID + ", Peer
+				// " + peerid + " unfinished!");
 				return false;
 			} else {
-				//System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
+				// System.out.println("[debug] in peer " + localPeerID + ", Peer
+				// " + peerid + " finished!");
 			}
 		}
 		return true;
@@ -911,26 +936,34 @@ public class PeerProcess {
 	public boolean isPeerCompleted(ArrayList<Byte> bfield, String peerid) {
 		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
-		//System.err.println("remaining: " + remaining);
-		
+		// System.err.println("remaining: " + remaining);
+
 		for (int i = 0; i < lengthOfBitfield; i++) {
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
-//				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
-//						+ Util.bitfieldToString(bfield));
+				// System.err.println("[debug] peer " + localPeerID + ":
+				// bitfield of peer: " + peerid + " "
+				// + Util.bitfieldToString(bfield));
 				return false;
 			}
 		}
-		
+
 		if (remaining != 0) {
 			Byte b = Util.setFirstNDigits(remaining);
 			byte last_byte = b.byteValue();
 			if (last_byte != bfield.get(bfield.size() - 1).byteValue()) {
-				//System.out.println("	byte " + (bfield.size() - 1) + " unfilled yet.");
+				// System.out.println(" byte " + (bfield.size() - 1) + "
+				// unfilled yet.");
 				return false;
 			}
 		}
 		return true;
 
+	}
+
+	public void checkIfEveryoneIsCompleteAndExit() {
+		if (this.gotCompletedFile && this.incompleteNeighbors.isEmpty()) {
+			System.exit(0);
+		}
 	}
 
 }

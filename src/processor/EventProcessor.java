@@ -65,14 +65,29 @@ public class EventProcessor {
 		int pieceIndex = -1;
 		switch (type) {
 
+		case Message.MESSAGETYPE_COMPLETED:
+			/**
+			 * Broadcast received when the remote peer has gotten the complete
+			 * file.
+			 */
+			// System.out.println(localPeerID + ">> bitfield received from " +
+			// remotePeerID + ". length: " + payload.length);
+			System.err.println("[DEBUG]: Peer " + localPeerID + " received COMPLETED from " + this.remotePeerID + ".");
+
+			this.localPeerProcessInstance.updateRemoteNeighborWhoIsComplete(remotePeerID);
+
+			this.localPeerProcessInstance.checkIfEveryoneIsCompleteAndExit();
+
+			break;
+
 		case Message.MESSAGETYPE_BITFIELD:
 			/**
 			 * print the length of the bitfield
 			 */
 			// System.out.println(localPeerID + ">> bitfield received from " +
 			// remotePeerID + ". length: " + payload.length);
-			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-					+ " received bitfield from " + this.remotePeerID + ".");
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " received bitfield from "
+					+ this.remotePeerID + ".");
 
 			break;
 
@@ -96,7 +111,7 @@ public class EventProcessor {
 			// from peer: " + this.remotePeerID);
 
 			this.localPeerProcessInstance.removePeerWhoChokedLocal(remotePeerID);
-			
+
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID) == false) {
 				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
 						+ this.remotePeerID
@@ -124,9 +139,9 @@ public class EventProcessor {
 					+ this.remotePeerID + ".");
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
 					+ this.remotePeerID + ".");
-			
+
 			this.localPeerProcessInstance.addPeerWhoHasUnchokedLocal(remotePeerID);
-			
+
 			/*
 			 * Action to take;
 			 * 
@@ -220,7 +235,6 @@ public class EventProcessor {
 
 			localPeerProcessInstance.removeNeighborWhoIsNotInterested(remotePeerID);
 
-
 			break;
 
 		case Message.MESSAGETYPE_HAVE:
@@ -267,14 +281,15 @@ public class EventProcessor {
 
 			this.localPeerProcessInstance.updateBitField(remotePeerID, pieceIndex);
 
-			/*
-			 * i. Check if all other peers are complete. if so, then ii. End
-			 * your local peer process.
-			 */
-			if (localPeerProcessInstance.isEveryPeerCompleted()) {
-				localPeerProcessInstance.setKeepRunning(false);
-				System.err.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
-			}
+//			/*
+//			 * i. Check if all other peers are complete. if so, then ii. End
+//			 * your local peer process.
+//			 */
+//			if (localPeerProcessInstance.isEveryPeerCompleted()) {
+//				localPeerProcessInstance.setKeepRunning(false);
+//				System.err
+//						.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
+//			}
 
 			break;
 
@@ -292,8 +307,8 @@ public class EventProcessor {
 			 * pieces.
 			 */
 			pieceIndex = Util.intFromByteArray(payload);
-			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-					+ " received request from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " received request from "
+					+ this.remotePeerID + " for the piece " + pieceIndex + ".");
 
 			// System.out.println("in peer: " + this.localPeerID + ", got
 			// 'REQUEST' piece#" + pieceIndex
@@ -331,9 +346,8 @@ public class EventProcessor {
 			 * messages to peers who don't have interesting pieces. c). check if
 			 * we have all pieces. i). If we do, update "have_complete_file"
 			 * variable, and create the complete data file. ii). if we do not,
-			 * and if that remote peer has un-choked this local peer,
-			 * send "request" about another piece, we don't have and not
-			 * requested.
+			 * and if that remote peer has un-choked this local peer, send
+			 * "request" about another piece, we don't have and not requested.
 			 */
 
 			byte[] pieceIndexBytesArray = Arrays.copyOfRange(payload, 0, 4);
@@ -360,8 +374,8 @@ public class EventProcessor {
 					+ pieceIndex + " from " + this.remotePeerID + ". Now the number of pieces it has is "
 					+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
 
-			System.out.println(
-					Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
+			System.out
+					.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
 							+ pieceIndex + " from " + this.remotePeerID + ". Now the number of pieces it has is "
 							+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
 
@@ -371,7 +385,7 @@ public class EventProcessor {
 			/*
 			 * //TODO 1. check for complete file i. Make complete file
 			 */
-			
+
 			if (!this.localPeerProcessInstance.getGotCompletedFile()) {
 				int pieceToBeRequestedFromPeer = localPeerProcessInstance.getPieceToBeRequested(remotePeerID);
 				if (pieceToBeRequestedFromPeer == -1) {
@@ -394,14 +408,15 @@ public class EventProcessor {
 				localPeerProcessInstance.setGotCompletedFile(true);
 				// merge file
 				Util.mergeDataPieces(localPeerID);
-				
-				logger.info(Util.dateFormat.format(new Date()) 
-						+ ": Peer " + localPeerID 
+
+				logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 						+ " has downloaded the complete file.");
-				
-				System.out.println(Util.dateFormat.format(new Date()) 
-						+ ": Peer " + localPeerID 
+
+				System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 						+ " has downloaded the complete file.");
+				localPeerProcessInstance.getConnManager().broadcastCompletedToPeers();
+
+				this.localPeerProcessInstance.checkIfEveryoneIsCompleteAndExit();
 			}
 
 			break;
