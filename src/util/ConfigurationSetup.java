@@ -12,8 +12,7 @@ import java.util.Scanner;
 import type.PeerInfo;
 
 /**
- * 1. read config files - common.cfg, peerinfo.cfg 
- * 2. store relevant common
+ * 1. read config files - common.cfg, peerinfo.cfg 2. store relevant common
  * variables and peer information
  * 
  * @author Mickey Vellukunnel, Arpitha, Xiaolong
@@ -34,21 +33,28 @@ import type.PeerInfo;
  *
  */
 public class ConfigurationSetup {
-	
+
+	private static final String NUMBER_OF_PREFERRED_NEIGHBORS_K = "NumberOfPreferredNeighbors";
+	private static final String UNCHOKING_INTERVAL_P = "UnchokingInterval";
+	private static final String OPTIMISTIC_UNCHOKING_INTERVAL_M = "OptimisticUnchokingInterval";
+	private static final String FILE_NAME = "FileName";
+	private static final String FILE_SIZE = "FileSize";
+	private static final String PIECE_SIZE = "PieceSize";
+
 	// from common.cfg
-	 public static final int NULL = -1;
-	 private static int numberOfPreferredNeighbors = NULL; 
-	 private static int unchokingInterval = NULL; 
-	 private static int optimisticUnchokingInterval = NULL; 
-	 
-	 public static String fileName = null; 
-	 private static int fileSize = NULL; 
-	 
-	 private static int pieceSize = NULL;
-	  
-	 static int numberOfPieces = NULL;
-	 
-	 public static int getNumberOfPieces() {
+	public static final int NULL = -1;
+	private static int numberOfPreferredNeighbors = NULL;
+	private static int unchokingInterval = NULL;
+	private static int optimisticUnchokingInterval = NULL;
+
+	public static String fileName = null;
+	private static int fileSize = NULL;
+
+	private static int pieceSize = NULL;
+
+	static int numberOfPieces = NULL;
+
+	public static int getNumberOfPieces() {
 		return numberOfPieces;
 	}
 
@@ -56,23 +62,31 @@ public class ConfigurationSetup {
 		ConfigurationSetup.numberOfPieces = numberOfPieces;
 	}
 
-	public int getNumberOfPreferredNeighbors(){
-		 
-		 return numberOfPreferredNeighbors; 
-	 }
-	  
-	 public static int getUnchokingInterval(){ return unchokingInterval; }
-	  
-	 public static int getOptimisticUnchokingInterval() { 
-		 return optimisticUnchokingInterval; 
-	 }
-	  
-	 public String getFileName(){ return fileName; }
-	  
-	 public int getFileSize(){ return fileSize; }
-	  
-	 public int getPieceSize(){ return pieceSize; }
-	 
+	public int getNumberOfPreferredNeighbors() {
+
+		return numberOfPreferredNeighbors;
+	}
+
+	public static int getUnchokingInterval() {
+		return unchokingInterval;
+	}
+
+	public static int getOptimisticUnchokingInterval() {
+		return optimisticUnchokingInterval;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public int getFileSize() {
+		return fileSize;
+	}
+
+	public int getPieceSize() {
+		return pieceSize;
+	}
+
 	// from peerInfo.cfg
 
 	// list of all the peers in the network (including local peer)
@@ -109,29 +123,47 @@ public class ConfigurationSetup {
 	}
 
 	/**
-	 * Read Common.cfg
-	 * TODO: Do this with the correct file format.
+	 * Read Common.cfg TODO: Do this with the correct file format.
 	 */
 	private static void readCommonInfoConfigFile() {
 		// reading from common.cfg
 		try {
-			
-			 Scanner scanner = new Scanner(new
-					 FileReader(commonInfoFile));
-			 
-			 numberOfPreferredNeighbors = Integer.parseInt(scanner.nextLine().trim());
-			 unchokingInterval = Integer.parseInt(scanner.nextLine().trim());
-			 optimisticUnchokingInterval = Integer.parseInt(scanner.nextLine().trim()); 
-			 fileName = scanner.nextLine().trim(); 
-			 fileSize = Integer.parseInt(scanner.nextLine().trim()); 
-			 pieceSize = Integer.parseInt(scanner.nextLine().trim());
-			  
-			 if (fileSize % pieceSize == 0) { 
-				 numberOfPieces = fileSize / pieceSize; 
-			 } else {
-				 numberOfPieces = fileSize / pieceSize + 1; 
-			 }
-			 scanner.close();
+
+			Scanner commonInfoScanner = new Scanner(new FileReader(commonInfoFile));
+			while (commonInfoScanner.hasNextLine()) {
+				String commonInfoLine = commonInfoScanner.nextLine();
+				String[] commonInfoLineSplitBySpaceArray = commonInfoLine.split("[ ]+");
+				switch (commonInfoLineSplitBySpaceArray[0]) {
+				case ConfigurationSetup.FILE_NAME:
+					fileName = commonInfoLineSplitBySpaceArray[1];
+					break;
+				case ConfigurationSetup.FILE_SIZE:
+					fileSize = Integer.parseInt(commonInfoLineSplitBySpaceArray[1]);
+					break;
+				case ConfigurationSetup.NUMBER_OF_PREFERRED_NEIGHBORS_K:
+					numberOfPreferredNeighbors = Integer.parseInt(commonInfoLineSplitBySpaceArray[1]);
+					break;
+				case ConfigurationSetup.OPTIMISTIC_UNCHOKING_INTERVAL_M:
+					optimisticUnchokingInterval = Integer.parseInt(commonInfoLineSplitBySpaceArray[1]);
+					break;
+				case ConfigurationSetup.PIECE_SIZE:
+					pieceSize = Integer.parseInt(commonInfoLineSplitBySpaceArray[1]);
+					break;
+				case ConfigurationSetup.UNCHOKING_INTERVAL_P:
+					unchokingInterval = Integer.parseInt(commonInfoLineSplitBySpaceArray[1]);
+					break;
+				default:
+					System.err.println("\nError in reading Common.cfg. Illegal parameter encountered.\n");
+
+				}
+			}
+
+			if (fileSize % pieceSize == 0) {
+				numberOfPieces = fileSize / pieceSize;
+			} else {
+				numberOfPieces = fileSize / pieceSize + 1;
+			}
+			commonInfoScanner.close();
 		} catch (Exception e) { // FileNotFoundException
 			// TODO Auto-generated catch block
 			e.printStackTrace();

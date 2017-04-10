@@ -688,10 +688,10 @@ public class PeerProcess {
 			sbReq.append(pieceIndex + ", ");
 		}
 
-		System.err.println("This is the remote bitfield for peer:" + remotePeerID + "\n"
-				+ Util.bitfieldToString(remotePeerBitField) + "\n the local bitfield for peer: " + this.localPeerID
-				+ "\n" + Util.bitfieldToString(this.localPeerBitField) + "\n the local peer needs peices, "
-				+ sbToBeReq.toString() + "\n the local peer requested peices, " + sbReq.toString());
+//		System.err.println("This is the remote bitfield for peer:" + remotePeerID + "\n"
+//				+ Util.bitfieldToString(remotePeerBitField) + "\n the local bitfield for peer: " + this.localPeerID
+//				+ "\n" + Util.bitfieldToString(this.localPeerBitField) + "\n the local peer needs peices, "
+//				+ sbToBeReq.toString() + "\n the local peer requested peices, " + sbReq.toString());
 
 		return -1; // if the remote peer does not have any piece which this
 					// local peer requires.
@@ -803,9 +803,9 @@ public class PeerProcess {
 					"piecesRequested in updatePieceRequested()");
 		}
 		
-		System.err
-				.println("[debug] " +localPeerID+ " ********** piece " + pieceToBeRequestedFromPeer 
-						+ " piecesRemainingToBeRequested ----> piecesRequested");
+//		System.err
+//				.println("[debug] " +localPeerID+ " ********** piece " + pieceToBeRequestedFromPeer 
+//						+ " piecesRemainingToBeRequested ----> piecesRequested");
 	}
 
 	/**

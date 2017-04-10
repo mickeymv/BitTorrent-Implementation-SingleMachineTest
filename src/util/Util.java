@@ -579,7 +579,7 @@ public class Util {
 			sb.append(piece + ", ");
 		}
 
-		System.err.println("for peer#" + localPeerID + "the piece index updated is#" + pieceIndex + " and the map is:"
-				+ string + "\n" + sb.toString());
+//		System.err.println("for peer#" + localPeerID + "the piece index updated is#" + pieceIndex + " and the map is:"
+//				+ string + "\n" + sb.toString());
 	}
 }
