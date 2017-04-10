@@ -35,7 +35,7 @@ import util.Util;
  */
 public class TCPConnectionManager {
 
-	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
+//	private static Logger logger = Logger.getLogger(TCPConnectionManager.class);
 
 	/** This is the map for P2pConnections. Input is the peerID of a peer. */
 
@@ -196,8 +196,8 @@ public class TCPConnectionManager {
 						localPeerClientSocket = new Socket(remotePeerServer.getHostName(),
 								remotePeerServer.getPortNumber());
 
-						logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
+//						logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+//								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
 
 						System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
@@ -400,8 +400,8 @@ public class TCPConnectionManager {
 
 			// log the connection: [Time]: Peer [peer_ID 1] is connected from
 			// Peer [peer_ID 2].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID + " is connected from Peer "
-					+ remoteClientPeerID + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID + " is connected from Peer "
+//					+ remoteClientPeerID + ".");
 
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID
 					+ " is connected from Peer " + remoteClientPeerID + ".");

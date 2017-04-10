@@ -34,7 +34,7 @@ import messages.Message;
  */
 public class PeerProcess {
 
-	private Logger logger = Logger.getLogger(PeerProcess.class);
+//	private Logger logger = Logger.getLogger(PeerProcess.class);
 
 	/** peer ID */
 	private String localPeerID;
@@ -298,8 +298,8 @@ public class PeerProcess {
 				try {
 					updatePreferredNeighbors();
 				} catch (Exception e) {
-					System.err.println("not enough interested peers. Need "
-							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
+//					System.err.println("not enough interested peers. Need "
+//							+ ConfigurationSetup.getInstance().getNumberOfPreferredNeighbors());
 					e.printStackTrace();
 				}
 				clearDownloadSpeed();
@@ -369,7 +369,9 @@ public class PeerProcess {
 		// [preferred neighbor list] is the list of peer IDs separated by comma
 		// ‘,’.
 
-		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
+//		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
+//				+ peer_list.toString() + "]" + ".");
+		System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
 				+ peer_list.toString() + "]" + ".");
 	}
 
@@ -496,8 +498,8 @@ public class PeerProcess {
 		// [preferred neighbor list] is the list of peer IDs separated by comma
 		// ‘,’.
 
-		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
-				+ peer_list.toString() + "]" + ".");
+//		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has the preferred neighbors " + "["
+//				+ peer_list.toString() + "]" + ".");
 
 		System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 				+ " has the preferred neighbors " + "[" + peer_list.toString() + "]" + ".");
@@ -586,8 +588,8 @@ public class PeerProcess {
 
 			// [Time]: Peer [peer_ID] has the optimistically unchoked neighbor
 			// [optimistically unchoked neighbor ID].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-					+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+//					+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
 
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
@@ -639,12 +641,12 @@ public class PeerProcess {
 	 */
 	public static void main(String[] args) {
 		if (args.length != 3) {
-			System.out.println("\n\nError: Incorrect number of arguments. Syntax is, \"java PeerProcess [peerID]\"");
+//			System.out.println("\n\nError: Incorrect number of arguments. Syntax is, \"java PeerProcess [peerID]\"");
 			return;
 		}
 		PeerProcess localPeer = new PeerProcess(args[2]);
 		// start logging
-		FileLogger.initialize(args[2]);
+		new FileLogger().initialize(args[2]);
 		localPeer.initiatePeerProcess();
 	}
 
@@ -687,15 +689,6 @@ public class PeerProcess {
 		for (Integer pieceIndex : this.piecesRequested.keySet()) {
 			sbReq.append(pieceIndex + ", ");
 		}
-
-		// System.err.println("This is the remote bitfield for peer:" +
-		// remotePeerID + "\n"
-		// + Util.bitfieldToString(remotePeerBitField) + "\n the local bitfield
-		// for peer: " + this.localPeerID
-		// + "\n" + Util.bitfieldToString(this.localPeerBitField) + "\n the
-		// local peer needs peices, "
-		// + sbToBeReq.toString() + "\n the local peer requested peices, " +
-		// sbReq.toString());
 
 		return -1; // if the remote peer does not have any piece which this
 					// local peer requires.
@@ -798,19 +791,14 @@ public class PeerProcess {
 
 		synchronized (piecesRemainingToBeRequested) {
 			this.piecesRemainingToBeRequested.remove(pieceToBeRequestedFromPeer);
-			Util.printArrayListOfIntegersFromLocalPeer(piecesRemainingToBeRequested, this.localPeerID,
-					pieceToBeRequestedFromPeer, "piecesRemainingToBeRequestedMap in updatePieceRequested()");
+//			Util.printArrayListOfIntegersFromLocalPeer(piecesRemainingToBeRequested, this.localPeerID,
+//					pieceToBeRequestedFromPeer, "piecesRemainingToBeRequestedMap in updatePieceRequested()");
 		}
 		synchronized (piecesRequested) {
 			this.piecesRequested.put(pieceToBeRequestedFromPeer, pieceToBeRequestedFromPeer);
-			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceToBeRequestedFromPeer,
-					"piecesRequested in updatePieceRequested()");
+//			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceToBeRequestedFromPeer,
+//					"piecesRequested in updatePieceRequested()");
 		}
-
-		// System.err
-		// .println("[debug] " +localPeerID+ " ********** piece " +
-		// pieceToBeRequestedFromPeer
-		// + " piecesRemainingToBeRequested ----> piecesRequested");
 	}
 
 	/**
@@ -823,8 +811,8 @@ public class PeerProcess {
 		synchronized (piecesRequested) {
 			this.piecesRequested.remove(pieceIndex);
 			Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
-			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceIndex,
-					"piecesRequestedMap in updatePieceRecieved()");
+//			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceIndex,
+//					"piecesRequestedMap in updatePieceRecieved()");
 		}
 	}
 
@@ -943,12 +931,8 @@ public class PeerProcess {
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
 
 			if (!isPeerCompleted(bfield, peerid)) {
-				// System.out.println("[debug] in peer:" + localPeerID + ", Peer
-				// " + peerid + " unfinished!");
 				return false;
 			} else {
-				// System.out.println("[debug] in peer " + localPeerID + ", Peer
-				// " + peerid + " finished!");
 			}
 		}
 		return true;
@@ -957,13 +941,9 @@ public class PeerProcess {
 	public boolean isPeerCompleted(ArrayList<Byte> bfield, String peerid) {
 		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
-		// System.err.println("remaining: " + remaining);
 
 		for (int i = 0; i < lengthOfBitfield; i++) {
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
-				// System.err.println("[debug] peer " + localPeerID + ":
-				// bitfield of peer: " + peerid + " "
-				// + Util.bitfieldToString(bfield));
 				return false;
 			}
 		}

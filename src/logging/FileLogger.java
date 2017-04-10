@@ -15,12 +15,12 @@ import peer.PeerProcess;
 
 public final class FileLogger {
 
-	public static void initialize(String localPeerID) {
+	public void initialize(String localPeerID) {
 		
 		//Logger logger = Logger.getLogger(FileLogger.class);
 		try {
 			
-			File logFileDirectory = new File("", "project");
+			File logFileDirectory = new File("project");
 			if (! logFileDirectory.exists())
 				logFileDirectory.mkdirs();
 			
@@ -30,11 +30,12 @@ public final class FileLogger {
 			
 			String filename = "log_peer_" + localPeerID + ".log";
 			
-			File logFile = new File(logFileDirectory.getAbsolutePath(), filename);
-
+			File logFile = new File(logFileDirectory, filename);
+			
 			if (!logFile.exists()) {
 				logFile.getParentFile().mkdirs();
 				try {
+//					System.out.println("create file: " + logFile.getAbsolutePath());
 					logFile.createNewFile();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

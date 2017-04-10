@@ -5,6 +5,7 @@ import util.Util;
 
 import java.util.HashMap;
 
+import logging.FileLogger;
 import peer.PeerProcess;
 
 /**
@@ -29,7 +30,10 @@ public class PeerProcesses {
 	
 	public static void initiatePeerProcessForLocalHostTesting(ArrayList<String> peerIDList) {
 		//Util.createRandomDataFile(2048); //change according to what is in Common.cfg
+		
 		for (String peerID : peerIDList) {
+			new FileLogger().initialize(peerID);
+			
 			PeerProcess localPeer = new PeerProcess(peerID);
 			peerProcesses.put(peerID, localPeer);
 			// start logging

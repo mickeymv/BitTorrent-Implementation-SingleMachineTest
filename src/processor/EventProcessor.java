@@ -25,7 +25,7 @@ import util.Util;
 
 public class EventProcessor {
 
-	private Logger logger = Logger.getLogger(PeerProcess.class);
+//	private Logger logger = Logger.getLogger(PeerProcess.class);
 
 	private String localPeerID, remotePeerID;
 	private PeerProcess localPeerProcessInstance = null;
@@ -70,10 +70,6 @@ public class EventProcessor {
 			 * Broadcast received when the remote peer has gotten the complete
 			 * file.
 			 */
-			// System.out.println(localPeerID + ">> bitfield received from " +
-			// remotePeerID + ". length: " + payload.length);
-			// System.err.println("[DEBUG]: Peer " + localPeerID + " received
-			// COMPLETED from " + this.remotePeerID + ".");
 
 			this.localPeerProcessInstance.updateRemoteNeighborWhoIsComplete(remotePeerID);
 
@@ -102,8 +98,8 @@ public class EventProcessor {
 			 */
 
 			// [Time]: Peer [peer_ID 1] is choked by [peer_ID 2].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
-					+ this.remotePeerID + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
+//					+ this.remotePeerID + ".");
 
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is choked by "
 					+ this.remotePeerID + ".");
@@ -114,9 +110,9 @@ public class EventProcessor {
 			this.localPeerProcessInstance.removePeerWhoChokedLocal(remotePeerID);
 
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID) == false) {
-				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
-						+ this.remotePeerID
-						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
+//				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
+//						+ this.remotePeerID
+//						+ ", when that peer does not have any interesting pieces. This peer should not have been selected by that peer!");
 				messageHandler.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
 
 				return;
@@ -136,8 +132,8 @@ public class EventProcessor {
 			 * was receieved in error;
 			 */
 			// [Time]: Peer [peer_ID 1] is unchoked by [peer_ID 2].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
-					+ this.remotePeerID + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
+//					+ this.remotePeerID + ".");
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
 					+ this.remotePeerID + ".");
 
@@ -174,14 +170,6 @@ public class EventProcessor {
 					synchronized (this) {
 						byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 						messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
-						// System.out.println("peer#: " + this.localPeerID + "
-						// sent a request when unchoked, for piece# "
-						// + pieceToBeRequestedFromPeer + " to peer#" +
-						// this.remotePeerID
-						// + "\n the remote peer's bitfield is: "
-						// +
-						// Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
-
 						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 					}
 				}
@@ -199,8 +187,8 @@ public class EventProcessor {
 			 */
 			// [Time]: Peer [peer_ID 1] received the ‘interested’
 			// message from [peer_ID 2].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+//					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
 
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘interested’ message from " + this.remotePeerID + ".");
@@ -227,8 +215,8 @@ public class EventProcessor {
 			 */
 			// [Time]: Peer [peer_ID 1] received the ‘not interested’
 			// message from [peer_ID 2].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+//					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘not interested’ message from " + this.remotePeerID + ".");
 
@@ -266,8 +254,8 @@ public class EventProcessor {
 
 			// [Time]: Peer [peer_ID 1] received the ‘have’ message
 			// from [peer_ID 2] for the piece [piece index].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+//					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 					+ " received the ‘have’ message from " + this.remotePeerID + " for the piece " + pieceIndex + ".");
 
@@ -378,9 +366,9 @@ public class EventProcessor {
 			// [Time]: Peer [peer_ID 1] has downloaded the piece [piece index]
 			// from [peer_ID 2]. Now the number of pieces it has is
 			// [number of pieces].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
-					+ pieceIndex + " from " + this.remotePeerID + ". Now the number of pieces it has is "
-					+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
+//			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
+//					+ pieceIndex + " from " + this.remotePeerID + ". Now the number of pieces it has is "
+//					+ localPeerProcessInstance.getNumberOfPiecesSoFar() + ".");
 
 			System.out
 					.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " has downloaded the piece "
@@ -405,13 +393,6 @@ public class EventProcessor {
 					synchronized (this) {
 						byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 						messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
-						// System.out.println("peer#: " + this.localPeerID
-						// + " sent a REQUEST message when received a piece for
-						// piece# " + pieceIndex + " to peer#"
-						// + this.remotePeerID + "\n the remote peer's bitfield
-						// is: "
-						// +
-						// Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
 						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
 					}
 				}
@@ -422,8 +403,8 @@ public class EventProcessor {
 				// merge file
 				Util.mergeDataPieces(localPeerID);
 
-				logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-						+ " has downloaded the complete file.");
+//				logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+//						+ " has downloaded the complete file.");
 
 				System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 						+ " has downloaded the complete file.");
