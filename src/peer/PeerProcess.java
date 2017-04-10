@@ -518,7 +518,6 @@ public class PeerProcess {
 	public void updateUnchokedNeighbor() throws Exception {
 
 		if (keepRunning == false) {
-
 			return;
 		}
 
@@ -529,49 +528,56 @@ public class PeerProcess {
 		}
 
 		if (peerSet.isEmpty()) {
+			// No peer is interested in local peer pieces.
 			// throw new Exception("interested_peer_list is empty!");
 			if (optimistically_unchoked_neighbor == null) {
-
+				// No peer was chose before
 				return;
 			} else {
-
-				this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_CHOKE);
+				// no peer is chosen this time and we choke earlier
+				// optimistically_unchoked_peer.
+				if (optimistically_unchoked_neighbor != null) {
+					this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_CHOKE);
+				}
 				optimistically_unchoked_neighbor = null;
-			}
-		}
-
-		for (String peer : peerSet) {
-
-			if (interested_peer_list.get(peer) == true && !preferred_neighbors.containsKey(peer)) {
-
-				interested_choked_peers.add(peer);
-			}
-		}
-
-		if (!interested_choked_peers.isEmpty()) {
-			Collections.shuffle(interested_choked_peers);
-
-			synchronized (optimistically_unchoked_neighbor) {
-				optimistically_unchoked_neighbor = interested_choked_peers.get(0);
+				return;
 			}
 		} else {
-			Random random = new Random();
-			int idx = random.nextInt(neighbors.size());
+			// there are peers interested in local peer's pieces.
+			for (String peer : peerSet) {
+				if (interested_peer_list.get(peer) == true && !preferred_neighbors.containsKey(peer)) {
+					// choose interested peers which are choked
+					interested_choked_peers.add(peer);
+				}
+			}
 
-			synchronized (optimistically_unchoked_neighbor) {
-				optimistically_unchoked_neighbor = neighbors.get(idx).getPeerID();
+			if (!interested_choked_peers.isEmpty()) {
+				// if there is an interested peer which was choked
+				Collections.shuffle(interested_choked_peers);
+				synchronized (optimistically_unchoked_neighbor) {
+					optimistically_unchoked_neighbor = interested_choked_peers.get(0);
+				}
+			} else {
+				// no interested peer which is currently choked
+				if (optimistically_unchoked_neighbor != null) {
+					this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_CHOKE);
+				}
+				optimistically_unchoked_neighbor = null;
+				return;
+			}
+
+			// [Time]: Peer [peer_ID] has the optimistically unchoked neighbor
+			// [optimistically unchoked neighbor ID].
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+					+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
+
+			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
+					+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
+			// unchoke the new optimistically unchoked neighbor
+			if (optimistically_unchoked_neighbor != null) {
+				this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_UNCHOKE);
 			}
 		}
-
-		// [Time]: Peer [peer_ID] has the optimistically unchoked neighbor
-		// [optimistically unchoked neighbor ID].
-		logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-				+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
-
-		System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-				+ " has the optimistically unchoked neighbor " + optimistically_unchoked_neighbor + ".");
-		// unchoke the new optimistically unchoked neighbor
-		this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_UNCHOKE);
 	}
 
 	public void updateInterested_peer_list(String remotePeerID, int messageType) throws Exception {
