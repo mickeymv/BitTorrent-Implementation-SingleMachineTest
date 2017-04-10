@@ -212,6 +212,10 @@ public class Util {
 					Byte b = setFirstNDigits(remaining);
 					bitField.add(b);
 				}
+			} else {
+				
+				Byte b = new Byte((byte)0x00);
+				bitField.add(b);
 			}
 			return bitField;
 		}
