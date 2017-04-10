@@ -881,28 +881,28 @@ public class PeerProcess {
 			ArrayList<Byte> bfield = peersBitfields.get(peerid);
 
 			if (!isPeerCompleted(bfield, peerid)) {
-				//System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
+				System.out.println("[debug] in peer:" + localPeerID + ",	Peer " + peerid + " unfinished!");
 				return false;
 			} else {
-				//System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
+				System.out.println("[debug] in peer " + localPeerID + ",	Peer " + peerid + " finished!");
 			}
 		}
 		return true;
 	}
 
 	public boolean isPeerCompleted(ArrayList<Byte> bfield, String peerid) {
-		int lengthOfBitfield = (int) Math.floor(ConfigurationSetup.getNumberOfPieces() / 8.0);
+		int lengthOfBitfield = ConfigurationSetup.getNumberOfPieces() / 8;
 		int remaining = ConfigurationSetup.getNumberOfPieces() - (lengthOfBitfield) * 8;
 		//System.err.println("remaining: " + remaining);
 
-		for (int i = 0; i < bfield.size(); i++) {
+		for (int i = 0; i < lengthOfBitfield; i++) {
 			if (bfield.get(i).byteValue() != (byte) 0xFF) {
-//				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
-//						+ Util.bitfieldToString(bfield));
+				System.err.println("[debug] peer " + localPeerID + ":	bitfield of peer: " + peerid + " "
+						+ Util.bitfieldToString(bfield));
 				return false;
 			}
 		}
-
+		
 		if (remaining != 0) {
 			Byte b = Util.setFirstNDigits(remaining);
 			byte last_byte = b.byteValue();
