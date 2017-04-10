@@ -9,8 +9,9 @@ import processor.EventProcessor;
 /**
  * @author Mickey Vellukunnel
  *
- *	Every peer will have a message listener for every other peer it is connected to.
- *	It will also have an instance of MessageProcessor for every peer it is connected to.
+ *         Every peer will have a message listener for every other peer it is
+ *         connected to. It will also have an instance of MessageProcessor for
+ *         every peer it is connected to.
  *
  */
 
@@ -37,9 +38,10 @@ public class MessageListener {
 
 			// receive the message sent from the peer
 			try {
-				
-				//System.out.println("In peer#" + localPeerID+" and started listening for messages from peer#" + remotePeerID);
-				
+
+				// System.out.println("In peer#" + localPeerID+" and started
+				// listening for messages from peer#" + remotePeerID);
+
 				messageLength = in.readInt();
 
 				/*
@@ -54,13 +56,15 @@ public class MessageListener {
 				if (messageLength >= 1) {
 					messageBytes = new byte[messageLength];
 					in.readFully(messageBytes, 0, messageBytes.length); // read
-					
-					//System.out.println("In peer#" + localPeerID+" and received a message from peer#" + remotePeerID);
-					
+
+					// System.out.println("In peer#" + localPeerID+" and
+					// received a message from peer#" + remotePeerID);
+
 					messageProcessor.processMessage(messageBytes);
 				} else {
-					System.out.println("ERROR! " + localPeerID
-							+ " local peer Received message of incorrect length from Peer " + remotePeerID);
+					System.err.println("\n\n\n###################\n\nERROR! " + localPeerID
+							+ " local peer Received message of incorrect length from Peer " + remotePeerID
+							+ "\n\n###################\n\n\n###################");
 				}
 
 			} catch (IOException e) {

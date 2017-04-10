@@ -529,12 +529,12 @@ public class PeerProcess {
 		}
 
 		if (peerSet.isEmpty()) {
-			//throw new Exception("interested_peer_list is empty!");
+			// throw new Exception("interested_peer_list is empty!");
 			if (optimistically_unchoked_neighbor == null) {
-				
+
 				return;
 			} else {
-				
+
 				this.connManager.sendMessage(optimistically_unchoked_neighbor, Message.MESSAGETYPE_CHOKE);
 				optimistically_unchoked_neighbor = null;
 			}
@@ -665,6 +665,22 @@ public class PeerProcess {
 			}
 		}
 
+		StringBuilder sbToBeReq = new StringBuilder();
+		StringBuilder sbReq = new StringBuilder();
+
+		for (Integer pieceIndex : piecesRemainingToBeRequested.keySet()) {
+			sbToBeReq.append(pieceIndex + ", ");
+		}
+
+		for (Integer pieceIndex : this.piecesRequested.keySet()) {
+			sbReq.append(pieceIndex + ", ");
+		}
+
+		System.err.println("This is the remote bitfield for peer:" + remotePeerID + "\n"
+				+ Util.bitfieldToString(remotePeerBitField) + "\n the local bitfield for peer: " + this.localPeerID
+				+ "\n" + Util.bitfieldToString(this.localPeerBitField) + "\n the local peer needs peices, "
+				+ sbToBeReq.toString() + "\n the local peer requested peices, " + sbReq.toString());
+
 		return -1; // if the remote peer does not have any piece which this
 					// local peer requires.
 	}
@@ -763,12 +779,17 @@ public class PeerProcess {
 	 * @param pieceToBeRequestedFromPeer
 	 */
 	public void updatePieceRequested(int pieceToBeRequestedFromPeer) {
-		
-		synchronized(piecesRemainingToBeRequested) {
-		
+
+		synchronized (piecesRemainingToBeRequested) {
 			this.piecesRemainingToBeRequested.remove(pieceToBeRequestedFromPeer);
+			Util.printArrayListOfIntegersFromLocalPeer(piecesRemainingToBeRequested, this.localPeerID,
+					pieceToBeRequestedFromPeer, "piecesRemainingToBeRequestedMap in updatePieceRequested()");
 		}
-		this.piecesRequested.put(pieceToBeRequestedFromPeer, pieceToBeRequestedFromPeer);
+		synchronized (piecesRequested) {
+			this.piecesRequested.put(pieceToBeRequestedFromPeer, pieceToBeRequestedFromPeer);
+			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceToBeRequestedFromPeer,
+					"piecesRequested in updatePieceRequested()");
+		}
 	}
 
 	/**
@@ -778,8 +799,12 @@ public class PeerProcess {
 	 * @param pieceIndex
 	 */
 	public void updatePieceRecieved(int pieceIndex) {
-		this.piecesRequested.remove(pieceIndex);
-		Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
+		synchronized (piecesRequested) {
+			this.piecesRequested.remove(pieceIndex);
+			Util.setPieceIndexInBitField(pieceIndex, this.localPeerBitField);
+			Util.printArrayListOfIntegersFromLocalPeer(piecesRequested, this.localPeerID, pieceIndex,
+					"piecesRequestedMap in updatePieceRecieved()");
+		}
 	}
 
 	/**
@@ -891,23 +916,6 @@ public class PeerProcess {
 		this.download_speed = download_speed;
 	}
 
-	public HashMap<Integer, Integer> getPiecesRemainingToBeRequested() {
-		return piecesRemainingToBeRequested;
-	}
-
-	public void setPiecesRemainingToBeRequested(HashMap<Integer, Integer> piecesRemainingToBeRequested) {
-		synchronized(piecesRemainingToBeRequested) {
-			this.piecesRemainingToBeRequested = piecesRemainingToBeRequested;
-		}
-	}
-
-	public HashMap<Integer, Integer> getPiecesRequested() {
-		return piecesRequested;
-	}
-
-	public void setPiecesRequested(HashMap<Integer, Integer> piecesRequested) {
-		this.piecesRequested = piecesRequested;
-	}
 	// >>>>>>**************** getter and setters *********************
 
 	public boolean isEveryPeerCompleted() {

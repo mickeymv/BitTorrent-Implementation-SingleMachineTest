@@ -198,9 +198,9 @@ public class TCPConnectionManager {
 
 						logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
 								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
-						
+
 						System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID
-						+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
+								+ " makes a connection to Peer " + remotePeerServer.getPeerID() + ".");
 
 						populateConnMap(localPeerID, localPeerClientSocket, remotePeerServer.getPeerID(),
 								remotePeerServer.getHostName(), remotePeerServer.getPortNumber());
@@ -383,9 +383,11 @@ public class TCPConnectionManager {
 			this.localPeerSocket = connection;
 			String clientHostname = connection.getInetAddress().getHostName();
 			while (!peerAddressToPeerIDMap.containsKey(clientHostname + ":" + connection.getPort())) {
-//				System.err.println("\nWait for the local server peer# " + localServerPeerID
-//						+ ", peerAddressToPeerIDMap to have a mapping for the host# " + clientHostname + ":"
-//						+ connection.getPort() + "\n");
+				// System.err.println("\nWait for the local server peer# " +
+				// localServerPeerID
+				// + ", peerAddressToPeerIDMap to have a mapping for the host# "
+				// + clientHostname + ":"
+				// + connection.getPort() + "\n");
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
@@ -397,12 +399,12 @@ public class TCPConnectionManager {
 
 			// log the connection: [Time]: Peer [peer_ID 1] is connected from
 			// Peer [peer_ID 2].
-			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID
-					+ " is connected from Peer " + remoteClientPeerID + ".");
+			logger.info(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID + " is connected from Peer "
+					+ remoteClientPeerID + ".");
 
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localServerPeerID
 					+ " is connected from Peer " + remoteClientPeerID + ".");
-			
+
 			// System.out.println("Server: " + localServerPeerID + ", connected
 			// to a client with address: "
 			// + clientHostname + ":" + connection.getPort() + " and ID: " +
@@ -520,9 +522,11 @@ public class TCPConnectionManager {
 		}
 		DataOutputStream out = connMap.get(localPeerID + ":" + remotePeerID).getDataOutputStream();
 		try {
-			out.writeInt(1);
-			out.write((byte) messageType);
-			out.flush();
+			synchronized (out) {
+				out.writeInt(1);
+				out.write((byte) messageType);
+				out.flush();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -558,9 +562,16 @@ public class TCPConnectionManager {
 			streamToCombineByteArrays.write((byte) Message.MESSAGETYPE_HAVE);
 			streamToCombineByteArrays.write(pieceIndexMessagePayload);
 			byte[] message = streamToCombineByteArrays.toByteArray();
-			out.writeInt(message.length);
-			out.write(message);
-			out.flush();
+			if (message.length < 1) {
+				System.err.println(
+						"\n\n\n\n\n########################################\n\n\n\n\n Sending have broadcast failed due to message length to peer#"
+								+ remotePeerID + "for piece#" + pieceIndex + "  ##########################\n\n\n");
+			}
+			synchronized (out) {
+				out.writeInt(message.length);
+				out.write(message);
+				out.flush();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

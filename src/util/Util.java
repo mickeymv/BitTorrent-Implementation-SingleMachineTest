@@ -15,6 +15,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.io.File;
@@ -568,5 +569,17 @@ public class Util {
 		}
 
 		return (Byte) null;
+	}
+
+	public static void printArrayListOfIntegersFromLocalPeer(HashMap<Integer, Integer> pieceMap, String localPeerID,
+			int pieceIndex, String string) {
+
+		StringBuilder sb = new StringBuilder();
+		for (Integer piece : pieceMap.keySet()) {
+			sb.append(piece + ", ");
+		}
+
+		System.err.println("for peer#" + localPeerID + "the piece index updated is#" + pieceIndex + " and the map is:"
+				+ string + "\n" + sb.toString());
 	}
 }

@@ -170,13 +170,15 @@ public class EventProcessor {
 					// This peer should NOT have been selected by that peer!");
 					return;
 				} else {
-					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
-					messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
-					// System.out.println("peer#: " + this.localPeerID + " sent
-					// a request for piece# "
-					// + pieceToBeRequestedFromPeer + " to peer#" +
-					// this.remotePeerID);
-					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
+					synchronized (this) {
+						byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
+						messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
+						System.out.println("peer#: " + this.localPeerID + " sent a request when unchoked, for piece# "
+								+ pieceToBeRequestedFromPeer + " to peer#" + this.remotePeerID
+								+ "\n the remote peer's bitfield is: "
+								+ Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
+						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
+					}
 				}
 			}
 
@@ -281,15 +283,16 @@ public class EventProcessor {
 
 			this.localPeerProcessInstance.updateBitField(remotePeerID, pieceIndex);
 
-//			/*
-//			 * i. Check if all other peers are complete. if so, then ii. End
-//			 * your local peer process.
-//			 */
-//			if (localPeerProcessInstance.isEveryPeerCompleted()) {
-//				localPeerProcessInstance.setKeepRunning(false);
-//				System.err
-//						.println("[debug] Peer " + localPeerID + " thinks all other peers have finished the download.");
-//			}
+			// /*
+			// * i. Check if all other peers are complete. if so, then ii. End
+			// * your local peer process.
+			// */
+			// if (localPeerProcessInstance.isEveryPeerCompleted()) {
+			// localPeerProcessInstance.setKeepRunning(false);
+			// System.err
+			// .println("[debug] Peer " + localPeerID + " thinks all other peers
+			// have finished the download.");
+			// }
 
 			break;
 
@@ -394,13 +397,15 @@ public class EventProcessor {
 					messageHandler.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
 					return;
 				} else if (this.localPeerProcessInstance.isRemotePeerUnchokedLocal(remotePeerID)) {
-					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
-					messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
-					// System.out.println("peer#: " + this.localPeerID + " sent
-					// a REQUEST message for piece# " + pieceIndex
-					// + " to peer#" + this.remotePeerID);
-
-					this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
+					synchronized (this) {
+						byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
+						messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
+						System.out.println("peer#: " + this.localPeerID
+								+ " sent a REQUEST message when received a piece for piece# " + pieceIndex + " to peer#"
+								+ this.remotePeerID + "\n the remote peer's bitfield is: "
+								+ Util.bitfieldToString(this.localPeerProcessInstance.getPeerBitField(remotePeerID)));
+						this.localPeerProcessInstance.updatePieceRequested(pieceToBeRequestedFromPeer);
+					}
 				}
 
 			} else {
