@@ -7,6 +7,12 @@ import java.util.HashMap;
 
 import peer.PeerProcess;
 
+/**
+ * 
+ * @author Mickey Vellukunnel
+ *
+ */
+
 public class PeerProcesses {
 	
 	private PeerProcesses(){		

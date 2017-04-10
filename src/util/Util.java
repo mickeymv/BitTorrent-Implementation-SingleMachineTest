@@ -21,8 +21,9 @@ import java.io.File;
 import connection.TCPConnectionManager;
 import peer.PeerProcess;
 import type.PeerInfo;
-/*
-* @author Mickey Vellukunnel, Arpitha
+
+/**
+* @author Mickey Vellukunnel, Xiaolong Li, Arpitha
 *
 */
 

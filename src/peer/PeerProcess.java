@@ -101,6 +101,10 @@ public class PeerProcess {
 	// piecesRequested -> pieces not present locally, and which have been
 	// requested
 	private HashMap<Integer, Integer> piecesRequested = new HashMap<>();
+	
+	/** This is the list of all peers who have currently unchoked the local peer.
+	 * This is used to decide whether or not to send a 'request' message.*/
+	private HashMap<String, String> peersWhoHaveUnChokedThisLocalPeer = new HashMap<>();
 
 	/**
 	 * This is a hashMap containing the unchokedNeighbors. This is used so as to
@@ -119,6 +123,33 @@ public class PeerProcess {
 
 	public void setKeepRunning(boolean keepRunning) {
 		this.keepRunning = keepRunning;
+	}
+	
+	/**
+	 * This is called when this local peer got a unchoke
+	 * from a remote peer.
+	 * @param remotePeerID
+	 */
+	public synchronized void addPeerWhoHasUnchokedLocal(String remotePeerID) {
+		peersWhoHaveUnChokedThisLocalPeer.put(remotePeerID, remotePeerID);
+	}
+	
+	/**
+	 * This is called when this local peer got a choke
+	 * from a remote peer.
+	 * @param remotePeerID
+	 */
+	public synchronized void removePeerWhoChokedLocal(String remotePeerID) {
+		peersWhoHaveUnChokedThisLocalPeer.remove(remotePeerID);
+	}
+	
+	/**
+	 * Check if the remotePeer has unchoked this local peer.
+	 * @param remotePeerID
+	 * @return
+	 */
+	public synchronized boolean isRemotePeerUnchokedLocal(String remotePeerID) {
+		return this.peersWhoHaveUnChokedThisLocalPeer.containsKey(remotePeerID);
 	}
 
 	public boolean getGotCompletedFile() {

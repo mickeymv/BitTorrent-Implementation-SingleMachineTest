@@ -95,6 +95,8 @@ public class EventProcessor {
 			// .println("in peer: " + this.localPeerID + ", got 'CHOKE' message
 			// from peer: " + this.remotePeerID);
 
+			this.localPeerProcessInstance.removePeerWhoChokedLocal(remotePeerID);
+			
 			if (localPeerProcessInstance.checkIfInterested(remotePeerID) == false) {
 				System.err.println("\nERROR! in peer: " + this.localPeerID + ", got CHOKE message from peer: "
 						+ this.remotePeerID
@@ -122,6 +124,9 @@ public class EventProcessor {
 					+ this.remotePeerID + ".");
 			System.out.println(Util.dateFormat.format(new Date()) + ": Peer " + localPeerID + " is unchoked by "
 					+ this.remotePeerID + ".");
+			
+			this.localPeerProcessInstance.addPeerWhoHasUnchokedLocal(remotePeerID);
+			
 			/*
 			 * Action to take;
 			 * 
@@ -316,7 +321,7 @@ public class EventProcessor {
 		case Message.MESSAGETYPE_PIECE:
 			/**
 			 * This happens when; 1. The remote peer sents a "Have" message, and
-			 * the local responds with "Intereted". 2. The local peer sends a
+			 * the local responds with "Interested". 2. The local peer sends a
 			 * "request" message.
 			 * 
 			 */
@@ -326,6 +331,7 @@ public class EventProcessor {
 			 * messages to peers who don't have interesting pieces. c). check if
 			 * we have all pieces. i). If we do, update "have_complete_file"
 			 * variable, and create the complete data file. ii). if we do not,
+			 * and if that remote peer has un-choked this local peer,
 			 * send "request" about another piece, we don't have and not
 			 * requested.
 			 */
@@ -373,7 +379,7 @@ public class EventProcessor {
 					// (does not any interesting pieces)
 					messageHandler.sendMessage(Message.MESSAGETYPE_NOTINTERESTED);
 					return;
-				} else {
+				} else if (this.localPeerProcessInstance.isRemotePeerUnchokedLocal(remotePeerID)) {
 					byte[] pieceIndexMessagePayload = Util.intToByteArray(pieceToBeRequestedFromPeer);
 					messageHandler.sendMessage(Message.MESSAGETYPE_REQUEST, pieceIndexMessagePayload);
 					// System.out.println("peer#: " + this.localPeerID + " sent
